@@ -78,29 +78,24 @@ const InstallSection = () => {
             <div className="flex items-start gap-3">
               <Rocket className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
               <div className="text-sm">
-                <p className="text-foreground font-medium mb-1">
-                  After installation:
-                </p>
                 <p className="text-muted-foreground text-xs">
                   Run{" "}
                   <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                     pilot
                   </code>{" "}
-                  to launch, then{" "}
+                  to launch{" → "}
                   <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                     /sync
                   </code>{" "}
-                  to load rules.{" "}
+                  to load rules{" → "}
                   <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                     /spec
                   </code>{" "}
-                  plans features,{" "}
+                  to build features{" → "}
                   <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                     /learn
                   </code>{" "}
-                  extracts knowledge, the{" "}
-                  <strong>Teams dashboard</strong>{" "}
-                  shares with your team.
+                  to extract knowledge
                 </p>
               </div>
             </div>
