@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.2.2] - 2026-03-06
+
+### Bug Fixes
+
+- Re-Enabled auto-updater for Claude Code in Settings
+
 ## [7.2.1] - 2026-03-06
 
 ### Bug Fixes
