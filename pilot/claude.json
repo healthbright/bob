@@ -1,7 +1,6 @@
 {
-  "installMethod": "npm",
   "showExpandedTodos": true,
-  "autoUpdates": false,
+  "autoUpdates": true,
   "lspRecommendationDisabled": true,
   "autoCompactEnabled": true,
   "autoConnectIde": true,
