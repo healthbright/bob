@@ -9,9 +9,9 @@ const syncPhases = [
   { phase: 1, action: "Read existing rules and standards from .claude/" },
   {
     phase: 2,
-    action: "Build Vexor semantic search index (first run may take 5–15 min)",
+    action: "Check Probe availability (no indexing required)",
   },
-  { phase: 3, action: "Explore codebase with Vexor/Grep to find patterns" },
+  { phase: 3, action: "Explore codebase with Probe MCP/Grep to find patterns" },
   { phase: 4, action: "Compare discovered vs documented patterns" },
   { phase: 5, action: "Sync/update project rule with tech stack and commands" },
   { phase: 6, action: "Sync MCP server documentation" },
@@ -57,9 +57,9 @@ const SyncSection = () => {
           <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
             /sync
           </code>{" "}
-          to explore your project structure, build a semantic search index,
-          discover your conventions and undocumented patterns, update project
-          documentation, and create new custom skills. This is how Pilot adapts
+          to explore your project structure, discover your conventions and
+          undocumented patterns, update project documentation, and create new
+          custom skills. This is how Pilot adapts
           to your project — not the other way around. Run it once initially,
           then any time your codebase changes significantly.
         </p>
