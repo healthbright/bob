@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.3.1] - 2026-03-08
+
+### Bug Fixes
+
+- Usage summary dashboard showing wrong costs and add token counts
+
 ## [7.3.0] - 2026-03-08
 
 ### Features
