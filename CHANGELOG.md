@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.4.3] - 2026-03-09
+
+### Bug Fixes
+
+- Enhance Changes tab with git operations, AI commit messages, and model routing
+
 ## [7.4.2] - 2026-03-09
 
 ### Bug Fixes
