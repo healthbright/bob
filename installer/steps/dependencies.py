@@ -57,6 +57,17 @@ def _get_nvm_source_cmd() -> str:
     return ""
 
 
+def install_claude_code() -> bool:
+    """Install Claude Code via native installer if not present."""
+    if command_exists("claude"):
+        return True
+
+    return _run_bash_with_retry(
+        "curl -fsSL https://claude.ai/install.sh | bash",
+        timeout=300,
+    )
+
+
 def install_nodejs() -> bool:
     """Install Node.js via NVM if not present."""
     if command_exists("node"):
@@ -430,6 +441,26 @@ def _setup_pilot_memory(ui: Any) -> bool:
     return True
 
 
+def _install_claude_code_with_ui(ui: Any) -> bool:
+    """Install Claude Code with UI feedback."""
+    if command_exists("claude"):
+        if ui:
+            ui.info("Claude Code already installed")
+        return True
+
+    if ui:
+        ui.info("Claude Code not found — installing via native installer (this can take a few minutes)...")
+        with ui.spinner("Installing Claude Code..."):
+            result = install_claude_code()
+        if result:
+            ui.success("Claude Code installed")
+        else:
+            ui.warning("Could not install Claude Code - please install manually: https://docs.anthropic.com/en/docs/claude-code/setup")
+        return result
+    else:
+        return install_claude_code()
+
+
 def _install_playwright_cli_with_ui(ui: Any) -> bool:
     """Install playwright-cli with UI feedback."""
     if ui:
@@ -592,6 +623,9 @@ class DependenciesStep(BaseStep):
         """Install all required dependencies."""
         ui = ctx.ui
         installed: list[str] = []
+
+        if _install_claude_code_with_ui(ui):
+            installed.append("claude_code")
 
         if _install_with_spinner(ui, "Node.js", install_nodejs):
             installed.append("nodejs")

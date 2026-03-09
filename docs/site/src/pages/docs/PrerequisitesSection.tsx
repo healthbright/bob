@@ -61,14 +61,13 @@ const PrerequisitesSection = () => {
           <div className="flex items-center gap-2 mb-2">
             <Terminal className="h-4 w-4 text-primary" />
             <h3 className="font-semibold text-foreground text-sm">
-              Claude Code (Required)
+              Claude Code (Auto-Installed)
             </h3>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Pilot Shell installs <span className="text-foreground font-medium">on top of Claude Code</span> — you must install it first.
-            Install via npm:{" "}
-            <code className="text-primary bg-primary/10 px-1 py-0.5 rounded">npm install -g @anthropic-ai/claude-code</code>
-            {" "}or use the{" "}
+            Pilot Shell installs <span className="text-foreground font-medium">on top of Claude Code</span>.
+            If Claude Code is not already installed, the Pilot Shell installer will install it automatically
+            via the{" "}
             <a
               href="https://docs.anthropic.com/en/docs/claude-code/setup"
               className="text-primary hover:underline"
@@ -77,7 +76,7 @@ const PrerequisitesSection = () => {
             >
               native installer
             </a>
-            . Pilot Shell does not install or update Claude Code for you.
+            .
           </p>
         </div>
 

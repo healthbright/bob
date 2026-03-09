@@ -46,8 +46,10 @@ class TestDependenciesStep:
     @patch("installer.steps.dependencies.install_python_tools")
     @patch("installer.steps.dependencies.install_uv")
     @patch("installer.steps.dependencies.install_nodejs")
+    @patch("installer.steps.dependencies._install_claude_code_with_ui")
     def test_dependencies_run_installs_core(
         self,
+        mock_claude_code,
         mock_nodejs,
         mock_uv,
         mock_python_tools,
@@ -69,6 +71,7 @@ class TestDependenciesStep:
         from installer.steps.dependencies import DependenciesStep
         from installer.ui import Console
 
+        mock_claude_code.return_value = True
         mock_nodejs.return_value = True
         mock_uv.return_value = True
         mock_python_tools.return_value = True
@@ -84,10 +87,58 @@ class TestDependenciesStep:
 
             step.run(ctx)
 
+            mock_claude_code.assert_called_once()
             mock_nodejs.assert_called_once()
             mock_uv.assert_called_once()
             mock_python_tools.assert_called_once()
             mock_plugin_deps.assert_called_once()
+
+
+class TestInstallClaudeCode:
+    """Test Claude Code installation."""
+
+    def test_install_claude_code_exists(self):
+        """install_claude_code function exists."""
+        from installer.steps.dependencies import install_claude_code
+
+        assert callable(install_claude_code)
+
+    @patch("installer.steps.dependencies.command_exists", return_value=True)
+    def test_install_claude_code_skips_if_already_installed(self, _mock_cmd):
+        """install_claude_code returns True without installing when claude is in PATH."""
+        from installer.steps.dependencies import install_claude_code
+
+        with patch("installer.steps.dependencies._run_bash_with_retry") as mock_run:
+            result = install_claude_code()
+
+        assert result is True
+        mock_run.assert_not_called()
+
+    @patch("installer.steps.dependencies._run_bash_with_retry", return_value=True)
+    @patch("installer.steps.dependencies.command_exists", return_value=False)
+    def test_install_claude_code_runs_native_installer(self, _mock_cmd, mock_run):
+        """install_claude_code runs the native installer when claude is not in PATH."""
+        from installer.steps.dependencies import install_claude_code
+
+        result = install_claude_code()
+
+        assert result is True
+        mock_run.assert_called_once()
+        call_args = mock_run.call_args[0][0]
+        assert "claude.ai/install.sh" in call_args
+        assert mock_run.call_args[1].get("timeout") == 300 or (
+            len(mock_run.call_args[0]) > 1 or "timeout" in str(mock_run.call_args)
+        )
+
+    @patch("installer.steps.dependencies._run_bash_with_retry", return_value=False)
+    @patch("installer.steps.dependencies.command_exists", return_value=False)
+    def test_install_claude_code_returns_false_on_failure(self, _mock_cmd, mock_run):
+        """install_claude_code returns False when native installer fails."""
+        from installer.steps.dependencies import install_claude_code
+
+        result = install_claude_code()
+
+        assert result is False
 
 
 class TestDependencyInstallFunctions:

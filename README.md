@@ -46,8 +46,6 @@ This isn't a vibe coding tool, it's true agentic engineering, but without the ad
 
 ### Prerequisites
 
-**Claude Code:** Pilot Shell installs on top of Claude Code — install it first [via npm](https://www.npmjs.com/package/@anthropic-ai/claude-code) or the [native installer](https://docs.anthropic.com/en/docs/claude-code/setup).
-
 **Claude Subscription:** Solo developers should choose [Max 5x](https://claude.com/pricing) for moderate usage or [Max 20x](https://claude.com/pricing) for heavy usage. Teams should use [Team Premium](https://claude.com/pricing) (6.25x usage per member, SSO, admin tools, billing management). Companies with stricter compliance or procurement requirements should use [Enterprise](https://claude.com/pricing) (API based pricing applies per usage).
 
 **Terminal:** [cmux](https://www.cmux.dev/) is the best terminal for Pilot Shell on macOS — built on the Ghostty rendering engine with native split panes, workspace tabs, and Claude Code notification hooks. On Linux, [Ghostty](https://ghostty.org/download) is the recommended terminal. Both are free and open source.
