@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.4.4] - 2026-03-09
+
+### Bug Fixes
+
+- Optimized runtime of Plan and Spec Reviewer subagents
+
 ## [7.4.3] - 2026-03-09
 
 ### Bug Fixes
