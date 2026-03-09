@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.4.2] - 2026-03-09
+
+### Bug Fixes
+
+- Quality Improvements to Agents, Rules and Spec-Commands
+
 ## [7.4.1] - 2026-03-09
 
 ### Bug Fixes
