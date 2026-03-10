@@ -43,11 +43,33 @@ SLUG=$(basename "$(git remote get-url origin 2>/dev/null | sed 's/\.git$//')" 2>
 
 Skill directory: `.claude/skills/{slug}-{name}/SKILL.md`
 
-**Keep names short.** The slug provides context; the name should be 1-3 words max. Examples: `pilot-shell-lsp-cleaner`, `my-api-auth-flow`, `acme-deploy`. Avoid redundant words like "handler", "helper", "workflow".
+**Naming rules:** Lowercase with hyphens only. The slug provides context; the name should be 1-3 words max that are descriptive (not generic). Examples: `pilot-shell-lsp-cleaner`, `my-api-auth-flow`, `acme-deploy`. Never use generic names like "helper", "utils", "tools", "handler", "workflow".
 
-### Skill Structure
+### Skill Complexity Spectrum
+
+Before writing, decide WHERE your skill falls. **Move left whenever possible** — simpler skills are more reliable, cheaper to execute, and work across more models.
+
+| Level | Style | Determinism | Best For |
+|-------|-------|-------------|----------|
+| **Passive** | Context only | N/A | Background knowledge, coding standards |
+| **Instructional** | Rules + guidelines | Medium | Code review, style guides |
+| **CLI Wrapper** | Calls a binary/script | **High** | Automation, integrations, data processing |
+| **Workflow** | Multi-step with validation | Medium | Deploy pipelines, migrations |
+| **Generative** | Asks agent to write code | Low | Scaffolding, code generation |
+
+**Key insight:** A skill that says "run `eslint --fix`" works on any model. A skill that says "analyze the code and suggest improvements" requires expensive reasoning. Prefer commands over descriptions, scripts over instructions, explicit values over judgment.
+
+### Skill Template
 
 **Location:** `.claude/skills/{slug}-{skill-name}/SKILL.md`
+
+Before writing, answer these five questions:
+
+1. **When should this skill activate?** (→ becomes `description`)
+2. **What inputs does it need?** (arguments, files, environment state)
+3. **What does success look like?** (specific output, files created, commands run)
+4. **What should it NOT do?** (explicit exclusions prevent scope creep)
+5. **How do you verify it worked?** (include a validation step)
 
 ```markdown
 ---
@@ -60,11 +82,21 @@ version: 1.0.0
 
 # Skill Name
 
-## Problem
-## Context / Trigger Conditions
+## When to Use
+[Specific trigger conditions — be precise]
+
 ## Solution
+[Steps — ordered, concrete, verifiable. Prefer exact commands over descriptions.]
+
 ## Verification
+[How to confirm it worked]
+
+## When NOT to Use
+[Explicit exclusions — prevents scope creep and misactivation]
+
 ## Example
+[Concrete input/output example]
+
 ## References
 ```
 
@@ -73,7 +105,19 @@ version: 1.0.0
 ✅ `"Fix for ENOENT errors in npm monorepos. Use when: (1) npm run fails with ENOENT, (2) symlinked deps cause failures."`
 ❌ `"Extract and organize npm monorepo fixes by analyzing symlinks and paths."`
 
-**Guidelines:** Concise (Claude is smart). Under 1000 lines. Examples over explanations.
+### Progressive Disclosure
+
+Don't dump everything into SKILL.md. Layer content so the AI loads only what it needs.
+
+| Layer | What | Context Cost |
+|-------|------|--------------|
+| **Metadata** | `description` in frontmatter | Always loaded (~100 tokens) |
+| **Body** | SKILL.md instructions | Loaded on activation |
+| **Scripts/Assets** | `scripts/`, `examples/` subdirs | Executed or path-referenced, never loaded |
+
+**Rule of thumb:** "Is this line worth the context tokens it costs?" Don't explain what AI already knows. Only add your project's specific conventions, internal APIs, and domain rules.
+
+**Guidelines:** Concise (Claude is smart). Under 500 lines for body. Examples over explanations. Put detailed reference docs in `references/` subdirectory.
 
 ---
 
@@ -110,17 +154,45 @@ rg -i "keyword" ~/.claude/pilot/skills/ 2>/dev/null
 
 ## Phase 3: Create Skill
 
-Write to `.claude/skills/{slug}-{skill-name}/SKILL.md` using the template from Phase 0. Ensure description contains specific trigger conditions and the name is prefixed with the project slug.
+Write to `.claude/skills/{slug}-{skill-name}/SKILL.md` using the template from Phase 0.
+
+**Determinism checklist** — maximize reliability:
+
+- Prefer exact commands over descriptions (`run prettier --write .` not "format the code")
+- Prefer scripts over multi-step instructions (reference `scripts/deploy.sh` not 5 prose steps)
+- Use explicit values over judgment (`block files > 100KB` not "block large files")
+- For high-risk operations (DB migrations, deploys): exact commands, validation steps, rollback plan
+- For low-risk operations (code review, docs): general guidelines, let AI use judgment
+
+**One skill = one purpose.** If the skill handles review AND testing AND deployment, split it.
 
 ---
 
 ## Phase 4: Quality Gates
 
-- [ ] Description contains specific trigger conditions
+- [ ] Description contains specific trigger conditions (not process summary)
+- [ ] Includes "When NOT to Use" section with explicit exclusions
 - [ ] Solution verified to work
 - [ ] Specific enough to be actionable
 - [ ] General enough to be reusable
-- [ ] No sensitive information
+- [ ] No sensitive information (API keys, passwords, internal URLs → use env vars instead)
+- [ ] No hardcoded paths (use relative paths or environment variables)
+- [ ] Deterministic where possible (commands > descriptions)
+- [ ] Context-efficient (no explaining what AI already knows)
+- [ ] Includes verification step (how to confirm it worked)
+
+---
+
+## Anti-Patterns
+
+| Anti-Pattern | Fix |
+|--------------|-----|
+| **Kitchen sink** — skill does too many things | One skill = one purpose. Split it. |
+| **Vague instructions** — "properly format the code" | Name the specific tool and command |
+| **Explaining AI knowledge** — "React is a JavaScript library..." | Only add what AI doesn't know: YOUR conventions |
+| **Too many options** — "use pdfplumber, PyMuPDF, or camelot..." | Give one default, mention alternatives only if needed |
+| **No verification** — "deploy to staging" (how do you know it worked?) | Always include a verification command |
+| **Hardcoded paths** — `/Users/john/projects/my-app/...` | Relative paths or environment variables |
 
 ---
 

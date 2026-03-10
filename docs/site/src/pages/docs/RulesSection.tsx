@@ -204,16 +204,34 @@ const RulesSection = () => {
         <div className="rounded-xl p-4 border border-primary/20 bg-primary/5">
           <div className="flex items-start gap-2">
             <Cpu className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              <span className="text-primary font-medium">Custom rules:</span>{" "}
-              Create{" "}
-              <code className="text-primary">.claude/rules/my-rule.md</code> in
-              your project. Add{" "}
-              <code className="text-primary">paths: ["*.py"]</code> frontmatter
-              to activate only for specific file types. Run{" "}
-              <code className="text-primary">/sync</code> to auto-discover
-              patterns and generate project-specific rules for you.
-            </p>
+            <div className="text-xs text-muted-foreground leading-relaxed space-y-2">
+              <p>
+                <span className="text-primary font-medium">Custom rules:</span>{" "}
+                Create{" "}
+                <code className="text-primary">.claude/rules/my-rule.md</code>{" "}
+                in your project. Add{" "}
+                <code className="text-primary">paths: ["*.py"]</code>{" "}
+                frontmatter to activate only for specific file types. Run{" "}
+                <code className="text-primary">/sync</code> to auto-discover
+                patterns and generate project-specific rules for you.
+              </p>
+              <p>
+                <span className="text-primary font-medium">
+                  Monorepo support:
+                </span>{" "}
+                Organize rules in nested subdirectories by product and team
+                (e.g.{" "}
+                <code className="text-primary">
+                  .claude/rules/my-product/team-x/
+                </code>
+                ). Team-level rules must use{" "}
+                <code className="text-primary">paths</code> frontmatter to scope
+                to the right files.{" "}
+                <code className="text-primary">/sync</code> generates a{" "}
+                <code className="text-primary">README.md</code> in your rules
+                directory to document the structure.
+              </p>
+            </div>
           </div>
         </div>
       </div>

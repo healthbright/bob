@@ -4,24 +4,26 @@ import { useInView } from "@/hooks/use-in-view";
 const syncPhases = [
   {
     phase: 0,
-    action: "Load reference guidelines, output locations, error handling",
+    action: "Load reference guidelines, recommended directory structure, error handling",
   },
-  { phase: 1, action: "Read existing rules and standards from .claude/" },
+  { phase: 1, action: "Read existing rules (including nested subdirectories), detect structure and path-scoping" },
+  { phase: 2, action: "Migrate unscoped assets to {slug}-prefixed names" },
+  { phase: 3, action: "Quality audit against best practices (size, specificity, path-scoping enforcement)" },
   {
-    phase: 2,
-    action: "Check Probe availability (no indexing required)",
+    phase: 4,
+    action: "Explore codebase with Probe CLI/Grep to find patterns",
   },
-  { phase: 3, action: "Explore codebase with Probe CLI/Grep to find patterns" },
-  { phase: 4, action: "Compare discovered vs documented patterns" },
-  { phase: 5, action: "Sync/update project rule with tech stack and commands" },
-  { phase: 6, action: "Sync MCP server documentation" },
-  { phase: 7, action: "Update existing custom skills that have changed" },
+  { phase: 5, action: "Compare discovered vs documented patterns" },
+  { phase: 6, action: "Sync project rule, nested directories, and generate rules README" },
+  { phase: 7, action: "Sync MCP server documentation" },
+  { phase: 8, action: "Update existing custom skills that have changed" },
   {
-    phase: 8,
-    action: "Discover and document new undocumented patterns as rules",
+    phase: 9,
+    action: "Discover new rules, place in correct directory by scope",
   },
-  { phase: 9, action: "Create new skills via /learn command" },
-  { phase: 10, action: "Report summary of all changes made" },
+  { phase: 10, action: "Create new skills via /learn command" },
+  { phase: 11, action: "Cross-check: validate references, README, path-scoping" },
+  { phase: 12, action: "Report summary of all changes made" },
 ];
 
 const whenToRun = [
@@ -74,7 +76,7 @@ const SyncSection = () => {
         </div>
 
         <h3 className="font-semibold text-foreground text-sm mb-3">
-          What /sync does — 11 phases (zero-indexed)
+          What /sync does — 13 phases (zero-indexed)
         </h3>
         <div className="rounded-xl border border-border/50 overflow-hidden mb-6">
           <table className="w-full text-sm">

@@ -171,6 +171,8 @@ Create your own rules, commands, and skills in `.claude/` — all plain markdown
 | **Commands** | On demand via `/command`                   | Specific workflows or multi-step tasks |
 | **Skills**   | On demand, created via `/learn`            | Reusable knowledge from past sessions  |
 
+**Monorepo support:** Organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter to scope to the right files. `/sync` auto-detects the structure, enforces path-scoping, and generates a `README.md` in your rules directory.
+
 ### Pilot Shell Console
 
 A local web dashboard with 7 views and real-time notifications when Claude needs your input:
@@ -534,6 +536,8 @@ Yes. Pilot Shell installs once globally and works across all your projects — y
 <summary><b>Can I add my own rules, commands, and skills?</b></summary>
 
 Yes. Create your own in your project's `.claude/` folder — rules, commands, and skills are all plain markdown files. Your project-level assets are loaded alongside Pilot Shell's built-in defaults and take precedence when they overlap. `/sync` auto-discovers your codebase patterns and generates project-specific rules for you. `/learn` extracts reusable knowledge from sessions into custom skills. Hooks can be extended for additional languages. Use the Teams dashboard in the Console to share your custom assets across your team.
+
+For monorepos, organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter so they only load when working on relevant files. `/sync` validates this structure, enforces path-scoping, and generates a `README.md` to document the organization.
 
 </details>
 
