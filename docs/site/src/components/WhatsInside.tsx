@@ -3,7 +3,7 @@ import {
   Plug2,
   GitBranch,
   Lightbulb,
-  Infinity as InfinityIcon,
+  Sparkles,
   Search,
   Stethoscope,
   Terminal,
@@ -26,11 +26,11 @@ const insideItems: InsideItem[] = [
       "A structured workflow with human review gates, sequential TDD, mandatory verification, and independent code review. Loops back automatically if any check fails.",
   },
   {
-    icon: InfinityIcon,
-    title: "Unlimited Context",
-    description: "Auto-compaction, zero interruptions",
+    icon: Sparkles,
+    title: "Skill Sharing",
+    description: "Global sync, project mode, org hubs",
     summary:
-      "Decisions, plans, and progress are preserved across context boundaries. Sessions run indefinitely — no manual restarts, no lost work.",
+      "Share skills across machines via git push/pull, commit project skills to your repo for team sharing, or distribute org-wide via tracked repos and hub indexes.",
   },
   {
     icon: Plug2,

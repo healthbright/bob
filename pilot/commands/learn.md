@@ -41,7 +41,12 @@ SLUG=$(basename "$(git remote get-url origin 2>/dev/null | sed 's/\.git$//')" 2>
 # Result: "pilot-shell", "my-api", "acme-backend"
 ```
 
-Skill directory: `.claude/skills/{slug}-{name}/SKILL.md`
+**Skill directory:** If `.skillshare/skills/` exists in the project, create skills there and run `skillshare sync -p` afterward. Otherwise, create directly in `.claude/skills/`.
+
+| `.skillshare/skills/` exists? | Create in | After creating |
+|-------------------------------|-----------|----------------|
+| Yes | `.skillshare/skills/{slug}-{name}/SKILL.md` | Run `skillshare sync -p` |
+| No | `.claude/skills/{slug}-{name}/SKILL.md` | Nothing needed |
 
 **Naming rules:** Lowercase with hyphens only. The slug provides context; the name should be 1-3 words max that are descriptive (not generic). Examples: `pilot-shell-lsp-cleaner`, `my-api-auth-flow`, `acme-deploy`. Never use generic names like "helper", "utils", "tools", "handler", "workflow".
 
@@ -61,7 +66,7 @@ Before writing, decide WHERE your skill falls. **Move left whenever possible** �
 
 ### Skill Template
 
-**Location:** `.claude/skills/{slug}-{skill-name}/SKILL.md`
+**Location:** `.skillshare/skills/{slug}-{skill-name}/SKILL.md` (if `.skillshare/skills/` exists) or `.claude/skills/{slug}-{skill-name}/SKILL.md`
 
 Before writing, answer these five questions:
 
@@ -138,8 +143,9 @@ Ask yourself:
 ## Phase 2: Check Existing
 
 ```bash
+ls .skillshare/skills/ 2>/dev/null
 ls .claude/skills/ 2>/dev/null
-rg -i "keyword" .claude/skills/ 2>/dev/null
+rg -i "keyword" .skillshare/skills/ .claude/skills/ 2>/dev/null
 ls ~/.claude/pilot/skills/ 2>/dev/null
 rg -i "keyword" ~/.claude/pilot/skills/ 2>/dev/null
 ```
@@ -154,7 +160,20 @@ rg -i "keyword" ~/.claude/pilot/skills/ 2>/dev/null
 
 ## Phase 3: Create Skill
 
-Write to `.claude/skills/{slug}-{skill-name}/SKILL.md` using the template from Phase 0.
+**Determine output directory:**
+
+```bash
+if [ -d ".skillshare/skills" ]; then
+  # Skillshare project mode — create in source, then sync
+  SKILL_BASE=".skillshare/skills"
+else
+  SKILL_BASE=".claude/skills"
+fi
+```
+
+Write to `${SKILL_BASE}/{slug}-{skill-name}/SKILL.md` using the template from Phase 0.
+
+**After creating (only if using `.skillshare/`):** Run `skillshare sync -p` to sync the new skill to `.claude/skills/` where Claude can use it.
 
 **Determinism checklist** — maximize reliability:
 

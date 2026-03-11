@@ -3,10 +3,13 @@ import { useInView } from "@/hooks/use-in-view";
 
 const autoTriggers = [
   "Non-obvious debugging solution discovered after 10+ minutes",
+  "Misleading errors — error pointed the wrong direction, found the real cause",
   "Workaround for a library limitation found during work",
   "Undocumented tool or API integration pattern",
+  "Trial-and-error — multiple approaches tried before finding the solution",
   "Multi-step workflow that will likely recur",
   "External service query pattern (Jira, GitHub, Confluence)",
+  "User-facing automation — reports or status checks user will ask for again",
 ];
 
 const whatGetsExtracted = [
@@ -108,7 +111,7 @@ const LearnSection = () => {
             stored in <code className="text-primary">.claude/skills/</code>.
             They're loaded on-demand when relevant, created by{" "}
             <code className="text-primary">/learn</code>, and shareable across
-            your team via the <strong>Teams dashboard</strong>. Skills
+            your team via the <strong>Share dashboard</strong>. Skills
             follow a frontmatter format that describes when they apply.
           </p>
         </div>

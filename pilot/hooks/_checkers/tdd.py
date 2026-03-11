@@ -1,8 +1,6 @@
-#!/usr/bin/env python3
 """TDD enforcer - reminds to use TDD when modifying implementation code.
 
-This is a PostToolUse hook — edits always complete, then a structured JSON
-reminder is shown to Claude via decision:block to encourage TDD practices.
+Provides reusable TDD check functions used by file_checker.py hook.
 """
 
 from __future__ import annotations
@@ -12,8 +10,7 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-from _util import post_tool_use_block
+from _lib.util import post_tool_use_block
 
 EXCLUDED_EXTENSIONS = [
     ".md",
@@ -359,5 +356,3 @@ def run_tdd_enforcer() -> int:
     return 0
 
 
-if __name__ == "__main__":
-    sys.exit(run_tdd_enforcer())

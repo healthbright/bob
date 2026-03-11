@@ -114,6 +114,6 @@ All code changes require a failing test first.
 Pilot provides two tools for rule management:
 
 - **`/sync`** scans your codebase and generates rules matching your actual project structure, dependencies, and patterns
-- **Team Vault** (`sx`) shares rules across your team via a private Git repository — push once, everyone gets it
+- **Skillshare** syncs skills across machines and teams — push to a git remote, pull on any machine, or distribute org-wide via tracked repos
 
 Rules compound. A well-maintained library means Claude starts every session already understanding your project, conventions, and quality bar.

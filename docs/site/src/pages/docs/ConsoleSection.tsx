@@ -28,14 +28,19 @@ const consoleViews = [
     desc: "Daily token costs, model routing breakdown (Opus vs Sonnet distribution), and usage trends over time.",
   },
   {
-    view: "Teams",
+    view: "Share",
     icon: "👥",
-    desc: "Shared team assets with version tracking — push, install, and manage rules, skills, commands, and agents.",
+    desc: "Skill sharing across machines and teams — sync, install from URLs, manage git remotes, and organize project skills.",
   },
   {
     view: "Settings",
     icon: "⚙️",
     desc: "Model selection per command and sub-agent (Sonnet 4.6 vs Opus 4.6), extended context toggle (1M tokens).",
+  },
+  {
+    view: "Help",
+    icon: "📖",
+    desc: "Embedded documentation from pilot-shell.com — full technical reference without leaving the Console.",
   },
 ];
 
@@ -82,7 +87,7 @@ const ConsoleSection = () => {
         </div>
 
         {/* 7 views */}
-        <h3 className="font-semibold text-foreground text-sm mb-3">7 views</h3>
+        <h3 className="font-semibold text-foreground text-sm mb-3">8 views</h3>
         <div className="grid sm:grid-cols-2 gap-2 mb-6">
           {consoleViews.map((item) => (
             <div

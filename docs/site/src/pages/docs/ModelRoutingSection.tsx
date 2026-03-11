@@ -51,7 +51,7 @@ const ModelRoutingSection = () => {
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              Smart Model Routing
+              Model Routing
             </h2>
             <p className="text-sm text-muted-foreground">
               Opus where reasoning matters, Sonnet where speed and cost matter

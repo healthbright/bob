@@ -31,8 +31,8 @@ class TestDependenciesStep:
             )
             assert step.check(ctx) is False
 
-    @patch("installer.steps.dependencies.install_sx", return_value=True)
-    @patch("installer.steps.dependencies.update_sx", return_value=True)
+    @patch("installer.steps.dependencies.install_skillshare", return_value=True)
+    @patch("installer.steps.dependencies.update_skillshare", return_value=True)
     @patch("installer.steps.dependencies._install_probe_with_ui", return_value=True)
     @patch("installer.steps.dependencies._install_playwright_cli_with_ui", return_value=True)
     @patch("installer.steps.dependencies.install_ccusage", return_value=True)
@@ -63,8 +63,8 @@ class TestDependenciesStep:
         _mock_ccusage,
         _mock_playwright,
         _mock_probe_ui,
-        _mock_sx,
-        _mock_update_sx,
+        _mock_skillshare,
+        _mock_update_skillshare,
     ):
         """DependenciesStep installs all dependencies including Python tools."""
         from installer.context import InstallContext
@@ -408,6 +408,175 @@ class TestNvmInstallPreservation:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(Path, "home", return_value=Path(tmpdir)):
                 result = install_nodejs()
+
+        assert result is False
+
+
+class TestInstallSkillshare:
+    """Tests for install_skillshare() — Skillshare CLI installation."""
+
+    def test_install_skillshare_exists(self):
+        """install_skillshare function exists and is callable."""
+        from installer.steps.dependencies import install_skillshare
+
+        assert callable(install_skillshare)
+
+    @patch("installer.steps.dependencies.subprocess.run")
+    @patch("installer.steps.dependencies.command_exists", return_value=True)
+    def test_install_skillshare_skips_curl_if_already_installed(self, _mock_cmd, mock_run):
+        """install_skillshare skips curl install when binary is already in PATH."""
+        from installer.steps.dependencies import install_skillshare
+
+        mock_run.return_value = MagicMock(returncode=0, stdout="{}", stderr="")
+        with patch("installer.steps.dependencies._run_bash_with_retry") as mock_bash:
+            result = install_skillshare()
+
+        assert result is True
+        # No curl or init calls — only collect + sync
+        curl_calls = [c for c in mock_bash.call_args_list if "runkids/skillshare" in str(c)]
+        init_calls = [c for c in mock_bash.call_args_list if "init" in str(c)]
+        collect_calls = [c for c in mock_bash.call_args_list if "collect" in str(c)]
+        sync_calls = [c for c in mock_bash.call_args_list if "sync" in str(c)]
+        assert len(curl_calls) == 0, "curl install should not run"
+        assert len(init_calls) == 0, "init should not run if already initialized"
+        assert len(collect_calls) == 2, "collect should run for global and project"
+        assert len(sync_calls) == 2, "sync should run for global and project"
+
+    @patch("installer.steps.dependencies.subprocess.run")
+    @patch("installer.steps.dependencies.command_exists", return_value=False)
+    def test_install_skillshare_runs_curl_when_not_installed(self, _mock_cmd, mock_run):
+        """install_skillshare runs curl installer when skillshare not in PATH."""
+        from installer.steps.dependencies import install_skillshare
+
+        # status check fails (not initialized), init succeeds
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="not initialized")
+        with patch("installer.steps.dependencies._run_bash_with_retry", return_value=True) as mock_bash:
+            result = install_skillshare()
+
+        assert result is True
+        curl_calls = [c for c in mock_bash.call_args_list if "runkids/skillshare" in str(c)]
+        assert len(curl_calls) == 1, "curl install should be called once"
+        assert "install.sh" in str(curl_calls[0])
+
+    @patch("installer.steps.dependencies.subprocess.run")
+    @patch("installer.steps.dependencies.command_exists", return_value=False)
+    def test_install_skillshare_returns_false_when_curl_fails(self, _mock_cmd, mock_run):
+        """install_skillshare returns False when curl installer fails."""
+        from installer.steps.dependencies import install_skillshare
+
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="error")
+        with patch("installer.steps.dependencies._run_bash_with_retry", return_value=False):
+            result = install_skillshare()
+
+        assert result is False
+
+    @patch("installer.steps.dependencies.subprocess.run")
+    @patch("installer.steps.dependencies.command_exists", return_value=True)
+    def test_install_skillshare_skips_init_when_already_initialized(self, _mock_cmd, mock_run):
+        """install_skillshare skips init when status --json succeeds."""
+        from installer.steps.dependencies import install_skillshare
+
+        # status succeeds → already initialized
+        mock_run.return_value = MagicMock(returncode=0, stdout='{"version": "0.16.14"}', stderr="")
+        with patch("installer.steps.dependencies._run_bash_with_retry") as mock_bash:
+            result = install_skillshare()
+
+        assert result is True
+        init_calls = [c for c in mock_bash.call_args_list if "init" in str(c)]
+        assert len(init_calls) == 0, "init should not run if already initialized"
+
+    @patch("installer.steps.dependencies.subprocess.run")
+    @patch("installer.steps.dependencies.command_exists", return_value=True)
+    def test_install_skillshare_runs_init_with_claude_target(self, _mock_cmd, mock_run):
+        """install_skillshare runs both global and project init with claude target and merge mode."""
+        from installer.steps.dependencies import install_skillshare
+
+        # status fails → not initialized; init succeeds
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="not found")
+        with patch("installer.steps.dependencies._run_bash_with_retry", return_value=True) as mock_bash:
+            result = install_skillshare()
+
+        assert result is True
+        init_calls = [c for c in mock_bash.call_args_list if "init" in str(c)]
+        assert len(init_calls) == 2, "should run both global and project init"
+        # Global init
+        assert "--targets claude" in str(init_calls[0])
+        assert "--no-skill" in str(init_calls[0])
+        assert "--mode merge" in str(init_calls[0])
+        assert "-p" not in str(init_calls[0])
+        # Project init (no --no-skill flag available)
+        assert "-p" in str(init_calls[1])
+        assert "--targets claude" in str(init_calls[1])
+        assert "--mode merge" in str(init_calls[1])
+
+    @patch("installer.steps.dependencies.subprocess.run")
+    @patch("installer.steps.dependencies.command_exists", return_value=True)
+    def test_install_skillshare_returns_true_when_init_fails_gracefully(self, _mock_cmd, mock_run):
+        """install_skillshare returns True even if init fails (binary present)."""
+        from installer.steps.dependencies import install_skillshare
+
+        # status fails, init fails — but binary is installed
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="error")
+        with patch("installer.steps.dependencies._run_bash_with_retry", return_value=False):
+            result = install_skillshare()
+
+        assert result is True
+
+
+class TestUpdateSkillshare:
+    """Tests for update_skillshare() — Skillshare upgrade."""
+
+    def test_update_skillshare_exists(self):
+        """update_skillshare function exists and is callable."""
+        from installer.steps.dependencies import update_skillshare
+
+        assert callable(update_skillshare)
+
+    @patch("installer.steps.dependencies.command_exists", return_value=False)
+    def test_update_skillshare_returns_false_when_not_installed(self, _mock_cmd):
+        """update_skillshare returns False when skillshare binary not found."""
+        from installer.steps.dependencies import update_skillshare
+
+        result = update_skillshare()
+
+        assert result is False
+
+    @patch("installer.steps.dependencies.subprocess")
+    @patch("installer.steps.dependencies._run_bash_with_retry", return_value=True)
+    @patch("installer.steps.dependencies.command_exists", return_value=True)
+    def test_update_skillshare_runs_upgrade_when_needed(self, _mock_cmd, mock_run, mock_subprocess):
+        """update_skillshare runs upgrade when dry-run shows update available."""
+        from installer.steps.dependencies import update_skillshare
+
+        # dry-run doesn't say "Already up to date" → upgrade needed
+        mock_subprocess.run.return_value.stdout = "Would upgrade to v0.17.0"
+        result = update_skillshare()
+
+        assert result is True
+        mock_run.assert_called_once_with("skillshare upgrade --force")
+
+    @patch("installer.steps.dependencies.subprocess")
+    @patch("installer.steps.dependencies._run_bash_with_retry")
+    @patch("installer.steps.dependencies.command_exists", return_value=True)
+    def test_update_skillshare_skips_when_up_to_date(self, _mock_cmd, mock_run, mock_subprocess):
+        """update_skillshare skips upgrade when already up to date."""
+        from installer.steps.dependencies import update_skillshare
+
+        mock_subprocess.run.return_value.stdout = "Already up to date"
+        result = update_skillshare()
+
+        assert result is True
+        mock_run.assert_not_called()
+
+    @patch("installer.steps.dependencies.subprocess")
+    @patch("installer.steps.dependencies._run_bash_with_retry", return_value=False)
+    @patch("installer.steps.dependencies.command_exists", return_value=True)
+    def test_update_skillshare_returns_false_on_upgrade_failure(self, _mock_cmd, mock_run, mock_subprocess):
+        """update_skillshare returns False when upgrade command fails."""
+        from installer.steps.dependencies import update_skillshare
+
+        mock_subprocess.run.return_value.stdout = "Would upgrade"
+        result = update_skillshare()
 
         assert result is False
 

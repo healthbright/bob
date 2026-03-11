@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, BookOpen, ChevronRight } from "lucide-react";
+import { Menu, ChevronRight, ArrowLeft } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -29,6 +29,7 @@ import LanguageServersSection from "./docs/LanguageServersSection";
 import ConsoleSection from "./docs/ConsoleSection";
 import CliSection from "./docs/CliSection";
 import ModelRoutingSection from "./docs/ModelRoutingSection";
+import OpenSourceSection from "./docs/OpenSourceSection";
 
 interface TocGroup {
   title: string;
@@ -44,7 +45,7 @@ const tocGroups: TocGroup[] = [
     ],
   },
   {
-    title: "Commands",
+    title: "Workflows",
     items: [
       { id: "sync", label: "/sync — Codebase Sync" },
       { id: "spec", label: "/spec — Spec-Driven Dev" },
@@ -53,13 +54,13 @@ const tocGroups: TocGroup[] = [
     ],
   },
   {
-    title: "System",
+    title: "Features",
     items: [
-      { id: "teams", label: "Teams — Asset Sharing" },
+      { id: "share", label: "Share — Skill Sharing" },
       { id: "hooks", label: "Hooks Pipeline" },
       { id: "context-preservation", label: "Context Preservation" },
       { id: "rules", label: "Rules & Standards" },
-      { id: "model-routing", label: "Smart Model Routing" },
+      { id: "model-routing", label: "Model Routing" },
     ],
   },
   {
@@ -67,8 +68,14 @@ const tocGroups: TocGroup[] = [
     items: [
       { id: "mcp-servers", label: "MCP Servers" },
       { id: "language-servers", label: "Language Servers" },
-      { id: "console", label: "Pilot Shell Console" },
+      { id: "console", label: "Pilot Console" },
       { id: "cli", label: "Pilot CLI" },
+    ],
+  },
+  {
+    title: "Reference",
+    items: [
+      { id: "open-source", label: "Open Source Compliance" },
     ],
   },
 ];
@@ -153,28 +160,20 @@ const DocsPage = () => {
       <main className="min-h-screen bg-background pt-24">
         {/* Hero */}
         <div className="border-b border-border/50 bg-card/20">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-              <Link to="/" className="hover:text-primary transition-colors">
-                Home
-              </Link>
-              <ChevronRight className="h-3.5 w-3.5" />
-              <span className="text-foreground">Documentation</span>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
-                <BookOpen className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-                  Documentation
-                </h1>
-                <p className="text-muted-foreground text-base sm:text-lg max-w-2xl">
-                  Complete technical reference for Pilot Shell. Everything from
-                  installation to hooks, MCP servers, and the full CLI.
-                </p>
-              </div>
-            </div>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to home
+            </Link>
+            <h1 className="text-3xl font-bold text-foreground mb-1.5">
+              Documentation
+            </h1>
+            <p className="text-muted-foreground text-base">
+              Technical reference for installation, workflows, features, and tools.
+            </p>
           </div>
         </div>
 
@@ -228,6 +227,7 @@ const DocsPage = () => {
               <LanguageServersSection />
               <ConsoleSection />
               <CliSection />
+              <OpenSourceSection />
             </div>
           </div>
         </div>

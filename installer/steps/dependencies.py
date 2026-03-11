@@ -137,25 +137,83 @@ def install_probe() -> bool:
     return _run_bash_with_retry(npm_global_cmd("npm install -g @probelabs/probe"))
 
 
-def install_sx() -> bool:
-    """Install sx (sleuth.io skills exchange) for team asset sharing."""
-    if not command_exists("sx"):
-        if not _run_bash_with_retry("curl -fsSL https://raw.githubusercontent.com/sleuth-io/sx/main/install.sh | bash"):
+def _is_skillshare_initialized(flag: str = "-g") -> bool:
+    """Check if skillshare is initialized for the given scope (-g or -p)."""
+    try:
+        result = subprocess.run(
+            ["skillshare", "status", flag, "--json"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+
+
+def install_skillshare() -> bool:
+    """Install Skillshare CLI for skill sharing (cross-machine sync and org hub)."""
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    if not command_exists("skillshare"):
+        if not _run_bash_with_retry(
+            "curl -fsSL https://raw.githubusercontent.com/runkids/skillshare/main/install.sh | sh",
+            timeout=120,
+        ):
             return False
 
-    # Disable all clients except claude-code to prevent .cursor/.gemini folders
-    for client in ("gemini", "cursor", "github-copilot", "codex"):
-        _run_bash_with_retry(f"sx clients disable {client}")
+    # Initialize global mode if not already set up
+    if not _is_skillshare_initialized("-g"):
+        if not _run_bash_with_retry(
+            "skillshare init --targets claude --no-skill --mode merge",
+            timeout=30,
+        ):
+            logger.warning(
+                "skillshare global init failed — binary installed but not initialized. "
+                "Run 'skillshare init --targets claude' manually to complete setup."
+            )
+
+    # Initialize project mode if not already set up
+    if not _is_skillshare_initialized("-p"):
+        if not _run_bash_with_retry(
+            "skillshare init -p --targets claude --mode merge",
+            timeout=30,
+        ):
+            logger.warning(
+                "skillshare project init failed — "
+                "Run 'skillshare init -p --targets claude' manually to complete setup."
+            )
+
+    # Collect existing skills from target dirs into source, then sync all
+    _run_bash_with_retry("echo y | skillshare collect -g", timeout=30)
+    _run_bash_with_retry("echo y | skillshare collect -p", timeout=30)
+    _run_bash_with_retry("skillshare sync -g", timeout=30)
+    _run_bash_with_retry("skillshare sync -p", timeout=30)
 
     return True
 
 
-def update_sx() -> bool:
-    """Update sx to the latest version."""
-    if not command_exists("sx"):
+def update_skillshare() -> bool:
+    """Update Skillshare CLI if a newer version is available."""
+    if not command_exists("skillshare"):
         return False
 
-    return _run_bash_with_retry("sx update")
+    # Check if update is actually needed (avoids slow network call + prompt on every install)
+    try:
+        result = subprocess.run(
+            ["skillshare", "upgrade", "--dry-run"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if "Already up to date" in result.stdout:
+            return True  # No update needed
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
+    return _run_bash_with_retry("skillshare upgrade --force")
 
 
 def _is_vtsls_installed() -> bool:
@@ -663,9 +721,9 @@ class DependenciesStep(BaseStep):
         if _install_probe_with_ui(ui):
             installed.append("probe")
 
-        if _install_with_spinner(ui, "sx (team assets)", install_sx):
-            installed.append("sx")
-            _install_with_spinner(ui, "sx update", update_sx)
+        if _install_with_spinner(ui, "Skillshare (skill sharing)", install_skillshare):
+            installed.append("skillshare")
+            _install_with_spinner(ui, "skillshare upgrade", update_skillshare)
 
         if _install_with_spinner(ui, "MCP server packages", _precache_npx_mcp_servers, ui):
             installed.append("mcp_npx_cache")

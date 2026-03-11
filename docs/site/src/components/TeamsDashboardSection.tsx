@@ -6,23 +6,23 @@ import { Users, GitBranch, Package, RefreshCw, Calendar, Mail } from "lucide-rea
 const features = [
   {
     icon: Package,
-    title: "Shared Assets",
-    desc: "Push and install rules, skills, commands, and agents across your team from a single Git repository.",
+    title: "Skill Sharing",
+    desc: "Install skills from GitHub, sync to Claude, and share across machines and teams from the Console Share page.",
   },
   {
     icon: GitBranch,
-    title: "Project-Scoped",
-    desc: "Assets are scoped to repositories — each project gets exactly the assets it needs, automatically.",
+    title: "Cross-Machine Sync",
+    desc: "Push and pull skills via git remote. Your personal skills stay in sync across every machine you work on.",
   },
   {
     icon: RefreshCw,
-    title: "Version Tracking",
-    desc: "Every asset is versioned. See what's installed locally vs. what's latest in the repository at a glance.",
+    title: "Organization Hub",
+    desc: "Track a shared repo for org-wide distribution. One command keeps every team member up to date.",
   },
   {
     icon: Users,
-    title: "Team Consistency",
-    desc: "New team members run one command to get every rule, skill, and workflow the team has standardized on.",
+    title: "Project Mode",
+    desc: "Commit skills to your repo — new team members get all project skills automatically on clone.",
   },
 ];
 
@@ -43,12 +43,11 @@ const TeamsDashboardSection = () => {
         >
           <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Teams Asset Sharing
+              Skill Sharing
             </h2>
             <p className="text-muted-foreground text-lg sm:text-xl max-w-3xl mx-auto">
-              Share AI assets across your team. Rules, skills, commands, and
-              agents — managed from a central Git repository and synced to every
-              project.
+              Share skills across machines and teams — from personal cross-machine sync
+              to organization-wide hubs. Managed from the Console Share dashboard.
             </p>
           </div>
 
@@ -56,8 +55,8 @@ const TeamsDashboardSection = () => {
           <div className="max-w-4xl mx-auto mb-10">
             <div className="rounded-xl overflow-hidden border border-border/50">
               <ImageModal
-                src="/console/teams.png"
-                alt="Teams Dashboard — shared asset management with project-scoped versioning"
+                src="/console/share.png"
+                alt="Share Dashboard — skill sharing with cross-machine sync and org hub"
                 className="w-full rounded-xl"
               />
             </div>

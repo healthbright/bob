@@ -39,6 +39,12 @@ const consoleSlides = [
     alt: "Usage view — daily costs, token charts, and model routing strategy",
     desc: "Daily token costs, model routing breakdown, and usage trends over time.",
   },
+  {
+    label: "Share",
+    src: "/console/share.png",
+    alt: "Share view — skill sharing, sync, audit, and hub management",
+    desc: "Install, sync, and audit skills. Set up cross-machine sync, manage org hubs, and build hub indexes.",
+  },
 ];
 
 const ConsoleSection = () => {
@@ -87,7 +93,7 @@ const ConsoleSection = () => {
             </div>
 
             {/* Thumbnail strip */}
-            <div className="grid grid-cols-6 gap-2 sm:gap-3 mt-3">
+            <div className="grid grid-cols-7 gap-2 sm:gap-3 mt-3">
               {consoleSlides.map((s, i) => (
                 <button
                   key={i}

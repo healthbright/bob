@@ -159,7 +159,7 @@ Just chat — no plan, no approval gate. Quality hooks and TDD enforcement still
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/sync`  | Explores your codebase, discovers conventions, builds a search index, updates project rules. Run once initially, then anytime your project changes. |
 | `/learn` | Captures non-obvious discoveries as reusable skills. Triggers automatically or on demand.                                                           |
-| Teams      | Share rules, skills, commands, and agents across your team via the Console dashboard (Team plan).                                                   |
+| Share      | Share skills across machines and teams — global sync, project mode, org hub (Solo+ / Team plan).                                                    |
 
 ### Extensibility
 
@@ -189,24 +189,36 @@ A local web dashboard with 7 views and real-time notifications when Claude needs
 | **Memories**       | Browsable observations — decisions, discoveries, bugfixes — with type filters and search |
 | **Sessions**       | Active and past sessions with observation counts and duration                              |
 | **Usage**          | Daily token costs, model routing breakdown, and usage trends                               |
-| **Teams**          | Shared team assets with push, install, and management (Team plan)                          |
+| **Share**          | Skill sharing — cross-machine sync (Solo+), org hub and tracked repos (Team plan)          |
 | **Settings**       | Model selection per command/sub-agent, extended context toggle                             |
 
 </details>
 
-### Team Asset Sharing
+### Skill Sharing
 
-Share rules, skills, commands, and agents across your team from a central, private Git repository:
-
-<img src="docs/img/teams.png" alt="Teams Dashboard — shared asset management" width="700">
+Share skills across machines and teams via [Skillshare](https://github.com/runkids/skillshare) — three modes for different scopes:
 
 <details>
-<summary><b>What Teams includes</b></summary>
+<summary><b>Three sharing modes</b></summary>
 
-- **Shared asset management** — Push and install rules, skills, commands, and agents from the Console UI
-- **Project-scoped** — Assets are tied to repositories, so each project gets exactly what it needs
-- **Automatic versioning** — See installed vs. latest versions at a glance
-- **Guided onboarding** — New team members get a step-by-step screen to setup
+| Mode | Scope | How It Works |
+|------|-------|--------------|
+| **Global** | Personal, all projects | Skills in `~/.config/skillshare/skills/` synced to `~/.claude/skills/`. Add a git remote for cross-machine sync. |
+| **Project** | Single repo, team-wide | Skills in `.skillshare/skills/` committed to the repo. Team members get them on `git clone`. |
+| **Organization** | All projects, org-wide | Tracked repos distribute curated skills. Hub index enables search. Team plan only. |
+
+| Tier | Feature | License |
+|------|---------|---------|
+| **All users** | Install skills from URL, sync to Claude, project mode | Solo, Team, Trial |
+| **All paid users** | Cross-machine sync via git push/pull | Solo, Team, Trial |
+| **Team/Trial** | Organization hub, tracked repos, hub search | Team, Trial only |
+
+**Console Share dashboard** — install skills, set up git remote, sync, push/pull, manage hubs, and browse skills in one place. Documentation links and CLI reference built in.
+
+- **[Project Setup](https://skillshare.runkids.cc/docs/how-to/sharing/project-setup)** — commit `.skillshare/skills/` to your repo; new members get skills on clone
+- **[Cross-Machine Sync](https://skillshare.runkids.cc/docs/how-to/sharing/cross-machine-sync)** — push skills to a git remote, pull on any other machine
+- **[Organization Sharing](https://skillshare.runkids.cc/docs/how-to/sharing/organization-sharing)** — tracked repos for org-wide skill distribution
+- **[Hub Index Guide](https://skillshare.runkids.cc/docs/how-to/sharing/hub-index)** — build a curated skill catalog for your team
 
 </details>
 
@@ -334,7 +346,7 @@ Production-tested best practices loaded into every session. Core rules cover wor
 <details>
 <summary><b>Collaboration</b></summary>
 
-- `team-sharing.md` — Teams asset sharing via sx
+- `skill-sharing.md` — Skillshare CLI reference and three-tier sharing model
 
 </details>
 
@@ -438,7 +450,7 @@ Pilot Shell is source-available under a commercial license. See the [LICENSE](LI
 | Tier           | Seats | Includes                                                                          |
 | :------------- | :---- | :-------------------------------------------------------------------------------- |
 | **Solo** | 1     | All features, continuous updates, community support via [GitHub Issues][gh-issues] |
-| **Team** | Multi | Solo + team asset sharing, seat management, priority support                      |
+| **Team** | Multi | Solo + organization skill hub, tracked repos, seat management, priority support   |
 
 All plans work across multiple personal machines and Dev Containers — one subscription, all your devices.
 
@@ -535,7 +547,7 @@ Yes. Pilot Shell installs once globally and works across all your projects — y
 <details>
 <summary><b>Can I add my own rules, commands, and skills?</b></summary>
 
-Yes. Create your own in your project's `.claude/` folder — rules, commands, and skills are all plain markdown files. Your project-level assets are loaded alongside Pilot Shell's built-in defaults and take precedence when they overlap. `/sync` auto-discovers your codebase patterns and generates project-specific rules for you. `/learn` extracts reusable knowledge from sessions into custom skills. Hooks can be extended for additional languages. Use the Teams dashboard in the Console to share your custom assets across your team.
+Yes. Create your own in your project's `.claude/` folder — rules, commands, and skills are all plain markdown files. Your project-level assets are loaded alongside Pilot Shell's built-in defaults and take precedence when they overlap. `/sync` auto-discovers your codebase patterns and generates project-specific rules for you. `/learn` extracts reusable knowledge from sessions into custom skills. Hooks can be extended for additional languages. Use the Share page in the Console to share skills across machines and teams.
 
 For monorepos, organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter so they only load when working on relevant files. `/sync` validates this structure, enforces path-scoping, and generates a `README.md` to document the organization.
 

@@ -1,185 +1,164 @@
-import { Users, CheckCircle2 } from "lucide-react";
+import { Share2, CheckCircle2, ExternalLink } from "lucide-react";
 import { useInView } from "@/hooks/use-in-view";
 
-const teamsFeatures = [
+const DOCS_BASE = "https://skillshare.runkids.cc/docs/how-to/sharing";
+
+const tiers = [
   {
-    title: "Console Dashboard",
-    desc: "Browse, push, install, and remove assets from a visual Teams page",
+    title: "Global Mode",
+    badge: "Solo+",
+    items: [
+      "Install skills from GitHub URLs",
+      "Sync skills to ~/.claude/skills/",
+      "Cross-machine sync via git push/pull",
+    ],
   },
   {
-    title: "Private Git Repo",
-    desc: "Use any Git repo — GitHub, GitLab, Bitbucket, public or private",
+    title: "Project Mode",
+    badge: "All plans",
+    items: [
+      "Commit skills to repo for team sharing",
+      "New members get skills on git clone",
+      "Separate from global skills — no conflicts",
+    ],
   },
   {
-    title: "Push & Install",
-    desc: "Push local assets to the repo, install team assets to your project",
-  },
-  {
-    title: "Versioned",
-    desc: "Assets auto-increment versions (v1, v2, v3…) on each push",
+    title: "Organization Hub",
+    badge: "Team",
+    items: [
+      "Tracked repos for org-wide distribution",
+      "Hub index — curated skill catalogs",
+      "One command for team onboarding",
+    ],
   },
 ];
 
-const assetTypes = [
-  {
-    type: "rule",
-    path: ".claude/rules/<name>.md",
-    desc: "Guidelines loaded every session",
-  },
-  {
-    type: "skill",
-    path: ".claude/skills/<name>/",
-    desc: "Reusable knowledge from /learn",
-  },
-  {
-    type: "command",
-    path: ".claude/commands/<name>.md",
-    desc: "Slash commands (/mycommand)",
-  },
-  {
-    type: "agent",
-    path: ".claude/agents/<name>.md",
-    desc: "Sub-agent definitions",
-  },
+const docLinks = [
+  { href: `${DOCS_BASE}/project-setup`, title: "Project Setup", desc: "Commit skills to your repo" },
+  { href: `${DOCS_BASE}/cross-machine-sync`, title: "Cross-Machine Sync", desc: "Sync via git push/pull" },
+  { href: `${DOCS_BASE}/organization-sharing`, title: "Organization Sharing", desc: "Tracked repos for teams" },
+  { href: `${DOCS_BASE}/hub-index`, title: "Hub Index Guide", desc: "Build a skill catalog" },
 ];
 
-const TeamsSection = () => {
+const ShareSection = () => {
   const [ref, inView] = useInView<HTMLDivElement>();
 
   return (
     <section
-      id="teams"
+      id="share"
       className="py-10 border-b border-border/50 scroll-mt-24"
     >
       <div ref={ref} className={inView ? "animate-fade-in-up" : "opacity-0"}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-            <Users className="h-5 w-5 text-primary" />
+            <Share2 className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              Teams — Asset Sharing
+              Skill Sharing
             </h2>
             <p className="text-sm text-muted-foreground">
-              Share rules, commands, and skills across your team via the Console
-              dashboard
+              Share skills across machines and teams — from personal sync to org-wide hubs
             </p>
           </div>
         </div>
 
         <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-          The Teams page in the Pilot Console lets your team share custom
-          assets — rules, skills, commands, and agents — via a private Git
-          repository. Browse assets, push local files, install team assets, and
-          manage versions — all from a visual dashboard. No CLI needed.
+          The Share page in the Pilot Console manages skills using{" "}
+          <a href="https://github.com/runkids/skillshare" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            Skillshare
+          </a>
+          . Three modes cover different scopes: <strong>Global</strong> for personal cross-machine sync,{" "}
+          <strong>Project</strong> for team-shared skills committed to the repo, and{" "}
+          <strong>Organization</strong> for tracked repos and hub-based distribution. Only skills are shared
+          — rules, commands, and agents stay project-specific.
         </p>
 
-        <div className="grid sm:grid-cols-2 gap-3 mb-6">
-          {teamsFeatures.map((f) => (
+        <div className="grid sm:grid-cols-3 gap-3 mb-6">
+          {tiers.map((tier) => (
             <div
-              key={f.title}
+              key={tier.title}
               className="rounded-xl p-4 border border-border/50 bg-card"
             >
-              <h3 className="font-semibold text-foreground text-sm mb-1">
-                {f.title}
-              </h3>
-              <p className="text-xs text-muted-foreground">{f.desc}</p>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-foreground text-sm">{tier.title}</h3>
+                <span className="text-xs font-medium text-primary bg-primary/10 rounded px-1.5 py-0.5">
+                  {tier.badge}
+                </span>
+              </div>
+              <ul className="space-y-1">
+                {tier.items.map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="h-3 w-3 text-primary flex-shrink-0 mt-0.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
 
         <h3 className="font-semibold text-foreground text-sm mb-2">Setup</h3>
         <p className="text-xs text-muted-foreground mb-3">
-          Open the Console dashboard and navigate to the Teams page. Click{" "}
-          <strong>Configure Repository</strong> to connect your team's Git repo.
-          Or use the CLI:
+          Skillshare is installed automatically by the Pilot installer. Open the Console
+          dashboard and navigate to the <strong>Share</strong> page to manage skills.
+          The page shows your current mode (Global or Project), synced skills, git remote status,
+          and documentation links.
         </p>
         <div className="bg-background/80 rounded-lg p-3 font-mono text-xs border border-border/50 text-muted-foreground mb-5">
-          <div className="text-muted-foreground/60 mb-1">
-            # Initialize with your team's private repo
-          </div>
+          <div className="text-muted-foreground/60 mb-1"># Cross-machine sync (Global mode)</div>
           <div>
-            <span className="text-primary">$</span> sx init --type git
-            --repo-url git@github.com:org/team-repo.git
+            <span className="text-primary">$</span> skillshare init --remote git@github.com:you/my-skills.git
+          </div>
+          <div className="text-muted-foreground/60 mt-2 mb-1"># Project mode — team sharing via git</div>
+          <div>
+            <span className="text-primary">$</span> skillshare init -p --targets claude
+          </div>
+          <div className="text-muted-foreground/60 mt-2 mb-1"># Organization hub (Team plan)</div>
+          <div>
+            <span className="text-primary">$</span> skillshare install github.com/org/skills --track
           </div>
         </div>
 
-        <h3 className="font-semibold text-foreground text-sm mb-3">
-          Shareable Asset Types
-        </h3>
-        <div className="rounded-xl border border-border/50 overflow-hidden mb-5">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/50 bg-card">
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">
-                  Type
-                </th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">
-                  Source Path
-                </th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground hidden sm:table-cell">
-                  Purpose
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {assetTypes.map((a, i) => (
-                <tr
-                  key={a.type}
-                  className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? "" : "bg-card/20"}`}
-                >
-                  <td className="px-4 py-2.5">
-                    <code className="text-xs text-primary">{a.type}</code>
-                  </td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground font-mono">
-                    {a.path}
-                  </td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground hidden sm:table-cell">
-                    {a.desc}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="grid sm:grid-cols-2 gap-3 mb-5">
           <div className="rounded-xl p-4 border border-primary/30 bg-primary/5">
             <h4 className="font-medium text-foreground text-sm mb-1">
-              Project-scoped
-              <span className="text-xs text-primary font-medium ml-2">
-                Recommended
-              </span>
+              Project mode
+              <span className="text-xs text-primary font-medium ml-2">All plans</span>
             </h4>
             <p className="text-xs text-muted-foreground">
-              Assets install to the project's{" "}
-              <code className="text-primary">.claude/</code>. Stays with the
-              repo, visible to all contributors.
+              Commit <code className="text-primary">.skillshare/skills/</code> to your repo.
+              New team members get all skills on clone — no extra setup.
             </p>
           </div>
           <div className="rounded-xl p-4 border border-border/50 bg-card">
-            <h4 className="font-medium text-foreground text-sm mb-1">Global</h4>
+            <h4 className="font-medium text-foreground text-sm mb-1">Organization hub</h4>
             <p className="text-xs text-muted-foreground">
-              Assets install to <code className="text-primary">~/.claude/</code>{" "}
-              and apply across all your projects on this machine.
+              Track shared repos for org-wide distribution. Build a hub index
+              for searchable skill catalogs.
             </p>
           </div>
         </div>
 
-        <div className="mt-4 rounded-xl p-3 border border-border/50 bg-card">
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Assets are auto-versioned — each push creates v1, v2, v3…
-              Teammates install the latest version from the Teams dashboard.
-              Background sync keeps everything up to date when you open the
-              page.
-            </p>
-          </div>
+        <h3 className="font-semibold text-foreground text-sm mb-2">Documentation</h3>
+        <div className="grid sm:grid-cols-2 gap-2">
+          {docLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors group text-xs"
+            >
+              <ExternalLink className="h-3 w-3 text-primary flex-shrink-0" />
+              <span className="font-medium text-foreground group-hover:text-primary transition-colors">{link.title}</span>
+              <span className="text-muted-foreground">— {link.desc}</span>
+            </a>
+          ))}
         </div>
       </div>
     </section>
   );
 };
 
-export default TeamsSection;
+export default ShareSection;

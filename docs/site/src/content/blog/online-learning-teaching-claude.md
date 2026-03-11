@@ -54,14 +54,21 @@ Rules tell Claude what to do. Skills teach Claude how to do things it's learned 
 
 ## Team Sharing
 
-Skills can be shared across your team using Pilot's vault system. When one developer discovers a workaround, the whole team benefits:
+Skills can be shared across your team using Skillshare. When one developer discovers a workaround, the whole team benefits:
 
 ```bash
-# Share a learned skill with the team
-sx add .claude/skills/deploy-staging --type skill --name "deploy-staging"
+# Push a learned skill to your git remote
+skillshare push -m "Add deploy-staging skill"
 
-# Team members install shared skills
-sx install --repair
+# Team members pull and sync
+skillshare pull
+```
+
+For org-wide distribution (Team plan), install a tracked repo so everyone stays current:
+
+```bash
+skillshare install github.com/org/skills --track
+skillshare update --all && skillshare sync
 ```
 
 ## The Flywheel

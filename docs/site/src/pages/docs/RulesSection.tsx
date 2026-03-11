@@ -60,7 +60,7 @@ const ruleCategories = [
     icon: GitBranch,
     category: "Collaboration",
     count: 1,
-    rules: [{ file: "team-sharing.md", desc: "Teams asset sharing via sx" }],
+    rules: [{ file: "skill-sharing.md", desc: "Skillshare CLI and three-tier sharing model" }],
   },
 ];
 
