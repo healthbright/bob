@@ -186,13 +186,61 @@ def install_skillshare() -> bool:
                 "Run 'skillshare init -p --targets claude' manually to complete setup."
             )
 
-    # Collect existing skills from target dirs into source, then sync all
-    _run_bash_with_retry("echo y | skillshare collect -g", timeout=30)
-    _run_bash_with_retry("echo y | skillshare collect -p", timeout=30)
-    _run_bash_with_retry("skillshare sync -g", timeout=30)
+    # Configure extras (rules, commands, agents) for cross-machine sync
+    _configure_skillshare_extras()
+
+    # Backup global targets before modifying, then collect and sync
+    _run_bash_with_retry("skillshare backup", timeout=30)
+    _run_bash_with_retry("skillshare collect -g --force", timeout=30)
+    _run_bash_with_retry("skillshare collect -p --force", timeout=30)
+    _run_bash_with_retry("skillshare sync -g --all", timeout=30)
     _run_bash_with_retry("skillshare sync -p", timeout=30)
 
     return True
+
+
+def _configure_skillshare_extras() -> None:
+    """Add extras config (rules, commands, agents) to skillshare global config.
+
+    Extras allow syncing non-skill resources to Claude's directories via
+    `skillshare sync --all`. Uses merge mode so user-created and Pilot-managed
+    files are preserved alongside shared extras.
+    """
+    config_path = Path.home() / ".config" / "skillshare" / "config.yaml"
+    if not config_path.exists():
+        return
+
+    try:
+        content = config_path.read_text()
+    except OSError:
+        return
+
+    # Skip if extras already configured
+    if "extras:" in content:
+        return
+
+    extras_block = (
+        "\nextras:\n"
+        "    - name: rules\n"
+        "      targets:\n"
+        "        - path: ~/.claude/rules\n"
+        "    - name: commands\n"
+        "      targets:\n"
+        "        - path: ~/.claude/commands\n"
+        "    - name: agents\n"
+        "      targets:\n"
+        "        - path: ~/.claude/agents\n"
+    )
+
+    try:
+        config_path.write_text(content.rstrip() + "\n" + extras_block)
+    except OSError:
+        return
+
+    # Create source directories for extras
+    base = Path.home() / ".config" / "skillshare"
+    for name in ("rules", "commands", "agents"):
+        (base / name).mkdir(parents=True, exist_ok=True)
 
 
 def update_skillshare() -> bool:

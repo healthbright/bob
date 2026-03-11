@@ -47,7 +47,7 @@ const faqItems = [
   {
     question: "Can I use one license on multiple machines?",
     answer:
-      "Yes. A Solo license covers you across all your personal devices \u2014 workstation, laptop, VPS, Dev Containers. One subscription, one key, multiple machines. No need for a Team plan just because you work from more than one device. Team licenses are for multiple people, not multiple machines.",
+      "Yes. A Solo license covers you across all your personal devices \u2014 workstation, laptop, VPS, cloud instances. One subscription, one key, multiple machines. No need for a Team plan just because you work from more than one device. Team licenses are for multiple people, not multiple machines.",
   },
   {
     question: "Can I use Pilot Shell on multiple projects?",
@@ -57,12 +57,12 @@ const faqItems = [
   {
     question: "Do I need to run the installer from inside a project directory?",
     answer:
-      "For local mode: no. You can run the installer from any directory \u2014 your home folder, a parent folder containing multiple repos, anywhere. Everything installs globally to ~/.pilot/ and ~/.claude/. For Dev Container mode: yes. The installer creates a .devcontainer/ folder in the current directory, so run it from inside the project you want to containerize.",
+      "No. You can run the installer from any directory \u2014 your home folder, a parent folder containing multiple repos, anywhere. Everything installs globally to ~/.pilot/ and ~/.claude/.",
   },
   {
     question: "Can I add my own rules, commands, and skills?",
     answer:
-      "Yes. Create your own in your project\u2019s .claude/ folder \u2014 rules, commands, and skills are all plain markdown files. Your project-level assets are loaded alongside Pilot Shell\u2019s built-in defaults and take precedence when they overlap. /sync auto-discovers your codebase patterns and generates project-specific rules for you. /learn extracts reusable knowledge from sessions into custom skills. Hooks can be extended for additional languages. Use the Share page in the Console to share skills across machines and teams.",
+      "Yes. Create your own in your project\u2019s .claude/ folder \u2014 rules, commands, and skills are all plain markdown files. Your project-level assets are loaded alongside Pilot Shell\u2019s built-in defaults and take precedence when they overlap. /sync auto-discovers your codebase patterns and generates project-specific rules for you. /learn extracts reusable knowledge from sessions into custom skills. Hooks can be extended for additional languages. Use the Share page in the Console to share skills across your machines, projects, and organization.",
   },
 ];
 

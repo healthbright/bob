@@ -437,8 +437,10 @@ class TestInstallSkillshare:
         init_calls = [c for c in mock_bash.call_args_list if "init" in str(c)]
         collect_calls = [c for c in mock_bash.call_args_list if "collect" in str(c)]
         sync_calls = [c for c in mock_bash.call_args_list if "sync" in str(c)]
+        backup_calls = [c for c in mock_bash.call_args_list if "backup" in str(c)]
         assert len(curl_calls) == 0, "curl install should not run"
         assert len(init_calls) == 0, "init should not run if already initialized"
+        assert len(backup_calls) == 1, "backup should run once before collect/sync"
         assert len(collect_calls) == 2, "collect should run for global and project"
         assert len(sync_calls) == 2, "sync should run for global and project"
 
@@ -521,6 +523,67 @@ class TestInstallSkillshare:
             result = install_skillshare()
 
         assert result is True
+
+
+class TestConfigureSkillshareExtras:
+    """Tests for _configure_skillshare_extras() — extras config for rules/commands/agents."""
+
+    def test_adds_extras_to_config(self, tmp_path: Path) -> None:
+        """Extras section is appended when not present."""
+        from installer.steps.dependencies import _configure_skillshare_extras
+
+        config = tmp_path / ".config" / "skillshare" / "config.yaml"
+        config.parent.mkdir(parents=True)
+        config.write_text("source: /path/to/skills\ntargets:\n    claude:\n        path: ~/.claude/skills\n")
+
+        with patch("installer.steps.dependencies.Path.home", return_value=tmp_path):
+            _configure_skillshare_extras()
+
+        content = config.read_text()
+        assert "extras:" in content
+        assert "name: rules" in content
+        assert "name: commands" in content
+        assert "name: agents" in content
+        assert "path: ~/.claude/rules" in content
+        assert "path: ~/.claude/commands" in content
+        assert "path: ~/.claude/agents" in content
+
+    def test_skips_if_extras_already_present(self, tmp_path: Path) -> None:
+        """Does not duplicate extras section."""
+        from installer.steps.dependencies import _configure_skillshare_extras
+
+        config = tmp_path / ".config" / "skillshare" / "config.yaml"
+        config.parent.mkdir(parents=True)
+        original = "source: /path\nextras:\n    - name: rules\n"
+        config.write_text(original)
+
+        with patch("installer.steps.dependencies.Path.home", return_value=tmp_path):
+            _configure_skillshare_extras()
+
+        assert config.read_text() == original
+
+    def test_creates_source_directories(self, tmp_path: Path) -> None:
+        """Creates rules, commands, agents directories in skillshare source."""
+        from installer.steps.dependencies import _configure_skillshare_extras
+
+        config = tmp_path / ".config" / "skillshare" / "config.yaml"
+        config.parent.mkdir(parents=True)
+        config.write_text("source: /path\n")
+
+        with patch("installer.steps.dependencies.Path.home", return_value=tmp_path):
+            _configure_skillshare_extras()
+
+        base = tmp_path / ".config" / "skillshare"
+        assert (base / "rules").is_dir()
+        assert (base / "commands").is_dir()
+        assert (base / "agents").is_dir()
+
+    def test_skips_if_config_missing(self, tmp_path: Path) -> None:
+        """Does nothing when config.yaml doesn't exist."""
+        from installer.steps.dependencies import _configure_skillshare_extras
+
+        with patch("installer.steps.dependencies.Path.home", return_value=tmp_path):
+            _configure_skillshare_extras()  # Should not raise
 
 
 class TestUpdateSkillshare:

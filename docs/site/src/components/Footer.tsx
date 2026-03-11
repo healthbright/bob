@@ -55,12 +55,12 @@ const Footer = () => {
                 </button>
               </li>
               <li>
-                <Link
-                  to="/docs"
+                <a
+                  href="/docs/"
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   Docs
-                </Link>
+                </a>
               </li>
               <li>
                 <button
@@ -83,12 +83,12 @@ const Footer = () => {
                 </button>
               </li>
               <li>
-                <Link
-                  to="/blog"
+                <a
+                  href="/blog/"
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   Blog
-                </Link>
+                </a>
               </li>
               <li>
                 <a

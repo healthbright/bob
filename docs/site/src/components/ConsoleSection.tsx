@@ -39,12 +39,6 @@ const consoleSlides = [
     alt: "Usage view — daily costs, token charts, and model routing strategy",
     desc: "Daily token costs, model routing breakdown, and usage trends over time.",
   },
-  {
-    label: "Share",
-    src: "/console/share.png",
-    alt: "Share view — skill sharing, sync, audit, and hub management",
-    desc: "Install, sync, and audit skills. Set up cross-machine sync, manage org hubs, and build hub indexes.",
-  },
 ];
 
 const ConsoleSection = () => {

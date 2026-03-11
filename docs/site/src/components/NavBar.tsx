@@ -64,7 +64,7 @@ const NavBar = () => {
             size="sm"
             className="hidden sm:inline-flex"
           >
-            <Link to="/docs">Docs</Link>
+            <a href="/docs/">Docs</a>
           </Button>
           <Button
             asChild
@@ -72,7 +72,7 @@ const NavBar = () => {
             size="sm"
             className="hidden sm:inline-flex"
           >
-            <Link to="/blog">Blog</Link>
+            <a href="/blog/">Blog</a>
           </Button>
           <a
             href="https://pilot.openchangelog.com/"
@@ -135,20 +135,18 @@ const NavBar = () => {
               {link.label}
             </button>
           ))}
-          <Link
-            to="/docs"
-            onClick={() => setMobileMenuOpen(false)}
+          <a
+            href="/docs/"
             className="block w-full text-left py-3 text-muted-foreground hover:text-foreground border-b border-border transition-colors"
           >
             Docs
-          </Link>
-          <Link
-            to="/blog"
-            onClick={() => setMobileMenuOpen(false)}
+          </a>
+          <a
+            href="/blog/"
             className="block w-full text-left py-3 text-muted-foreground hover:text-foreground border-b border-border last:border-0 transition-colors"
           >
             Blog
-          </Link>
+          </a>
           <Button
             onClick={() => handleSectionClick("#installation")}
             className="mt-4 w-full"

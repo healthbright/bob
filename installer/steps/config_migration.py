@@ -162,4 +162,4 @@ def _write_atomic(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_suffix(".json.tmp")
     tmp_path.write_text(json.dumps(data, indent=2))
-    os.rename(tmp_path, path)
+    os.replace(tmp_path, path)

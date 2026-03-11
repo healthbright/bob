@@ -231,8 +231,8 @@ const PricingSection = () => {
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          All plans work across multiple personal machines and Dev Containers —
-          one subscription, all your devices.
+          All plans work across multiple personal machines — one subscription,
+          all your devices.
         </p>
         <p className="text-center text-sm text-muted-foreground mt-2">
           Already a subscriber?{" "}

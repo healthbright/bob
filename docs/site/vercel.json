@@ -1,11 +1,19 @@
 {
   "ignoreCommand": "bash vercel-build-check.sh",
-  "buildCommand": "npm run build",
+  "buildCommand": "bash build-all.sh",
   "outputDirectory": "dist",
-  "framework": "vite",
+  "framework": null,
   "trailingSlash": false,
   "cleanUrls": true,
   "rewrites": [
+    {
+      "source": "/docs/:path*",
+      "destination": "/docs/:path*"
+    },
+    {
+      "source": "/blog/:path*",
+      "destination": "/blog/:path*"
+    },
     {
       "source": "/(.*)",
       "destination": "/"

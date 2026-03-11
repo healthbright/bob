@@ -38,7 +38,7 @@ Use `{slug}-` prefix on everything: `{slug}-project.md`, `{slug}-mcp-servers.md`
 
 **Custom rules** in `.claude/rules/`: `{slug}-project.md` (tech stack, structure), `{slug}-mcp-servers.md` (custom MCP servers), `{slug}-{pattern-name}.md` (tribal knowledge).
 
-**Custom skills:** If `.skillshare/skills/` exists, create in `.skillshare/skills/{slug}-{name}/SKILL.md` and run `skillshare sync -p` afterward. Otherwise, create in `.claude/skills/{slug}-{name}/SKILL.md`.
+**Custom skills:** If `skillshare` is installed, use `skillshare new {slug}-{name} -p` (project) or `-g` (global), with `--into {category}` for organization. Run `skillshare sync` after creating. Without skillshare: create directly in `.claude/skills/{slug}-{name}/SKILL.md`.
 
 Use unique names (not `plan`, `implement`, `verify`, `standards-*`) for custom skills.
 
@@ -480,7 +480,7 @@ For each skill from Phase 1 (from both `.skillshare/skills/` and `.claude/skills
 1. **Relevance:** Does the workflow/tool still exist? Has process changed?
 2. **Currency:** Steps accurate? APIs changed? Examples working?
 3. **Triggers:** Description still accurate for discovery?
-4. **Location:** If skill is in `.claude/skills/` but `.skillshare/skills/` exists, offer to move it to `.skillshare/skills/` (enables sharing via Skillshare)
+4. **Location:** If `skillshare` is installed and skill is in `.claude/skills/` but `.skillshare/skills/` exists, offer to move it to `.skillshare/skills/` (enables sharing via Skillshare)
 
 If updates needed: AskUserQuestion (multiSelect) with what changed and why. For each selected: update content, bump version (e.g., 1.0.0 → 1.0.1). Confirm each: "Yes, update it" | "Edit first" | "Skip this one".
 
@@ -519,10 +519,10 @@ Skills are appropriate for: multi-step workflows, tool integrations, reusable sc
 
 1. Identify candidates from exploration: repeated workflows, complex tool usage, bundled scripts
 2. AskUserQuestion (multiSelect): which to create
-3. **Determine output directory:** If `.skillshare/skills/` exists, create there. Otherwise `.claude/skills/`.
-4. For each: invoke `Skill(skill="learn")` if available — otherwise create `{skill-base}/{slug}-{name}/SKILL.md` directly with frontmatter (`name`, `description`, optionally `user-invocable: true`)
+3. **Create skill:** If `skillshare` is installed, use `skillshare new {slug}-{name} -p` (project) or `-g` (global), with `--into {category}` for subdirectories. Without skillshare: `mkdir -p .claude/skills/{slug}-{name}` and write SKILL.md directly.
+4. For each: invoke `Skill(skill="learn")` if available — otherwise write SKILL.md directly with frontmatter (`name`, `description`, `targets: [claude]`, optionally `user-invocable: true`)
 5. Verify: skill directory exists, SKILL.md has proper frontmatter
-6. **If created in `.skillshare/`:** Run `skillshare sync -p` to make new skills available to Claude
+6. **Sync (if skillshare available):** Run `skillshare sync -p` (project) or `skillshare sync -g` (global) to make new skills available to Claude. Without skillshare: skills in `.claude/skills/` are already in the target — no sync needed.
 
 ## Phase 11: Cross-Check
 

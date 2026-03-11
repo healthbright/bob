@@ -55,7 +55,7 @@ const TeamsDashboardSection = () => {
           <div className="max-w-4xl mx-auto mb-10">
             <div className="rounded-xl overflow-hidden border border-border/50">
               <ImageModal
-                src="/console/share.png"
+                src="/console/teams.png"
                 alt="Share Dashboard — skill sharing with cross-machine sync and org hub"
                 className="w-full rounded-xl"
               />
