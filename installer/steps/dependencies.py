@@ -137,26 +137,13 @@ def install_probe() -> bool:
     return _run_bash_with_retry(npm_global_cmd("npm install -g @probelabs/probe"))
 
 
-def _is_skillshare_initialized(flag: str = "-g") -> bool:
-    """Check if skillshare is initialized for the given scope (-g or -p)."""
-    try:
-        result = subprocess.run(
-            ["skillshare", "status", flag, "--json"],
-            capture_output=True,
-            text=True,
-            timeout=15,
-        )
-        return result.returncode == 0
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        return False
-
-
 def install_skillshare() -> bool:
-    """Install Skillshare CLI for skill sharing (cross-machine sync and org hub)."""
-    import logging
+    """Install Skillshare CLI binary and configure extras.
 
-    logger = logging.getLogger(__name__)
-
+    Only installs the binary and sets up extras config (non-destructive).
+    Does NOT run init, collect, sync, or backup — users should use the CLI
+    or the Console Share page for guidance on initialization.
+    """
     if not command_exists("skillshare"):
         if not _run_bash_with_retry(
             "curl -fsSL https://raw.githubusercontent.com/runkids/skillshare/main/install.sh | sh",
@@ -164,37 +151,9 @@ def install_skillshare() -> bool:
         ):
             return False
 
-    # Initialize global mode if not already set up
-    if not _is_skillshare_initialized("-g"):
-        if not _run_bash_with_retry(
-            "skillshare init --targets claude --no-skill --mode merge",
-            timeout=30,
-        ):
-            logger.warning(
-                "skillshare global init failed — binary installed but not initialized. "
-                "Run 'skillshare init --targets claude' manually to complete setup."
-            )
-
-    # Initialize project mode if not already set up
-    if not _is_skillshare_initialized("-p"):
-        if not _run_bash_with_retry(
-            "skillshare init -p --targets claude --mode merge",
-            timeout=30,
-        ):
-            logger.warning(
-                "skillshare project init failed — "
-                "Run 'skillshare init -p --targets claude' manually to complete setup."
-            )
-
     # Configure extras (rules, commands, agents) for cross-machine sync
+    # This is non-destructive — only adds config entries and creates directories
     _configure_skillshare_extras()
-
-    # Backup global targets before modifying, then collect and sync
-    _run_bash_with_retry("skillshare backup", timeout=30)
-    _run_bash_with_retry("skillshare collect -g --force", timeout=30)
-    _run_bash_with_retry("skillshare collect -p --force", timeout=30)
-    _run_bash_with_retry("skillshare sync -g --all", timeout=30)
-    _run_bash_with_retry("skillshare sync -p", timeout=30)
 
     return True
 

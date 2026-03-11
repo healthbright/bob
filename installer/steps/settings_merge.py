@@ -22,7 +22,7 @@ def merge_settings(
 
     Rules:
     - If no baseline exists (first install), incoming wins for all keys.
-    - For list fields (permissions.allow, permissions.deny): union of current + incoming,
+    - For list fields (permissions.allow, permissions.deny, permissions.ask): union of current + incoming,
       minus any Pilot entries the user explicitly removed (in baseline but not in current).
     - For dict fields (env, attribution, statusLine): merge keys individually.
       If user changed a key from baseline value, keep user's value. Otherwise update to incoming.
@@ -66,37 +66,56 @@ def merge_settings(
     return result
 
 
+def _normalize_for_set(item: Any) -> Any:
+    """Convert nested lists to tuples for hashability in set operations."""
+    if isinstance(item, list):
+        return tuple(_normalize_for_set(i) for i in item)
+    return item
+
+
+def _denormalize_from_set(item: Any) -> Any:
+    """Convert tuples back to lists after set operations."""
+    if isinstance(item, tuple):
+        return [_denormalize_from_set(i) for i in item]
+    return item
+
+
 def _merge_permissions(
     baseline: dict[str, Any] | None,
     current: dict[str, Any],
     incoming: dict[str, Any],
 ) -> dict[str, Any]:
-    """Merge permissions with set-union for allow/deny lists, scalar merge for other keys.
+    """Merge permissions with set-union for allow/deny/ask lists, scalar merge for other keys.
 
-    - allow/deny lists: union of incoming + user-added, minus user-removed.
+    - allow/deny/ask lists: union of incoming + user-added, minus user-removed.
     - Other keys (e.g., defaultMode): scalar merge — user changes win over Pilot defaults.
     - Entries in incoming are always included (Pilot-managed).
     - User-added entries (in current but not in baseline) are preserved.
     - Entries the user explicitly removed (in baseline but not in current) stay removed.
+    - ask entries may be nested lists (e.g., [["Bash(git push *)"]]), handled via
+      normalize/denormalize for hashable set operations.
     """
     result: dict[str, Any] = {}
 
-    for list_key in ("allow", "deny"):
-        incoming_set = set(incoming.get(list_key, []))
-        current_set = set(current.get(list_key, []))
+    for list_key in ("allow", "deny", "ask"):
+        incoming_set = {_normalize_for_set(x) for x in incoming.get(list_key, [])}
+        current_set = {_normalize_for_set(x) for x in current.get(list_key, [])}
 
         if baseline is None:
             merged = incoming_set | current_set
         else:
-            baseline_set = set(baseline.get(list_key, []))
+            baseline_set = {_normalize_for_set(x) for x in baseline.get(list_key, [])}
             user_added = current_set - baseline_set
             user_removed = baseline_set - current_set
             merged = (incoming_set | user_added) - user_removed
 
-        result[list_key] = sorted(merged)
+        result[list_key] = sorted(
+            [_denormalize_from_set(x) for x in merged],
+            key=lambda x: str(x),
+        )
 
     all_keys = set(incoming.keys()) | set(current.keys())
-    for key in all_keys - {"allow", "deny"}:
+    for key in all_keys - {"allow", "deny", "ask"}:
         if key not in incoming:
             result[key] = current[key]
         elif key not in current:

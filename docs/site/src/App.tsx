@@ -24,7 +24,7 @@ const App = () => (
           <ScrollToHash />
           <Routes>
             <Route path="/" element={<Index />} />
-            {/* /docs and /blog are now served by Docusaurus static files */}
+            {/* /docs is served by Docusaurus static files */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

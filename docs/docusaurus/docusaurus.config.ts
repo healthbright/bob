@@ -39,15 +39,7 @@ const config: Config = {
           editUrl:
             "https://github.com/maxritter/pilot-shell/tree/main/docs/docusaurus/",
         },
-        blog: {
-          showReadingTime: true,
-          blogSidebarCount: 15,
-          blogSidebarTitle: "Recent Posts",
-          postsPerPage: 12,
-          onUntruncatedBlogPosts: "ignore",
-          editUrl:
-            "https://github.com/maxritter/pilot-shell/tree/main/docs/docusaurus/",
-        },
+        blog: false,
         theme: {
           customCss: "./src/css/custom.css",
         },
@@ -74,11 +66,6 @@ const config: Config = {
           sidebarId: "docsSidebar",
           position: "left",
           label: "Docs",
-        },
-        {
-          to: "/blog",
-          label: "Blog",
-          position: "left",
         },
         {
           href: "https://pilot-shell.com",
@@ -116,7 +103,6 @@ const config: Config = {
           title: "More",
           items: [
             { label: "Home", href: "https://pilot-shell.com" },
-            { label: "Blog", to: "/blog" },
           ],
         },
       ],

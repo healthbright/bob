@@ -66,14 +66,6 @@ const NavBar = () => {
           >
             <a href="/docs/">Docs</a>
           </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="hidden sm:inline-flex"
-          >
-            <a href="/blog/">Blog</a>
-          </Button>
           <a
             href="https://pilot.openchangelog.com/"
             target="_blank"
@@ -140,12 +132,6 @@ const NavBar = () => {
             className="block w-full text-left py-3 text-muted-foreground hover:text-foreground border-b border-border transition-colors"
           >
             Docs
-          </a>
-          <a
-            href="/blog/"
-            className="block w-full text-left py-3 text-muted-foreground hover:text-foreground border-b border-border last:border-0 transition-colors"
-          >
-            Blog
           </a>
           <Button
             onClick={() => handleSectionClick("#installation")}

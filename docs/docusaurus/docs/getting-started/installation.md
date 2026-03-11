@@ -30,6 +30,34 @@ Run from any directory — it installs globally to `~/.pilot/` and `~/.claude/`.
 | 6 | Automated updater | Checks for updates on launch with release notes and one-key upgrade |
 | 7 | Cross-platform | Works on macOS, Linux, Windows (WSL2) |
 
+## Permissions Mode
+
+Pilot Shell sets Claude Code to `bypassPermissions` mode by default. This enables the `/spec` workflow to run autonomously — planning, implementing, and verifying without pausing for permission prompts.
+
+**In Quick Mode (regular chat), you control the permission level.** Press `Shift+Tab` to cycle through modes:
+
+| Mode | Behavior |
+|------|----------|
+| **Plan** | Claude proposes changes, you approve before execution |
+| **Accept Edits** | File edits auto-approved, other actions still prompt |
+| **Normal** | Fine-grained permission prompts for each tool call |
+
+To set a persistent default, change `defaultMode` in `~/.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "defaultMode": "acceptEdits"
+  }
+}
+```
+
+The installer merges permissions additively — your customizations to `allow`, `deny`, `ask`, and `defaultMode` are preserved across updates.
+
+:::tip Use /spec instead of plan mode
+Claude Code's built-in plan mode (`Shift+Tab` → "plan") is unstructured — plans aren't saved as files, have no consistent format, and disappear when the session ends. Use `/spec` as a drop-in replacement: plans are saved as structured markdown in `docs/plans/`, persist across sessions, and drive a complete workflow with TDD and verification. See the [spec workflow guide](/docs/workflows/spec).
+:::
+
 ## Install Specific Version
 
 ```bash

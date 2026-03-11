@@ -31,7 +31,7 @@ cd your-project && pilot
 |----------|-----------|
 | **[Getting Started](/docs/getting-started/prerequisites)** | Prerequisites, one-command installation |
 | **[Workflows](/docs/workflows/sync)** | `/sync`, `/spec`, Quick Mode, `/learn` |
-| **[Features](/docs/features/share)** | Skill sharing, hooks pipeline, context preservation, rules, model routing |
+| **[Features](/docs/features/share)** | Customize & share, hooks pipeline, context preservation, rules, model routing |
 | **[Tools](/docs/tools/mcp-servers)** | MCP servers, language servers, Console dashboard, CLI reference |
 | **[Reference](/docs/reference/open-source)** | Open source compliance |
 

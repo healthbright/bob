@@ -60,9 +60,21 @@ const faqItems = [
       "No. You can run the installer from any directory \u2014 your home folder, a parent folder containing multiple repos, anywhere. Everything installs globally to ~/.pilot/ and ~/.claude/.",
   },
   {
-    question: "Can I add my own rules, commands, and skills?",
+    question:
+      "Should I still use Claude Code's built-in plan mode (Shift+Tab)?",
     answer:
-      "Yes. Create your own in your project\u2019s .claude/ folder \u2014 rules, commands, and skills are all plain markdown files. Your project-level assets are loaded alongside Pilot Shell\u2019s built-in defaults and take precedence when they overlap. /sync auto-discovers your codebase patterns and generates project-specific rules for you. /learn extracts reusable knowledge from sessions into custom skills. Hooks can be extended for additional languages. Use the Share page in the Console to share skills across your machines, projects, and organization.",
+      "No \u2014 use /spec instead. Claude Code\u2019s built-in plan mode is unstructured: plans live only in the conversation, have no consistent format, aren\u2019t saved as files, and disappear when the session ends. There\u2019s no verification, no TDD enforcement, and no way to resume or review a plan later. /spec is a drop-in replacement that fixes all of this. Plans are written as structured markdown files in docs/plans/ with a consistent format \u2014 scope, tasks, definition of done, and approval status. They persist across sessions, can be edited before approval, and drive a complete workflow: plan \u2192 implement with TDD \u2192 verify with code review. Use /spec for all planned work. Use Quick Mode (regular chat) for small tasks and exploration.",
+  },
+  {
+    question:
+      "Why does Pilot Shell use bypass permissions mode by default?",
+    answer:
+      "Pilot Shell sets Claude Code to bypassPermissions mode so the /spec workflow can run autonomously \u2014 planning, implementing, and verifying without pausing for permission prompts at every tool call. In Quick Mode (regular chat), you have full control: press Shift+Tab at any time to cycle through Claude Code\u2019s permission modes \u2014 Plan mode (propose then approve), Accept Edits (auto-approve file changes), or Normal mode (fine-grained prompts for each action). You can also set a persistent default in ~/.claude/settings.json by changing the defaultMode field. Pilot Shell preserves your choice across updates \u2014 the installer merges permissions additively and never overwrites your customizations.",
+  },
+  {
+    question: "Can I add my own rules, commands, skills, and agents?",
+    answer:
+      "Yes. Create your own in your project\u2019s .claude/ folder \u2014 rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell\u2019s built-in defaults and take precedence when they overlap. /sync auto-discovers your codebase patterns and generates project-specific rules. /learn extracts reusable knowledge from sessions into custom skills. Manage sharing via the skillshare CLI and view all shared assets on the Console Share page.",
   },
 ];
 

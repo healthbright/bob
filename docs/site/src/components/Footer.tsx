@@ -84,14 +84,6 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="/blog/"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a
                   href="https://pilot.openchangelog.com/"
                   target="_blank"
                   rel="noopener noreferrer"

@@ -120,11 +120,11 @@ const rulesCategories = [
   },
   {
     icon: GitBranch,
-    category: "Collaboration",
+    category: "Customize & Share",
     rules: [
-      "Skill sharing via Skillshare — cross-machine and org hub",
-      "Custom rules, commands & skills",
-      "Project skills committed to repo",
+      "Custom rules, commands, skills & agents in .claude/",
+      "Project sharing — commit to repo, team gets on clone",
+      "Cross-machine sync and org-wide hubs via Skillshare",
     ],
   },
   {

@@ -1,61 +1,162 @@
 ---
 sidebar_position: 1
-title: Skill Sharing
-description: Share skills across machines and teams — from personal sync to org-wide hubs
+title: Customize & Share
+description: Create your own rules, commands, and skills — then share them across machines, projects, and organizations
 ---
 
-# Skill Sharing
+# Customize & Share
 
-Share skills across machines and teams — from personal sync to org-wide hubs.
+Create your own rules, commands, and skills — then share them across machines, projects, and organizations.
 
-The Share page in the Pilot Console manages skills using [Skillshare](https://github.com/runkids/skillshare). Three modes cover different scopes: **Global** for personal cross-machine sync, **Project** for team-shared skills committed to the repo, and **Organization** for tracked repos and hub-based distribution. Only skills are shared — rules, commands, and agents stay project-specific.
+## Create Your Own Assets
 
-## Sharing Tiers
+All assets are plain markdown files in your project's `.claude/` directory. Your project-level assets load alongside Pilot's built-in defaults and take precedence when they overlap.
 
-### Global Mode (Solo+)
+| Asset | Location | When it loads | Best for |
+|-------|----------|---------------|----------|
+| **Rules** | `.claude/rules/` | Every session, or conditionally by file type | Guidelines Claude should always follow |
+| **Commands** | `.claude/commands/` | On demand via `/command-name` | Specific workflows or multi-step tasks |
+| **Skills** | `.claude/skills/` | Automatically when relevant | Reusable knowledge from past sessions |
 
-- Install skills from GitHub URLs
-- Sync skills to `~/.claude/skills/`
-- Cross-machine sync via git push/pull
+### How to create assets
 
-### Project Mode (All plans)
+- **Rules** — Create `.claude/rules/my-rule.md`. Add `paths: ["*.py"]` frontmatter to activate only for specific file types. Rules without `paths` load every session.
+- **Commands** — Create `.claude/commands/my-command.md`. Invoke with `/my-command` in any session.
+- **Skills** — Create `.claude/skills/my-skill.md` with a `description` frontmatter. Claude loads skills automatically when their description matches the current task.
 
-- Commit skills to repo for team sharing
-- New members get skills on git clone
-- Separate from global skills — no conflicts
+### Auto-generation
 
-### Organization Hub (Team)
+- `/sync` explores your codebase and generates project-specific rules based on your tech stack, conventions, and patterns.
+- `/learn` captures non-obvious debugging discoveries, workarounds, and tool integrations as reusable skills.
 
-- Tracked repos for org-wide distribution
-- Hub index — curated skill catalogs
-- One command for team onboarding
+### Monorepo support
 
-## Setup
+Organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter to scope to the right files. `/sync` validates the structure, enforces path-scoping, and generates a `README.md` to document the organization.
 
-Skillshare is installed automatically by the Pilot installer. Open the Console dashboard and navigate to the **Share** page to manage skills. The page shows your current mode (Global or Project), synced skills, git remote status, and documentation links.
+### MCP servers
+
+Add custom MCP servers in `.mcp.json`, then run `/sync` to generate documentation so Claude knows how to use them.
+
+## Share Across Boundaries
+
+Share assets across machines, projects, and organizations using [Skillshare](https://github.com/runkids/skillshare). Skillshare is installed automatically by the Pilot installer. Use the `skillshare` CLI for all operations and view your shared assets on the Console Share page.
+
+Skillshare manages **4 asset types**: skills, rules, commands, and agents.
+
+### Getting Started
 
 ```bash
-# Cross-machine sync (Global mode)
-$ skillshare init --remote git@github.com:you/my-skills.git
+# Global mode — available in all projects
+skillshare init --targets claude
 
-# Project mode — team sharing via git
-$ skillshare init -p --targets claude
+# Project mode — skills committed to this repo
+skillshare init -p --targets claude
 
-# Organization hub (Team plan)
-$ skillshare install github.com/org/skills --track
+# Cross-machine sync — add a git remote
+skillshare init --remote git@github.com:you/my-skills.git
 ```
 
-### Project Mode
+### Project Mode — team sharing via git
 
-Commit `.skillshare/skills/` to your repo. New team members get all skills on clone — no extra setup.
+Commit `.skillshare/skills/` to your repo. Team members get all assets on `git clone` — no extra setup.
 
-### Organization Hub
+```bash
+skillshare init -p --targets claude     # Initialize project mode
+skillshare install <url> -p             # Install a skill to the project
+skillshare install -p                   # Install all from registry.yaml
+skillshare sync -p                      # Sync to Claude's directory
+skillshare status -p                    # Check project status
+```
 
-Track shared repos for org-wide distribution. Build a hub index for searchable skill catalogs.
+New team members onboard with:
 
-## Documentation
+```bash
+git clone <repo> && cd <repo> && skillshare install -p && skillshare sync -p
+```
 
-- [Project Setup](https://skillshare.runkids.cc/docs/how-to/sharing/project-setup) — Commit skills to your repo
+[Project Setup Guide →](https://skillshare.runkids.cc/docs/how-to/sharing/project-setup)
+
+### Global Mode — personal cross-machine sync
+
+Skills in `~/.config/skillshare/skills/` sync to `~/.claude/skills/` on every machine. Add a git remote to push/pull between devices.
+
+```bash
+skillshare init --remote git@github.com:you/my-skills.git   # First machine
+skillshare push -m "Add skill"                               # Push changes
+# On another machine:
+skillshare init --remote git@github.com:you/my-skills.git   # Auto-pulls
+skillshare pull                                              # Sync updates
+```
+
+```bash
+skillshare status -g            # Global status
+skillshare list -g              # List global skills
+skillshare install <url> -g     # Install to global
+skillshare sync -g --all        # Sync skills + extras → Claude
+skillshare collect -g           # Import local-only skills to source
+skillshare diff -g              # Show pending changes
+```
+
+[Cross-Machine Sync Guide →](https://skillshare.runkids.cc/docs/how-to/sharing/cross-machine-sync)
+
+### Extras — rules, commands, agents
+
+Share non-skill assets across machines via extras (global only). Place files in `~/.config/skillshare/{rules,commands,agents}/` and sync with `skillshare sync -g --all`.
+
+| To share | Place file in | Syncs to |
+|----------|---------------|----------|
+| Rule | `~/.config/skillshare/rules/my-rule.md` | `~/.claude/rules/my-rule.md` |
+| Command | `~/.config/skillshare/commands/my-cmd.md` | `~/.claude/commands/my-cmd.md` |
+| Agent | `~/.config/skillshare/agents/my-agent.md` | `~/.claude/agents/my-agent.md` |
+
+Extras are included when you push/pull — they sync across machines automatically. The Pilot installer configures extras automatically.
+
+### Organization Mode — org-wide distribution
+
+Track shared repos to distribute curated assets across your organization.
+
+```bash
+skillshare install github.com/org/skills --track   # Install tracked repo
+skillshare update --all && skillshare sync -g       # Update all tracked repos
+```
+
+[Organization Sharing Guide →](https://skillshare.runkids.cc/docs/how-to/sharing/organization-sharing)
+
+### Console Dashboard
+
+The Share page in the Pilot Console displays the current state:
+
+- **Source & Sync** — source/target paths, synced counts for global and project modes
+- **Team Remote** — connected git remotes for cross-machine sync
+- **Assets Grid** — all skills, rules, commands, and agents with type and scope badges
+- **Asset Detail** — click any asset to see content, metadata (source, version, repo URL), and file list
+- **CLI Reference** — complete command reference for both modes
+
+The Share page is **read-only** — for all operations, use the `skillshare` CLI.
+
+### CLI Quick Reference
+
+| Command | Description |
+|---------|-------------|
+| `skillshare init --targets claude` | Initialize global mode |
+| `skillshare init -p --targets claude` | Initialize project mode |
+| `skillshare init --remote <url>` | Set up git remote |
+| `skillshare status -g` / `-p` | Check status |
+| `skillshare list -g` / `-p` | List skills |
+| `skillshare install <url> -g` / `-p` | Install a skill |
+| `skillshare sync -g --all` | Sync skills + extras |
+| `skillshare sync -p` | Sync project skills |
+| `skillshare collect -g` | Import local-only skills |
+| `skillshare update --all` | Update tracked repos |
+| `skillshare push -m "msg"` | Push to remote |
+| `skillshare pull` | Pull from remote |
+| `skillshare diff -g` / `-p` | Show pending changes |
+| `skillshare audit --json -g` | Security audit |
+
+### Documentation
+
+- [Quick Start](https://skillshare.runkids.cc/docs/learn/with-claude-code) — Get started with Skillshare
+- [Commands Reference](https://skillshare.runkids.cc/docs/reference/commands) — All CLI commands
 - [Cross-Machine Sync](https://skillshare.runkids.cc/docs/how-to/sharing/cross-machine-sync) — Sync via git push/pull
+- [Project Setup](https://skillshare.runkids.cc/docs/how-to/sharing/project-setup) — Commit skills to your repo
 - [Organization Sharing](https://skillshare.runkids.cc/docs/how-to/sharing/organization-sharing) — Tracked repos for teams
-- [Hub Index Guide](https://skillshare.runkids.cc/docs/how-to/sharing/hub-index) — Build a skill catalog

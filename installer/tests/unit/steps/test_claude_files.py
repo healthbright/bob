@@ -993,6 +993,78 @@ class TestMergePermissionsNonListKeys:
         assert result["permissions"]["defaultMode"] == "default"
 
 
+class TestMergePermissionsAskList:
+    """Tests for ask list merge — nested list entries must be union-merged like allow/deny."""
+
+    def test_user_added_ask_rules_preserved(self):
+        """User-added ask rules survive a Pilot update."""
+        from installer.steps.settings_merge import merge_settings
+
+        baseline = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"]]}}
+        current = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"], ["Bash(rm -rf *)"]]}}
+        incoming = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"], ["Bash(git rebase *)"]]}}
+
+        result = merge_settings(baseline, current, incoming)
+
+        ask = result["permissions"]["ask"]
+        ask_strs = [str(x) for x in ask]
+        assert any("git push" in s for s in ask_strs)
+        assert any("rm -rf" in s for s in ask_strs)
+        assert any("rebase" in s for s in ask_strs)
+
+    def test_user_removed_ask_rules_stay_removed(self):
+        """If user deliberately removed an ask rule, it stays removed after update."""
+        from installer.steps.settings_merge import merge_settings
+
+        baseline = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"], ["Bash(git rebase *)"]]}}
+        current = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"]]}}
+        incoming = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"], ["Bash(git rebase *)"], ["Bash(git reset *)"]]}}
+
+        result = merge_settings(baseline, current, incoming)
+
+        ask = result["permissions"]["ask"]
+        ask_strs = [str(x) for x in ask]
+        assert any("git push" in s for s in ask_strs)
+        assert any("git reset" in s for s in ask_strs)
+        assert not any("rebase" in s for s in ask_strs)
+
+    def test_first_install_uses_incoming_ask(self):
+        """Without baseline, incoming ask rules are used."""
+        from installer.steps.settings_merge import merge_settings
+
+        incoming = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"]]}}
+        result = merge_settings(None, {}, incoming)
+
+        assert result["permissions"]["ask"] == [["Bash(git push *)"]]
+
+    def test_ask_with_string_entries(self):
+        """Ask entries that are plain strings (not nested lists) are also merged."""
+        from installer.steps.settings_merge import merge_settings
+
+        baseline = {"permissions": {"allow": [], "deny": [], "ask": ["Bash(git push *)"]}}
+        current = {"permissions": {"allow": [], "deny": [], "ask": ["Bash(git push *)", "Bash(rm *)"]}}
+        incoming = {"permissions": {"allow": [], "deny": [], "ask": ["Bash(git push *)", "Bash(git rebase *)"]}}
+
+        result = merge_settings(baseline, current, incoming)
+
+        ask = result["permissions"]["ask"]
+        assert "Bash(git push *)" in ask
+        assert "Bash(rm *)" in ask
+        assert "Bash(git rebase *)" in ask
+
+    def test_empty_ask_preserved_when_not_in_incoming(self):
+        """User's empty ask list is preserved when incoming doesn't have ask."""
+        from installer.steps.settings_merge import merge_settings
+
+        baseline = {"permissions": {"allow": [], "deny": []}}
+        current = {"permissions": {"allow": [], "deny": [], "ask": []}}
+        incoming = {"permissions": {"allow": [], "deny": []}}
+
+        result = merge_settings(baseline, current, incoming)
+
+        assert result["permissions"]["ask"] == []
+
+
 class TestResolveRepoUrl:
     """Tests for _resolve_repo_url method."""
 

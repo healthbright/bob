@@ -27,10 +27,10 @@ const insideItems: InsideItem[] = [
   },
   {
     icon: Sparkles,
-    title: "Skill Sharing",
-    description: "Global sync, project mode, org hubs",
+    title: "Customize & Share",
+    description: "Create assets, share everywhere",
     summary:
-      "Share skills across machines via git push/pull, commit project skills to your repo for team sharing, or distribute org-wide via tracked repos and hub indexes.",
+      "Create rules, commands, skills, and agents in .claude/ — all plain markdown. Share them across machines via git, across teams via project repos, or org-wide via tracked repos and hub indexes.",
   },
   {
     icon: Plug2,
