@@ -17,6 +17,7 @@ All assets are plain markdown files in your project's `.claude/` directory. Your
 | **Rules** | `.claude/rules/` | Every session, or conditionally by file type | Guidelines Claude should always follow |
 | **Commands** | `.claude/commands/` | On demand via `/command-name` | Specific workflows or multi-step tasks |
 | **Skills** | `.claude/skills/` | Automatically when relevant | Reusable knowledge from past sessions |
+| **Agents** | `.claude/agents/` | Spawned as sub-agents for specialized tasks | Code review, security audits, domain experts |
 
 ### How to create assets
 
@@ -39,9 +40,9 @@ Add custom MCP servers in `.mcp.json`, then run `/sync` to generate documentatio
 
 ## Share Across Boundaries
 
-Share assets across machines, projects, and organizations using [Skillshare](https://github.com/runkids/skillshare). Skillshare is installed automatically by the Pilot installer. Use the `skillshare` CLI for all operations and view your shared assets on the Console Share page.
+Share all four asset types across machines, projects, and organizations using [Skillshare](https://github.com/runkids/skillshare). Skillshare is installed automatically by the Pilot installer and works with **50+ AI coding tools** — Claude Code, Cursor, Codex, Windsurf, Copilot, and more. One central source of truth for all your AI assets.
 
-Skillshare manages **4 asset types**: skills, rules, commands, and agents.
+Use the `skillshare` CLI for operations and the Console Share page for browsing, editing, and managing assets.
 
 ### Getting Started
 
@@ -122,17 +123,19 @@ skillshare update --all && skillshare sync -g       # Update all tracked repos
 
 [Organization Sharing Guide →](https://skillshare.runkids.cc/docs/how-to/sharing/organization-sharing)
 
-### Console Dashboard
+### Console Share Page
 
-The Share page in the Pilot Console displays the current state:
+The Share page in the Pilot Console provides a full management interface:
 
-- **Source & Sync** — source/target paths, synced counts for global and project modes
-- **Team Remote** — connected git remotes for cross-machine sync
-- **Assets Grid** — all skills, rules, commands, and agents with type and scope badges
-- **Asset Detail** — click any asset to see content, metadata (source, version, repo URL), and file list
-- **CLI Reference** — complete command reference for both modes
-
-The Share page is **read-only** — for all operations, use the `skillshare` CLI.
+- **Source & Sync** — asset counts (skills, rules, commands, agents) for both project and global scopes
+- **Team Remote** — connected git remotes with **Push** and **Pull** buttons for one-click sync
+- **Assets Grid** — all assets with type and scope badges, filterable by scope (Project / Global / All) and type (Skill / Rule / Command / Agent), plus text search
+- **Asset Detail** — click any asset to:
+  - **Preview** rendered markdown or view raw source
+  - **Edit** markdown in-place with a Save button
+  - **Rename** the asset file
+  - **Delete** with confirmation prompt
+  - View metadata (source, version, install date, repository URL) and file list
 
 ### CLI Quick Reference
 

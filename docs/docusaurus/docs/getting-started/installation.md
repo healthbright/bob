@@ -58,6 +58,10 @@ The installer merges permissions additively — your customizations to `allow`, 
 Claude Code's built-in plan mode (`Shift+Tab` → "plan") is unstructured — plans aren't saved as files, have no consistent format, and disappear when the session ends. Use `/spec` as a drop-in replacement: plans are saved as structured markdown in `docs/plans/`, persist across sessions, and drive a complete workflow with TDD and verification. See the [spec workflow guide](/docs/workflows/spec).
 :::
 
+## Dev Container
+
+Pilot Shell works inside Dev Containers. Copy the `.devcontainer` folder from the [Pilot Shell repository](https://github.com/maxritter/pilot-shell/tree/main/.devcontainer) into your project, adapt it to your needs (base image, extensions, dependencies), and run the installer inside the container. The installer auto-detects the container environment and skips system-level dependencies like Homebrew.
+
 ## Install Specific Version
 
 ```bash

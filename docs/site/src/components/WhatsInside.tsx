@@ -20,7 +20,7 @@ interface InsideItem {
 const insideItems: InsideItem[] = [
   {
     icon: Workflow,
-    title: "Spec-Driven Development",
+    title: "Spec-Driven",
     description: "Plan → Implement → Verify",
     summary:
       "A structured workflow with human review gates, sequential TDD, mandatory verification, and independent code review. Loops back automatically if any check fails.",
@@ -30,7 +30,7 @@ const insideItems: InsideItem[] = [
     title: "Customize & Share",
     description: "Create assets, share everywhere",
     summary:
-      "Create rules, commands, skills, and agents in .claude/ — all plain markdown. Share them across machines via git, across teams via project repos, or org-wide via tracked repos and hub indexes.",
+      "Create rules, commands, skills, and agents in .claude/ — all plain markdown. Share all four asset types across machines via git, across teams via project repos, or org-wide via tracked repos. Works with 50+ AI tools — one source of truth for Claude Code, Cursor, Codex, and more.",
   },
   {
     icon: Plug2,

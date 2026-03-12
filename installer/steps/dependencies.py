@@ -151,8 +151,6 @@ def install_skillshare() -> bool:
         ):
             return False
 
-    # Configure extras (rules, commands, agents) for cross-machine sync
-    # This is non-destructive — only adds config entries and creates directories
     _configure_skillshare_extras()
 
     return True
@@ -174,7 +172,6 @@ def _configure_skillshare_extras() -> None:
     except OSError:
         return
 
-    # Skip if extras already configured
     if "extras:" in content:
         return
 
@@ -196,7 +193,6 @@ def _configure_skillshare_extras() -> None:
     except OSError:
         return
 
-    # Create source directories for extras
     base = Path.home() / ".config" / "skillshare"
     for name in ("rules", "commands", "agents"):
         (base / name).mkdir(parents=True, exist_ok=True)
@@ -207,7 +203,6 @@ def update_skillshare() -> bool:
     if not command_exists("skillshare"):
         return False
 
-    # Check if update is actually needed (avoids slow network call + prompt on every install)
     try:
         result = subprocess.run(
             ["skillshare", "upgrade", "--dry-run"],
@@ -216,7 +211,7 @@ def update_skillshare() -> bool:
             timeout=30,
         )
         if "Already up to date" in result.stdout:
-            return True  # No update needed
+            return True
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
 
@@ -520,7 +515,9 @@ def _install_claude_code_with_ui(ui: Any) -> bool:
         if result:
             ui.success("Claude Code installed")
         else:
-            ui.warning("Could not install Claude Code - please install manually: https://docs.anthropic.com/en/docs/claude-code/setup")
+            ui.warning(
+                "Could not install Claude Code - please install manually: https://docs.anthropic.com/en/docs/claude-code/setup"
+            )
         return result
     else:
         return install_claude_code()

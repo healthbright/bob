@@ -650,7 +650,7 @@ class TestMergeAppConfig:
             source_pilot = Path(tmpdir) / "source" / "pilot"
             source_pilot.mkdir(parents=True)
             (source_pilot / "settings.json").write_text(
-                json.dumps({"env": {"X": "1"}, "permissions": {"allow": [], "deny": []}}, indent=2)
+                json.dumps({"env": {"X": "1"}, "permissions": {"defaultMode": "bypassPermissions"}}, indent=2)
             )
             (source_pilot / "claude.json").write_text(
                 json.dumps(
@@ -700,7 +700,7 @@ class TestMergeAppConfig:
             source_pilot = Path(tmpdir) / "source" / "pilot"
             source_pilot.mkdir(parents=True)
             (source_pilot / "settings.json").write_text(
-                json.dumps({"env": {"X": "1"}, "permissions": {"allow": [], "deny": []}}, indent=2)
+                json.dumps({"env": {"X": "1"}, "permissions": {"defaultMode": "bypassPermissions"}}, indent=2)
             )
             (source_pilot / "claude.json").write_text(
                 json.dumps({"autoCompactEnabled": True, "theme": "dark"}, indent=2)
@@ -742,7 +742,7 @@ class TestMergeAppConfig:
             source_pilot = Path(tmpdir) / "source" / "pilot"
             source_pilot.mkdir(parents=True)
             (source_pilot / "settings.json").write_text(
-                json.dumps({"env": {"X": "1"}, "permissions": {"allow": [], "deny": []}}, indent=2)
+                json.dumps({"env": {"X": "1"}, "permissions": {"defaultMode": "bypassPermissions"}}, indent=2)
             )
 
             dest_dir = Path(tmpdir) / "dest"
@@ -770,41 +770,14 @@ class TestMergeSettings:
 
         incoming = {
             "env": {"A": "1", "B": "2"},
-            "permissions": {"allow": ["Bash", "Edit"], "deny": []},
+            "permissions": {"defaultMode": "bypassPermissions"},
             "spinnerTipsEnabled": False,
         }
         result = merge_settings(None, {}, incoming)
 
         assert result["env"] == {"A": "1", "B": "2"}
-        assert result["permissions"]["allow"] == ["Bash", "Edit"]
+        assert result["permissions"]["defaultMode"] == "bypassPermissions"
         assert result["spinnerTipsEnabled"] is False
-
-    def test_preserves_user_added_permissions(self):
-        """User-added permissions survive an update."""
-        from installer.steps.settings_merge import merge_settings
-
-        baseline = {"permissions": {"allow": ["Bash", "Edit"], "deny": []}}
-        current = {"permissions": {"allow": ["Bash", "Edit", "mcp__typefully__*"], "deny": []}}
-        incoming = {"permissions": {"allow": ["Bash", "Edit", "LSP"], "deny": []}}
-
-        result = merge_settings(baseline, current, incoming)
-
-        assert "mcp__typefully__*" in result["permissions"]["allow"]
-        assert "LSP" in result["permissions"]["allow"]
-        assert "Bash" in result["permissions"]["allow"]
-
-    def test_preserves_user_removed_permissions(self):
-        """If user deliberately removed a Pilot permission, it stays removed."""
-        from installer.steps.settings_merge import merge_settings
-
-        baseline = {"permissions": {"allow": ["Bash", "Edit", "WebFetch"], "deny": []}}
-        current = {"permissions": {"allow": ["Bash", "Edit"], "deny": []}}
-        incoming = {"permissions": {"allow": ["Bash", "Edit", "WebFetch", "LSP"], "deny": []}}
-
-        result = merge_settings(baseline, current, incoming)
-
-        assert "WebFetch" not in result["permissions"]["allow"]
-        assert "LSP" in result["permissions"]["allow"]
 
     def test_preserves_user_changed_env_var(self):
         """If user changed an env var value, Pilot doesn't overwrite it."""
@@ -952,31 +925,27 @@ class TestMergeAppConfigWithBaseline:
         assert result["autoCompactEnabled"] is True
 
 
-class TestMergePermissionsNonListKeys:
-    """Regression test: non-list keys in permissions dict survive merge."""
+class TestMergePermissions:
+    """Tests for permissions dict merge (scalar keys only, no allow/deny/ask lists)."""
 
     def test_user_default_mode_preserved_through_update(self):
         """User's defaultMode: bypassPermissions survives a Pilot update."""
         from installer.steps.settings_merge import merge_settings
 
-        baseline = {"permissions": {"allow": ["Bash", "Edit"], "deny": []}}
-        current = {"permissions": {"allow": ["Bash", "Edit"], "deny": [], "defaultMode": "bypassPermissions"}}
-        incoming = {"permissions": {"allow": ["Bash", "Edit", "LSP"], "deny": []}}
+        baseline = {"permissions": {"defaultMode": "bypassPermissions"}}
+        current = {"permissions": {"defaultMode": "bypassPermissions"}}
+        incoming = {"permissions": {"defaultMode": "bypassPermissions"}}
 
         result = merge_settings(baseline, current, incoming)
 
         assert result["permissions"]["defaultMode"] == "bypassPermissions"
-        assert "LSP" in result["permissions"]["allow"]
 
     def test_default_mode_in_incoming_is_applied(self):
-        """defaultMode from Pilot's incoming settings is applied when user hasn't set it."""
+        """defaultMode from Pilot's incoming settings is applied on first install."""
         from installer.steps.settings_merge import merge_settings
 
-        baseline = {"permissions": {"allow": ["Bash"], "deny": []}}
-        current = {"permissions": {"allow": ["Bash"], "deny": []}}
         incoming = {"permissions": {"defaultMode": "bypassPermissions"}}
-
-        result = merge_settings(baseline, current, incoming)
+        result = merge_settings(None, {}, incoming)
 
         assert result["permissions"]["defaultMode"] == "bypassPermissions"
 
@@ -992,77 +961,18 @@ class TestMergePermissionsNonListKeys:
 
         assert result["permissions"]["defaultMode"] == "default"
 
-
-class TestMergePermissionsAskList:
-    """Tests for ask list merge — nested list entries must be union-merged like allow/deny."""
-
-    def test_user_added_ask_rules_preserved(self):
-        """User-added ask rules survive a Pilot update."""
+    def test_user_added_custom_key_preserved(self):
+        """User-added keys in permissions survive a Pilot update."""
         from installer.steps.settings_merge import merge_settings
 
-        baseline = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"]]}}
-        current = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"], ["Bash(rm -rf *)"]]}}
-        incoming = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"], ["Bash(git rebase *)"]]}}
+        baseline = {"permissions": {"defaultMode": "bypassPermissions"}}
+        current = {"permissions": {"defaultMode": "bypassPermissions", "customKey": "userValue"}}
+        incoming = {"permissions": {"defaultMode": "bypassPermissions"}}
 
         result = merge_settings(baseline, current, incoming)
 
-        ask = result["permissions"]["ask"]
-        ask_strs = [str(x) for x in ask]
-        assert any("git push" in s for s in ask_strs)
-        assert any("rm -rf" in s for s in ask_strs)
-        assert any("rebase" in s for s in ask_strs)
-
-    def test_user_removed_ask_rules_stay_removed(self):
-        """If user deliberately removed an ask rule, it stays removed after update."""
-        from installer.steps.settings_merge import merge_settings
-
-        baseline = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"], ["Bash(git rebase *)"]]}}
-        current = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"]]}}
-        incoming = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"], ["Bash(git rebase *)"], ["Bash(git reset *)"]]}}
-
-        result = merge_settings(baseline, current, incoming)
-
-        ask = result["permissions"]["ask"]
-        ask_strs = [str(x) for x in ask]
-        assert any("git push" in s for s in ask_strs)
-        assert any("git reset" in s for s in ask_strs)
-        assert not any("rebase" in s for s in ask_strs)
-
-    def test_first_install_uses_incoming_ask(self):
-        """Without baseline, incoming ask rules are used."""
-        from installer.steps.settings_merge import merge_settings
-
-        incoming = {"permissions": {"allow": [], "deny": [], "ask": [["Bash(git push *)"]]}}
-        result = merge_settings(None, {}, incoming)
-
-        assert result["permissions"]["ask"] == [["Bash(git push *)"]]
-
-    def test_ask_with_string_entries(self):
-        """Ask entries that are plain strings (not nested lists) are also merged."""
-        from installer.steps.settings_merge import merge_settings
-
-        baseline = {"permissions": {"allow": [], "deny": [], "ask": ["Bash(git push *)"]}}
-        current = {"permissions": {"allow": [], "deny": [], "ask": ["Bash(git push *)", "Bash(rm *)"]}}
-        incoming = {"permissions": {"allow": [], "deny": [], "ask": ["Bash(git push *)", "Bash(git rebase *)"]}}
-
-        result = merge_settings(baseline, current, incoming)
-
-        ask = result["permissions"]["ask"]
-        assert "Bash(git push *)" in ask
-        assert "Bash(rm *)" in ask
-        assert "Bash(git rebase *)" in ask
-
-    def test_empty_ask_preserved_when_not_in_incoming(self):
-        """User's empty ask list is preserved when incoming doesn't have ask."""
-        from installer.steps.settings_merge import merge_settings
-
-        baseline = {"permissions": {"allow": [], "deny": []}}
-        current = {"permissions": {"allow": [], "deny": [], "ask": []}}
-        incoming = {"permissions": {"allow": [], "deny": []}}
-
-        result = merge_settings(baseline, current, incoming)
-
-        assert result["permissions"]["ask"] == []
+        assert result["permissions"]["defaultMode"] == "bypassPermissions"
+        assert result["permissions"]["customKey"] == "userValue"
 
 
 class TestResolveRepoUrl:

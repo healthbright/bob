@@ -76,6 +76,11 @@ const faqItems = [
     answer:
       "Yes. Create your own in your project\u2019s .claude/ folder \u2014 rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell\u2019s built-in defaults and take precedence when they overlap. /sync auto-discovers your codebase patterns and generates project-specific rules. /learn extracts reusable knowledge from sessions into custom skills. Manage sharing via the skillshare CLI and view all shared assets on the Console Share page.",
   },
+  {
+    question: "Can I use Pilot Shell inside a Dev Container?",
+    answer:
+      "Yes. Copy the .devcontainer folder from the Pilot Shell repository into your project, adapt it to your needs (base image, extensions, dependencies), and install Pilot Shell inside the container. Everything works the same \u2014 hooks, rules, MCP servers, persistent memory, and the Console dashboard all run inside the container. This is a great option for teams that want a consistent, reproducible development environment.",
+  },
 ];
 
 const FAQSection = () => {

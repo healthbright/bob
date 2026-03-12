@@ -93,6 +93,13 @@ curl -fsSL https://raw.githubusercontent.com/maxritter/pilot-shell/main/uninstal
 
 </details>
 
+<details>
+<summary><b>Dev Container</b></summary>
+
+Pilot Shell works inside Dev Containers. Copy the [`.devcontainer`](https://github.com/maxritter/pilot-shell/tree/main/.devcontainer) folder from this repository into your project, adapt it to your needs (base image, extensions, dependencies), and run the installer inside the container. The installer auto-detects the container environment and skips system-level dependencies like Homebrew.
+
+</details>
+
 ---
 
 ## How It Works
@@ -170,15 +177,15 @@ Create your own rules, commands, skills, and agents — all plain markdown files
 
 `/sync` explores your codebase and generates project-specific rules. `/learn` captures debugging discoveries as reusable skills. Add MCP servers in `.mcp.json` and run `/sync` to generate documentation. For monorepos, organize rules in subdirectories by team with `paths` frontmatter to scope by file type.
 
-**Share assets across boundaries:**
+**Share all four asset types** — skills, rules, commands, and agents — across boundaries via [Skillshare](https://github.com/runkids/skillshare). Works with 50+ AI tools (Claude Code, Cursor, Codex, Windsurf, and more) so you have one source of truth for all your AI assets.
 
 | Mode | Scope | How it works |
 | ---- | ----- | ------------ |
 | [**Project**](https://skillshare.runkids.cc/docs/how-to/sharing/project-setup) | Single repo, team-wide | Commit `.skillshare/skills/` to your repo — team members get assets on `git clone` |
-| [**Global**](https://skillshare.runkids.cc/docs/how-to/sharing/cross-machine-sync) | Personal, all projects | Sync to `~/.config/skillshare/skills/` — push/pull across your machines via git |
+| [**Global**](https://skillshare.runkids.cc/docs/how-to/sharing/cross-machine-sync) | Personal, all projects | Sync skills, rules, commands, and agents — push/pull across your machines via git |
 | [**Organization**](https://skillshare.runkids.cc/docs/how-to/sharing/organization-sharing) | All projects, org-wide | Tracked repos distribute curated assets — hub index enables search |
 
-Manage all sharing operations via the `skillshare` CLI and view your shared assets on the Console Share page.
+Manage sharing via the `skillshare` CLI and view all shared assets on the Console Share page.
 
 ### Pilot Shell Console
 
@@ -556,6 +563,13 @@ You can also set a persistent default in `~/.claude/settings.json` by changing t
 Yes. Create your own in your project's `.claude/` folder — rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell's built-in defaults and take precedence when they overlap. `/sync` auto-discovers your codebase patterns and generates project-specific rules. `/learn` extracts reusable knowledge from sessions into custom skills. Manage sharing via the `skillshare` CLI and view all shared assets on the Console Share page.
 
 For monorepos, organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter so they only load when working on relevant files. `/sync` validates this structure, enforces path-scoping, and generates a `README.md` to document the organization.
+
+</details>
+
+<details>
+<summary><b>Can I use Pilot Shell inside a Dev Container?</b></summary>
+
+Yes. Copy the `.devcontainer` folder from this repository into your project, adapt it to your needs (base image, extensions, dependencies), and install Pilot Shell inside the container. Everything works the same — hooks, rules, MCP servers, persistent memory, and the Console dashboard all run inside the container. This is a great option for teams that want a consistent, reproducible development environment.
 
 </details>
 

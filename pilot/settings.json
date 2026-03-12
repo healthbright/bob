@@ -15,34 +15,6 @@
     "DISABLE_INSTALLATION_CHECKS": "true"
   },
   "permissions": {
-    "allow": [
-      "Glob",
-      "Grep",
-      "LSP",
-      "NotebookEdit",
-      "Read",
-      "Skill(learn)",
-      "Skill(spec)",
-      "Skill(spec-bugfix-plan)",
-      "Skill(spec-bugfix-verify)",
-      "Skill(spec-implement)",
-      "Skill(spec-plan)",
-      "Skill(spec-verify)",
-      "Skill(sync)",
-      "Task(plan-reviewer:*)",
-      "Task(spec-reviewer:*)",
-      "TodoWrite",
-      "mcp__ide__*",
-      "mcp__plugin_pilot_context7__*",
-      "mcp__plugin_pilot_grep-mcp__*",
-      "mcp__plugin_pilot_mem-search__*"
-    ],
-    "ask": [
-      [
-        "Bash(git push *)"
-      ]
-    ],
-    "deny": [],
     "defaultMode": "bypassPermissions"
   },
   "skipDangerousModePermissionPrompt": true,
@@ -129,6 +101,6 @@
     "padding": 0
   },
   "companyAnnouncements": [
-    "👨‍✈️ Console: http://localhost:41777 | 📋 /spec — plan, build & verify | 🔄 /sync — sync rules | 🧠 /learn — extract skills"
+    "👨‍✈️ Console: http://localhost:41777 | 📋 /spec — plan, build & verify | 🔄 /sync — explore codebase | 🧠 /learn — create skills"
   ]
 }

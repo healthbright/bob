@@ -23,7 +23,7 @@ $ open http://localhost:41777
 | **Memories** | Browsable observations — decisions, discoveries, bugfixes — with type filters, search, and timeline view. |
 | **Sessions** | Active and past sessions with observation counts, duration, and the ability to browse session context. |
 | **Usage** | Daily token costs, model routing breakdown (Opus vs Sonnet distribution), and usage trends over time. |
-| **Share** | Skill sharing across machines and teams — sync, install from URLs, manage git remotes, and organize project skills. |
+| **Share** | Browse, edit, rename, and delete all assets (skills, rules, commands, agents). Filter by scope and type. Push/pull to git remotes. Markdown preview. |
 | **Settings** | Model selection per command and sub-agent (Sonnet 4.6 vs Opus 4.6), extended context toggle (1M tokens). |
 | **Help** | Embedded documentation from pilot-shell.com — full technical reference without leaving the Console. |
 

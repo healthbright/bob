@@ -100,6 +100,10 @@ dev-*)
 	;;
 esac
 
+is_in_container() {
+	[ -f "/.dockerenv" ] || [ -f "/run/.containerenv" ]
+}
+
 download_file() {
 	local path="$1"
 	local dest="$2"
@@ -378,8 +382,13 @@ run_installer() {
 		local_arg="--local --local-repo-dir $(pwd)"
 	fi
 
+	local system_arg=""
+	if ! is_in_container; then
+		system_arg="--local-system"
+	fi
+
 	uv run --python 3.12 --no-project --with rich --with certifi \
-		python -m installer install --local-system $version_arg $local_arg "$@"
+		python -m installer install $system_arg $version_arg $local_arg "$@"
 }
 
 is_native_windows() {
@@ -411,7 +420,10 @@ echo "  Pilot Shell Installer (v${VERSION})"
 echo "======================================================================"
 echo ""
 
-if [ "$RESTART_PILOT" = true ]; then
+if is_in_container; then
+	echo "  Running inside container — skipping system dependencies"
+	echo ""
+elif [ "$RESTART_PILOT" = true ]; then
 	echo "  Updating local installation..."
 	echo ""
 elif [ "$USE_LOCAL_INSTALLER" = true ]; then
