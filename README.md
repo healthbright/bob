@@ -290,9 +290,9 @@ Opus for planning — where reasoning quality matters most. Sonnet for implement
 | Phase                 | Default | Why                                                                                                                                                |
 | --------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Planning**          | Opus    | Exploring your codebase, designing architecture, and writing the spec requires deep reasoning. A good plan is the foundation of everything.        |
-| **Plan Verification** | Sonnet  | The plan-reviewer sub-agent validates completeness and challenges assumptions on every feature spec.                                               |
+| **Plan Verification** | Sonnet  | The plan-reviewer sub-agent validates completeness and challenges assumptions on every feature spec. *(disabled by default)*                       |
 | **Implementation**    | Sonnet  | With a solid plan, writing code is straightforward. Sonnet is fast, cost-effective, and produces high-quality code when guided by a clear spec.    |
-| **Code Verification** | Sonnet  | The unified spec-reviewer agent handles deep code review (compliance + quality + goal). The orchestrator runs mechanical checks and applies fixes. |
+| **Code Verification** | Sonnet  | The unified spec-reviewer agent handles deep code review (compliance + quality + goal). The orchestrator runs mechanical checks and applies fixes. *(disabled by default)* |
 
 Choose between Sonnet 4.6 and Opus 4.6 for the main session, each command, and sub-agents. A global "Extended Context (1M)" toggle enables the 1M token context window across all models simultaneously. **Note:** 1M context models require a Max (20x) or Enterprise subscription — not available to all users.
 

@@ -137,6 +137,10 @@ def _migration_v3(raw: dict[str, Any]) -> bool:
         if reviewer_agents.get("specReviewer") is True:
             reviewer_agents["specReviewer"] = False
             modified = True
+        for key in ("planReviewer", "specReviewer"):
+            if key not in reviewer_agents:
+                reviewer_agents[key] = False
+                modified = True
     else:
         raw["reviewerAgents"] = {"planReviewer": False, "specReviewer": False}
         modified = True
