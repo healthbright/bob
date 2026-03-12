@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.5.1] - 2026-03-12
+
+### Bug Fixes
+
+- Share page detection, sync/collect buttons, skillshare via brew, README cleanup
+
 ## [7.5.0] - 2026-03-12
 
 ### Features
