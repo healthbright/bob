@@ -88,15 +88,14 @@ jobs:
           scan-ref: '.'
           scanners: 'vuln,secret'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
           skip-dirs: '.venv,node_modules,console/node_modules,launcher,docs/site/api,console,docs/site/node_modules,docs/docusaurus/node_modules'
           trivyignores: '.trivyignore'
           format: 'table'
           output: trivy-results.txt
 
-      - name: Publish Trivy results to step summary
-        if: always()
+      - name: Check Trivy results
         run: |
           if [[ -s trivy-results.txt ]]; then
             {
@@ -108,6 +107,8 @@ jobs:
               echo '```'
               echo "</details>"
             } >> $GITHUB_STEP_SUMMARY
+            echo "::error::Trivy found vulnerabilities — see step summary for details"
+            exit 1
           else
             echo "### Security Scan: No issues found" >> $GITHUB_STEP_SUMMARY
           fi
