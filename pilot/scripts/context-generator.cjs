@@ -337,6 +337,11 @@ ${o.stack}`:` ${o.message}`:this.getLevel()===0&&typeof o=="object"?l=`
       FROM sdk_sessions
       WHERE id = ?
       LIMIT 1
+    `).get(e)||null}getSessionByContentId(e){return this.db.prepare(`
+      SELECT id, content_session_id, memory_session_id, project, user_prompt
+      FROM sdk_sessions
+      WHERE content_session_id = ?
+      LIMIT 1
     `).get(e)||null}getSdkSessionsBySessionIds(e){if(e.length===0)return[];let t=e.map(()=>"?").join(",");return this.db.prepare(`
       SELECT id, content_session_id, memory_session_id, project, user_prompt,
              started_at, started_at_epoch, completed_at, completed_at_epoch, status

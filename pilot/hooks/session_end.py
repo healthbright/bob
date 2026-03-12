@@ -1,21 +1,47 @@
 #!/usr/bin/env python3
-"""SessionEnd hook - stops worker only when no other sessions are active.
+"""SessionEnd hook - completes session in Console and stops worker if last session.
 
-Checks session directories directly (no subprocess) for reliability during
-shutdown. Only stops the worker when the current session is the last active one.
+1. Marks the session as completed in the Console (so the sessions tab updates)
+2. Stops the worker only when the current session is the last active one
 """
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 SESSIONS_DIR = Path.home() / ".pilot" / "sessions"
 SKIP_NAMES = {"default", "pipes"}
+CONSOLE_URL = "http://localhost:41777"
+
+
+def _complete_session() -> None:
+    """Mark the current session as completed in the Console.
+
+    Fire-and-forget — silently ignores errors. The Console may already
+    be stopped or the session may not exist (e.g. private session).
+    """
+    session_id = os.environ.get("CLAUDE_SESSION_ID", "")
+    if not session_id:
+        return
+
+    payload = json.dumps({"contentSessionId": session_id}).encode()
+    req = urllib.request.Request(
+        f"{CONSOLE_URL}/api/sessions/complete",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=5)
+    except Exception:
+        pass
 
 
 def _has_other_active_sessions() -> bool:
@@ -58,6 +84,9 @@ def main() -> int:
     plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT", "")
     if not plugin_root:
         return 0
+
+    # Mark session as completed in Console (fire-and-forget)
+    _complete_session()
 
     if _has_other_active_sessions():
         return 0
