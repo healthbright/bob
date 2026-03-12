@@ -10,11 +10,7 @@
       "source": "/docs/:path*",
       "destination": "/docs/:path*"
     },
-    {
-      "source": "/blog/:path*",
-      "destination": "/blog/:path*"
-    },
-    {
+{
       "source": "/(.*)",
       "destination": "/"
     }

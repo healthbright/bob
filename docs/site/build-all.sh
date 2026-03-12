@@ -1,6 +1,6 @@
 #!/bin/bash
-# Build both the Vite landing page and Docusaurus docs+blog, combine into single output.
-# Output: docs/site/dist/ (Vite) with docs/site/dist/docs/ and docs/site/dist/blog/ (Docusaurus)
+# Build both the Vite landing page and Docusaurus docs, combine into single output.
+# Output: docs/site/dist/ (Vite) with docs/site/dist/docs/ (Docusaurus)
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -12,7 +12,7 @@ cd "$SITE_DIR"
 npm ci --prefer-offline 2>/dev/null || npm install
 npm run build
 
-echo "=== Building Docusaurus docs + blog ==="
+echo "=== Building Docusaurus docs ==="
 cd "$DOCUSAURUS_DIR"
 npm ci --prefer-offline 2>/dev/null || npm install
 npm run build
@@ -21,9 +21,8 @@ echo "=== Combining outputs ==="
 DIST="$SITE_DIR/dist"
 BUILD="$DOCUSAURUS_DIR/build"
 
-# Copy Docusaurus docs and blog into Vite dist
+# Copy Docusaurus docs into Vite dist
 cp -r "$BUILD/docs" "$DIST/docs"
-cp -r "$BUILD/blog" "$DIST/blog"
 
 # Merge Docusaurus assets into Vite assets (no filename conflicts — Vite uses hashes, Docusaurus uses css/js subdirs)
 cp -r "$BUILD/assets/"* "$DIST/assets/"
@@ -43,8 +42,6 @@ done
 echo "=== Build complete ==="
 echo "Landing page: $DIST/"
 echo "Documentation: $DIST/docs/"
-echo "Blog: $DIST/blog/"
 echo ""
 echo "File counts:"
 echo "  docs: $(find "$DIST/docs" -name '*.html' | wc -l | tr -d ' ') pages"
-echo "  blog: $(find "$DIST/blog" -name '*.html' | wc -l | tr -d ' ') pages"
