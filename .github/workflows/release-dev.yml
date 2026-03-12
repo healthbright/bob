@@ -47,7 +47,7 @@ jobs:
 
       - name: Check Trivy results
         run: |
-          if [[ -s trivy-results.txt ]]; then
+          if [[ -s trivy-results.txt ]] && grep -qE "CRITICAL|HIGH" trivy-results.txt; then
             {
               echo "### Security Scan Results"
               echo "<details><summary>Click to expand Trivy output</summary>"
