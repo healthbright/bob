@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Pre-commit hook: test gates + auto-rebuild console build artifacts
+# Pre-commit hook: security scan, test gates, auto-rebuild console artifacts
 #
+# 0.  Trivy security scan — always (skip: SKIP_TRIVY=1 or trivy not installed)
 # 1a. Python unit tests  — when launcher/ or pilot/hooks/ changed
 # 1b. Installer tests    — when installer/ changed
 # 2.  Console unit tests — when console/ changed
@@ -12,6 +13,20 @@ set -eo pipefail
 if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" = "true" ] && \
    [ "$(git rev-parse --git-dir)" != ".git" ]; then
   exit 0
+fi
+
+# --- 0. Trivy security scan ---
+if [ "${SKIP_TRIVY:-0}" != "1" ] && command -v trivy &>/dev/null; then
+  echo "[pre-commit] Running Trivy security scan..."
+  trivy fs . \
+    --scanners vuln,secret \
+    --severity CRITICAL,HIGH \
+    --exit-code 1 \
+    --ignore-unfixed \
+    --skip-dirs .venv,node_modules,console/node_modules,launcher,docs/site/api,console,docs/site/node_modules,docs/docusaurus/node_modules \
+    --ignorefile .trivyignore \
+    --quiet
+  echo "[pre-commit] Security scan passed."
 fi
 
 # --- 1. Python unit tests ---
