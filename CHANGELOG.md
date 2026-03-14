@@ -2,6 +2,13 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.5.7] - 2026-03-14
+
+### Bug Fixes
+
+- Add trivy security scan to pre-commit hook and fix undici CVEs
+- Auto-detect context window size from Claude Code statusline
+
 ## [7.5.6] - 2026-03-13
 
 ### Bug Fixes
