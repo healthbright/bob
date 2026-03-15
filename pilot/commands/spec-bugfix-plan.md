@@ -72,8 +72,8 @@ If you catch yourself thinking any of these, STOP. Return to Step 1.2.
 1. **Parse worktree** from arguments: `--worktree=yes|no` (default: `No`). Strip flag.
 2. **Create worktree early (if yes):** Same pattern as spec-plan Step 1.1.
 3. **Generate filename:** `docs/plans/YYYY-MM-DD-<bug-slug>.md`
-4. `mkdir -p docs/plans`
-5. **Write header:**
+4. **Write header:**
+
    ```markdown
    # [Bug Description] Fix Plan
 
@@ -87,12 +87,15 @@ If you catch yourself thinking any of these, STOP. Return to Step 1.2.
    > Investigating bug...
 
    ## Summary
+
    **Symptom:** [Bug description from user]
 
    ---
+
    _Tracing root cause..._
    ```
-6. **Register:** `~/.pilot/bin/pilot register-plan "<plan_path>" "PENDING" 2>/dev/null || true`
+
+5. **Register:** `~/.pilot/bin/pilot register-plan "<plan_path>" "PENDING" 2>/dev/null || true`
 
 ---
 
@@ -117,12 +120,14 @@ If you catch yourself thinking any of these, STOP. Return to Step 1.2.
 Read as many files as needed. For each: read completely, trace execution path from user action to symptom, note specific lines where behavior diverges.
 
 **Backward tracing technique (from symptom to source):**
+
 1. Find where the error/wrong behavior appears — note file:line
 2. What called this with the wrong value/state? Trace one level up.
 3. Keep tracing until you find the **source** — where the bad data originates
 4. **Fix at the source, not where the error appears**
 
 **Multi-component systems:** Before concluding, instrument at component boundaries:
+
 - What data enters each component? What exits?
 - WHERE does it break? Run once to gather evidence, THEN investigate the failing component.
 
@@ -137,6 +142,7 @@ Tools: Probe CLI `probe search` (find by intent), `probe extract` (extract funct
 ### 1.2.5: Root Cause Statement
 
 State clearly:
+
 - **Root cause:** `file/path.py:lineN` — `function_name()` does X but should do Y
 - **Why:** Explain WHY it causes the symptom (not just what's wrong)
 - **Confidence:** High (traced fully) / Medium (strong hypothesis) / Low (needs more data)
@@ -160,10 +166,10 @@ BEFORE writing the plan:
 
 ### Size the task structure
 
-| Size | Criteria | Tasks |
-|------|----------|-------|
-| **Compact** (default) | ≤3 files, clear root cause | 2: Fix (test + code) → Verify |
-| **Full** | 4+ files, multiple failure modes | 3: Tests → Fix → Verify |
+| Size                  | Criteria                         | Tasks                         |
+| --------------------- | -------------------------------- | ----------------------------- |
+| **Compact** (default) | ≤3 files, clear root cause       | 2: Fix (test + code) → Verify |
+| **Full**              | 4+ files, multiple failure modes | 3: Tests → Fix → Verify       |
 
 ### Compact (most bugs)
 
@@ -197,34 +203,41 @@ Worktree: [Yes|No]
 Type: Bugfix
 
 ## Summary
+
 **Symptom:** [What user observes]
 **Trigger:** [When/how it happens]
 **Root Cause:** `file/path.py:lineN` — [what's wrong and why]
 
 ## Investigation
+
 - [Key findings from tracing — breadcrumb trail so implementer understands the bug]
 - [Working example for comparison, if relevant]
 - [Recent changes that may have caused it, if relevant]
 
 ## Fix Approach
+
 **Files:** [files to modify]
 **Strategy:** [how to fix — reference pattern from working code if applicable]
 **Tests:** [test files to create/modify]
 **Defense-in-depth:** [additional validation layers, if applicable — skip for isolated fixes]
 
 ## Progress
+
 - [ ] Task 1: [title]
 - [ ] Task 2: [title]
-**Tasks:** N | **Done:** 0
+      **Tasks:** N | **Done:** 0
 
 ## Tasks
+
 ### Task 1: [Title]
+
 **Objective:** [what]
 **Files:** [list]
 **TDD:** Write regression test → verify FAILS → implement fix → verify all PASS
 **Verify:** `[command]`
 
 ### Task 2: Verify
+
 **Objective:** Full suite + quality checks
 **Verify:** `uv run pytest -q && ruff check . && basedpyright launcher`
 ```

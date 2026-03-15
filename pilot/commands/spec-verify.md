@@ -309,7 +309,6 @@ Re-run full test suite + type checker + build one final time. If code changed du
 
 5. **Save plan to project root** (gitignored, local reference):
    ```bash
-   mkdir -p <project_root>/docs/plans
    cp <worktree_plan_path> <project_root>/docs/plans/<plan_filename>
    ```
 
@@ -360,6 +359,11 @@ If any fails: fix on base branch, re-run, commit fix separately (e.g., `fix: res
    ### Goal Achievement: N/M truths verified
    ### Must Fix (N) | Should Fix (N) | Suggestions (N)
    ### Not Verified: [list items from Step 3.8b, or "None"]
+   ```
+
+4. **Instruct the user:** Include in your completion message:
+   ```
+   Run /clear before starting new work — this resets context while keeping project rules loaded.
    ```
 
 **When verification FAILS (missing features, serious bugs):**

@@ -44,6 +44,14 @@
         "hooks": [
           {
             "type": "command",
+            "command": "uv run python \"${CLAUDE_PLUGIN_ROOT}/hooks/spec_mode_guard.py\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "bun \"${CLAUDE_PLUGIN_ROOT}/scripts/worker-service.cjs\" hook claude-code session-init",
             "async": true,
             "timeout": 15
@@ -53,7 +61,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash|WebSearch|WebFetch|Grep|Agent",
+        "matcher": "Bash|WebSearch|WebFetch|Grep|Agent|EnterPlanMode|ExitPlanMode",
         "hooks": [
           {
             "type": "command",

@@ -275,9 +275,10 @@ For each selected improvement:
 ### Step 4.1: Setup
 
 1. Check `probe --version` — if available, use Probe for semantic exploration (Step 4.2). If not installed, skip Step 4.2 and use Grep/Glob/Read in Step 4.3.
-2. **Directory structure:** `tree -L 3 -I 'node_modules|.git|__pycache__|dist|build|.venv|.next|coverage|.cache|cdk.out'`
-3. **Technologies:** Check `package.json`, `pyproject.toml`, `tsconfig.json`, `go.mod`
-4. **Source documents:** Find and read canonical docs — `docs/`, `**/ARCHITECTURE.md`, `**/CONTRIBUTING.md`, `**/docs/*.md`. These are the source of truth for generated rules — keep them open when writing.
+2. **Ensure `docs/plans/` exists** — `/spec` stores plans here: `mkdir -p ./docs/plans`
+3. **Directory structure:** `tree -L 3 -I 'node_modules|.git|__pycache__|dist|build|.venv|.next|coverage|.cache|cdk.out'`
+4. **Technologies:** Check `package.json`, `pyproject.toml`, `tsconfig.json`, `go.mod`
+5. **Source documents:** Find and read canonical docs — `docs/`, `**/ARCHITECTURE.md`, `**/CONTRIBUTING.md`, `**/docs/*.md`. These are the source of truth for generated rules — keep them open when writing.
 
 ### Step 4.2: Semantic Exploration with Probe — OPTIONAL
 

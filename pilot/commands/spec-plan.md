@@ -78,19 +78,19 @@ When adding tasks to an existing plan: load it, parse structure, verify compatib
 1. **Parse worktree** from arguments: `--worktree=yes|no` (default: `Yes`). Strip flag from task description.
 
 2. **Create worktree early (if yes):**
+
    ```bash
    ~/.pilot/bin/pilot worktree detect --json <plan_slug>
    # If not found:
    ~/.pilot/bin/pilot worktree create --json <plan_slug>
    # Returns: {"path": "...", "branch": "spec/<slug>", "base_branch": "main"}
    ```
+
    All file writes use the worktree path as base. If creation fails (old git): continue without worktree, set to `No`.
 
 3. **Generate filename:** `docs/plans/YYYY-MM-DD-<feature-slug>.md` — slug from first 3-4 words (lowercase, hyphens). If worktree active, use worktree path as base directory.
 
-4. `mkdir -p docs/plans`
-
-5. **Write initial header:**
+4. **Write initial header:**
 
    ```markdown
    # [Feature Name] Implementation Plan
@@ -113,7 +113,7 @@ When adding tasks to an existing plan: load it, parse structure, verify compatib
    _Exploring codebase and gathering requirements..._
    ```
 
-6. **Register plan:** `~/.pilot/bin/pilot register-plan "<plan_path>" "PENDING" 2>/dev/null || true`
+5. **Register plan:** `~/.pilot/bin/pilot register-plan "<plan_path>" "PENDING" 2>/dev/null || true`
 
 **Do this FIRST** — before any exploration or questions. Status bar shows progress immediately.
 
@@ -124,17 +124,19 @@ When adding tasks to an existing plan: load it, parse structure, verify compatib
 1. Restate the task in your own words — core problem, assumptions
 2. Identify gray areas:
 
-   | Domain | Typical Gray Areas |
-   |--------|-------------------|
+   | Domain      | Typical Gray Areas                                 |
+   | ----------- | -------------------------------------------------- |
    | UI/frontend | Layout, interaction patterns, empty/loading states |
-   | API/backend | Response shape, error codes, auth, pagination |
-   | CLI/scripts | Output format, flags, exit codes |
-   | Data/config | Schema, migration, validation, defaults |
+   | API/backend | Response shape, error codes, auth, pagination      |
+   | CLI/scripts | Output format, flags, exit codes                   |
+   | Data/config | Schema, migration, validation, defaults            |
 
 3. **Ask Batch 1 questions** → notify, then use `AskUserQuestion` with each question as a separate entry with predefined options:
+
    ```bash
    ~/.pilot/bin/pilot notify plan_approval "Input Needed" "<plan_name> — clarification questions" --plan-path "<plan_path>" 2>/dev/null || true
    ```
+
    Each question must have 2-4 concrete options. Use `multiSelect: true` when choices aren't mutually exclusive.
 
    Even when the task seems clear, ask about: scope boundaries (what's explicitly out), priority trade-offs (speed vs completeness), or behavioral expectations (error handling, edge cases). **Only skip if the task is a trivial single-file change.**
@@ -143,14 +145,14 @@ When adding tasks to an existing plan: load it, parse structure, verify compatib
 
 **Explore systematically, one area at a time (sequentially, not parallel).**
 
-| Tool | When |
-|------|------|
-| **Context7** | Library/framework docs |
-| **Probe CLI** (`probe search`) | Semantic code search by intent (via Bash) |
-| **Probe CLI** (`probe extract`) | Extract specific functions/classes by symbol or line |
-| **codebase-memory-mcp** | Call tracing, impact analysis, structural graph queries |
-| **grep-mcp** | Real-world GitHub examples |
-| **Read/Grep/Glob** | Direct file exploration |
+| Tool                            | When                                                    |
+| ------------------------------- | ------------------------------------------------------- |
+| **Context7**                    | Library/framework docs                                  |
+| **Probe CLI** (`probe search`)  | Semantic code search by intent (via Bash)               |
+| **Probe CLI** (`probe extract`) | Extract specific functions/classes by symbol or line    |
+| **codebase-memory-mcp**         | Call tracing, impact analysis, structural graph queries |
+| **grep-mcp**                    | Real-world GitHub examples                              |
+| **Read/Grep/Glob**              | Direct file exploration                                 |
 
 **Areas (in order):** Architecture → Similar Features → Dependencies → Tests
 
@@ -190,19 +192,23 @@ Incorporate user choices into plan design, proceed to Step 1.5.
 **Dependencies:** [None | Task X, Task Y]
 
 **Files:**
+
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py`
 - Test: `tests/exact/path/to/test.py`
 
 **Key Decisions / Notes:**
+
 - [Technical approach, pattern to follow with file:line ref]
 
 **Definition of Done:**
+
 - [ ] All tests pass
 - [ ] No diagnostics errors
 - [ ] [Verifiable criterion — e.g., "API returns 404 for nonexistent resources"]
 
 **Verify:**
+
 - `uv run pytest tests/path/to/test.py -q`
 ```
 
@@ -215,6 +221,7 @@ Incorporate user choices into plan design, proceed to Step 1.5.
 #### Step 1.5.1: Goal Verification Criteria
 
 After creating tasks, derive for the `## Goal Verification` section:
+
 1. State the goal
 2. Derive 3-7 observable truths (falsifiable, user-perspective)
 3. For each truth, identify supporting artifacts (files with real implementation, not stubs)
@@ -236,16 +243,21 @@ Worktree: [Yes|No]
 Type: Feature
 
 ## Summary
+
 **Goal:** [One sentence]
 **Architecture:** [2-3 sentences]
 **Tech Stack:** [Key technologies]
 
 ## Scope
+
 ### In Scope
+
 ### Out of Scope
 
 ## Context for Implementer
+
 > Write for an implementer who has never seen the codebase.
+
 - **Patterns to follow:** [file:line references]
 - **Conventions:** [naming, organization, error handling]
 - **Key files:** [important files with descriptions]
@@ -253,31 +265,39 @@ Type: Feature
 - **Domain context:** [business logic needed to understand task]
 
 ## Runtime Environment (only if project has a running service)
+
 - **Start command / Port / Deploy path / Health check / Restart procedure**
 
 ## Feature Inventory (only for migration/refactoring — see Migration section)
 
 ## Assumptions
+
 - [What you assume] — supported by [finding/file:line] — Tasks N, M depend on this
 - [What you assume] — supported by [finding/file:line] — Task N depends on this
 
 ## Risks and Mitigations
+
 | Risk | Likelihood | Impact | Mitigation |
 ⚠️ Mitigations are commitments — verification checks they're implemented.
 ✅ "Reset to null when project not in list" ❌ "Handle edge cases"
 
 ## Goal Verification
+
 ### Truths
+
 ### Artifacts
 
 ## Progress Tracking
+
 - [ ] Task 1: [summary]
-**Total Tasks:** N | **Completed:** 0 | **Remaining:** N
+      **Total Tasks:** N | **Completed:** 0 | **Remaining:** N
 
 ## Implementation Tasks
+
 [Tasks from Step 1.5]
 
 ## Open Questions (only if any remain)
+
 ### Deferred Ideas (only if any surfaced)
 ```
 
@@ -340,6 +360,7 @@ Then Read the file once. If not READY after 5 min, re-launch synchronously.
 **When `PILOT_PLAN_APPROVAL_ENABLED` is NOT `"false"` — MANDATORY APPROVAL GATE:**
 
 0. Notify:
+
    ```bash
    ~/.pilot/bin/pilot notify plan_approval "Plan Ready for Review" "<plan_name> — approval needed" --plan-path "<plan_path>" 2>/dev/null || true
    ```
