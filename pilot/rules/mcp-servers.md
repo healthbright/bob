@@ -135,6 +135,52 @@ Options: `waitUntil` (load/domcontentloaded/networkidle), `returnHtml`, `waitFor
 
 ---
 
+### codebase-memory-mcp — Code Knowledge Graph
+
+**Purpose:** Structural code analysis, call tracing, dead code detection, and impact analysis via a persistent code graph.
+
+**Complements Probe CLI:** Probe finds code by intent ("how does auth work?"). codebase-memory finds by structure ("who calls this?", "what's dead?", "what's the blast radius?").
+
+**Key tools:**
+
+| Tool | Purpose |
+|------|---------|
+| `index_repository` | Parse repo into graph (once — auto-sync keeps it fresh) |
+| `search_graph` | Find functions/classes by name pattern, label, degree |
+| `trace_call_path` | BFS call chain — who calls X, what does X call |
+| `detect_changes` | Map git diff to affected symbols + blast radius |
+| `get_code_snippet` | Source code + caller/callee metadata |
+| `query_graph` | Cypher-like graph queries |
+| `get_architecture` | Codebase overview (languages, packages, hotspots, entry points) |
+| `search_code` | Grep-like text search within indexed files |
+
+**Workflow:** Check `index_status` → `index_repository` if needed → `search_graph` / `trace_call_path` / `query_graph`
+
+```
+ToolSearch(query="+codebase-memory-mcp search")
+
+mcp__plugin_pilot_codebase-memory-mcp__search_graph(label="Function", name_pattern=".*Handler.*")
+mcp__plugin_pilot_codebase-memory-mcp__trace_call_path(function_name="ProcessOrder", direction="both", depth=2)
+mcp__plugin_pilot_codebase-memory-mcp__detect_changes(scope="all")
+mcp__plugin_pilot_codebase-memory-mcp__get_code_snippet(qualified_name="MyClass", auto_resolve=true, include_neighbors=true)
+```
+
+**When to use over Probe:**
+- Call tracing / impact analysis (Probe can't do this)
+- Dead code detection (`max_degree=0, exclude_entry_points=true`)
+- Structural queries via Cypher (class methods, interface implementations)
+- Change blast radius analysis
+- Code snippets with caller/callee context
+
+**When Probe is better:**
+- Intent-based search ("how does authentication work?")
+- Natural language queries
+- AST-aware code extraction by line/symbol
+
+Full reference in skills: `codebase-memory-reference`, `codebase-memory-tracing`, `codebase-memory-exploring`, `codebase-memory-quality`.
+
+---
+
 ### Tool Selection Quick Reference
 
 | Need | Server/Tool | Reference |
@@ -142,6 +188,9 @@ Options: `waitUntil` (load/domcontentloaded/networkidle), `returnHtml`, `waitFor
 | **Codebase search** | **Probe CLI** (`probe search`) | `cli-tools.md` |
 | Extract code block | Probe CLI (`probe extract`) | `cli-tools.md` |
 | AST pattern matching | Probe CLI (`probe query`) | `cli-tools.md` |
+| Call tracing / impact analysis | codebase-memory-mcp | `trace_call_path`, `detect_changes` |
+| Dead code / quality analysis | codebase-memory-mcp | `search_graph` with degree filters |
+| Structural graph queries | codebase-memory-mcp | `query_graph` (Cypher) |
 | Past work / decisions | mem-search | `search` → `timeline` → `get_observations` |
 | Library/framework docs | context7 | `resolve-library-id` → `query-docs` |
 | Web search | web-search | `search` |

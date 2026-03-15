@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
 title: Hooks Pipeline
-description: 15 hooks across 7 lifecycle events — fire automatically at every stage
+description: 17 hooks across 7 lifecycle events — fire automatically at every stage
 ---
 
 # Hooks Pipeline
 
-15 hooks across 7 lifecycle events — fire automatically at every stage.
+17 hooks across 7 lifecycle events — fire automatically at every stage.
 
 Hooks are the enforcement layer. They run at each stage of Claude's work cycle — automatically, without prompting. Blocking hooks can reject an action or force a fix. Non-blocking hooks warn without interrupting. Async hooks run in the background.
 
@@ -18,6 +18,7 @@ Hooks are the enforcement layer. They run at each stage of Claude's work cycle �
 |------|------|-------------|
 | Memory loader | Blocking | Loads persistent context from Console memory into the session |
 | `post_compact_restore.py` | Blocking | Re-injects active plan, task state, and key context after compaction |
+| `session_clear.py` | Blocking | Resets session state (spec artifacts, task list, caches) when user runs /clear |
 | Session tracker | Async | Initializes user message tracking for the session |
 
 ## UserPromptSubmit
@@ -34,7 +35,8 @@ Hooks are the enforcement layer. They run at each stage of Claude's work cycle �
 
 | Hook | Type | Description |
 |------|------|-------------|
-| `tool_redirect.py` | Blocking | Redirects to MCP alternatives, blocks plan mode conflicts, hints Probe CLI for search |
+| `tool_redirect.py` | Blocking | Redirects to MCP alternatives, blocks Explore agent (use Probe + codebase-memory-mcp), blocks plan mode conflicts |
+| `tool_token_saver.py` | Blocking | Rewrites Bash commands via RTK for token savings (60–90% reduction on dev operations) |
 
 ## PostToolUse
 

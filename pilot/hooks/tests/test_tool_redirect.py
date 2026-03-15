@@ -32,13 +32,18 @@ class TestBlockedTools:
         assert code == 2
 
 
+class TestBlockedAgentTypes:
+    """Agent types that should be hard-blocked (exit code 2)."""
+
+    def test_blocks_explore_agent(self):
+        code, output = _run_with_input("Agent", {"subagent_type": "Explore", "prompt": "find files"})
+        assert code == 2
+        assert "Probe CLI" in output
+        assert "codebase-memory-mcp" in output
+
+
 class TestAgentWarning:
     """General Agent calls are warned (not blocked) — exit code 0 with context."""
-
-    def test_warns_agent_explore(self):
-        code, output = _run_with_input("Agent", {"subagent_type": "Explore", "prompt": "find files"})
-        assert code == 0
-        assert "additionalContext" in output
 
     def test_warns_agent_general_purpose(self):
         code, output = _run_with_input("Agent", {"subagent_type": "general-purpose", "prompt": "research"})

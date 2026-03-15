@@ -48,6 +48,7 @@ Pilot Shell installs the following open-source tools during setup. Each tool is 
 |------|---------|---------|
 | [Probe](https://github.com/probelabs/probe) | Semantic code search engine | ISC |
 | [RTK](https://github.com/rtk-ai/rtk) | Token-optimized CLI proxy (60-90% savings) | MIT |
+| [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | Code knowledge graph and structural analysis | MIT |
 | [ccusage](https://github.com/ryoppippi/ccusage) | Claude Code usage analytics | MIT |
 | [Skillshare](https://github.com/runkids/skillshare) | AI skill sharing and sync | MIT |
 

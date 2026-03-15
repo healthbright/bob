@@ -31,7 +31,7 @@ The only manual step is **Approve**. Everything else runs automatically. The Ver
 
 Full exploration workflow for new functionality, refactoring, or any work where architecture decisions matter.
 
-- Codebase exploration with Probe semantic search
+- Codebase exploration with Probe semantic search and codebase-memory-mcp structural analysis
 - Architecture design decisions via Q&A
 - Full plan with scope, risks, and Definition of Done
 - Unified verification agent (optional, configurable in Console Settings)
@@ -67,6 +67,29 @@ Investigation-first flow for targeted fixes. Finds the root cause before touchin
 - Features: unified review sub-agent (optional, enabled by default)
 - Bugfixes: regression test + full suite — no sub-agents needed
 - Auto-fixes findings, loops back until all checks pass
+
+## Configurable Toggles
+
+All interaction points in `/spec` are configurable via **Console Settings → Spec Workflow** and **Console Settings → Reviewers**.
+
+### Spec Workflow Toggles
+
+| Toggle | Default | Effect when disabled |
+|--------|---------|---------------------|
+| **Worktree Support** | On | Worktree is never used — implementation always runs on the current branch |
+| **Ask Questions** | On | Planning runs fully autonomous — no clarifying questions |
+| **Plan Approval** | On | Implementation starts immediately after planning — no approval gate |
+
+When all three are disabled, `/spec` runs end-to-end without any user interaction. Start a task, come back to verified code.
+
+### Reviewer Toggles
+
+| Toggle | Default | What it does |
+|--------|---------|--------------|
+| **Plan Review** | On | Validates the plan before implementation — checks alignment and flags risky assumptions |
+| **Spec Review** | On | Reviews code after implementation — compliance, security, test coverage, and goal achievement |
+
+Both reviewers run in a separate context window and don't consume the main session's context budget.
 
 ## Worktree Isolation (Optional)
 

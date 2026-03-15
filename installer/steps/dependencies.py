@@ -209,6 +209,17 @@ def install_rtk() -> bool:
     )
 
 
+def install_codebase_memory_mcp() -> bool:
+    """Install codebase-memory-mcp for code knowledge graph and structural analysis."""
+    if command_exists("codebase-memory-mcp"):
+        return True
+
+    return _run_bash_with_retry(
+        "curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/scripts/setup.sh | bash",
+        timeout=120,
+    )
+
+
 def _is_vtsls_installed() -> bool:
     """Check if vtsls is already installed globally."""
     try:
@@ -659,6 +670,9 @@ class DependenciesStep(BaseStep):
 
         if _install_with_spinner(ui, "RTK (token optimizer)", install_rtk):
             installed.append("rtk")
+
+        if _install_with_spinner(ui, "codebase-memory-mcp (code intelligence)", install_codebase_memory_mcp):
+            installed.append("codebase_memory_mcp")
 
         if _install_with_spinner(ui, "Skillshare (skill sharing)", install_skillshare):
             installed.append("skillshare")

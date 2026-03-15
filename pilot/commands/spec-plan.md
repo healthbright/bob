@@ -148,6 +148,7 @@ When adding tasks to an existing plan: load it, parse structure, verify compatib
 | **Context7** | Library/framework docs |
 | **Probe CLI** (`probe search`) | Semantic code search by intent (via Bash) |
 | **Probe CLI** (`probe extract`) | Extract specific functions/classes by symbol or line |
+| **codebase-memory-mcp** | Call tracing, impact analysis, structural graph queries |
 | **grep-mcp** | Real-world GitHub examples |
 | **Read/Grep/Glob** | Direct file exploration |
 

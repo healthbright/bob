@@ -13,7 +13,7 @@ probe search "database connection setup" ./
 
 **File Size:** Aim for production files under 800 lines. Over 1000 lines is a signal to consider splitting — but only when it's the focus of the current task, not as a side-refactor. Test files exempt.
 
-**Dependency Check:** Before modifying any function, use Probe CLI first (then `Grep` or LSP `findReferences` if needed) to find all callers. Update all affected call sites.
+**Dependency Check:** Before modifying any function, use codebase-memory-mcp `trace_call_path` (structural, exact) or Probe CLI (intent-based) to find all callers. Fallback: `Grep` or LSP `findReferences`. Update all affected call sites.
 
 **Self-Correction:** Fix obvious mistakes (syntax errors, typos, missing imports) in code you are actively writing. Do not auto-fix errors in code the user edited — report them and let the user decide.
 

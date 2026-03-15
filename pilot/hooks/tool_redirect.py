@@ -28,17 +28,27 @@ BLOCKS: dict[str, dict[str, str]] = {
 }
 
 AGENT_WARNING = (
-    "Prefer doing work directly with Probe CLI, Grep/Glob, and Bash instead of sub-agents. "
+    "Prefer doing work directly with Probe CLI, codebase-memory-mcp, Grep/Glob, and Bash instead of sub-agents. "
     "Sub-agents waste tokens duplicating work you can do yourself. "
     "Exception: /spec reviewer agents (pilot:plan-reviewer, pilot:spec-reviewer) are fine."
+)
+
+EXPLORE_BLOCK_REASON = (
+    "The Explore agent is blocked. Use Probe CLI for intent-based search and "
+    "codebase-memory-mcp (via ToolSearch) for structural analysis instead.\n"
+    "-> Probe: probe search \"query\" ./ --max-results 5 --max-tokens 2000\n"
+    "-> Graph: ToolSearch(query=\"+codebase-memory-mcp search\") then search_graph/trace_call_path/query_graph"
 )
 
 # Agent sub-agent types that pass through without any warning
 SILENT_AGENT_TYPES: set[str] = {"pilot:plan-reviewer", "pilot:spec-reviewer"}
 
+# Agent sub-agent types that are hard-blocked
+BLOCKED_AGENT_TYPES: set[str] = {"Explore"}
+
 
 def run_tool_redirect() -> int:
-    """Block WebSearch/WebFetch. Warn (don't block) on general Agent calls."""
+    """Block WebSearch/WebFetch/Explore agent. Warn (don't block) on general Agent calls."""
     try:
         hook_data = json.load(sys.stdin)
     except (json.JSONDecodeError, OSError):
@@ -46,11 +56,15 @@ def run_tool_redirect() -> int:
 
     tool_name = hook_data.get("tool_name", "")
 
-    # Agent: silent pass for /spec reviewers, warning for everything else
+    # Agent: silent pass for /spec reviewers, block Explore, warning for everything else
     if tool_name == "Agent":
         subagent_type = hook_data.get("tool_input", {}).get("subagent_type", "")
         if subagent_type in SILENT_AGENT_TYPES:
             return 0
+        if subagent_type in BLOCKED_AGENT_TYPES:
+            sys.stderr.write(f"\033[0;31m[Pilot] Explore agent blocked: use Probe CLI + codebase-memory-mcp\033[0m\n")
+            print(pre_tool_use_deny(EXPLORE_BLOCK_REASON))
+            return 2
         sys.stderr.write(f"\033[0;33m[Pilot] Agent sub-agent warning: prefer direct tools\033[0m\n")
         print(pre_tool_use_context(AGENT_WARNING))
         return 0

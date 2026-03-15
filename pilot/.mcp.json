@@ -4,6 +4,12 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"]
     },
+    "codebase-memory-mcp": {
+      "type": "stdio",
+      "command": "sh",
+      "args": ["-c", "~/.local/bin/codebase-memory-mcp"],
+      "env": {}
+    },
     "mem-search": {
       "type": "stdio",
       "command": "sh",

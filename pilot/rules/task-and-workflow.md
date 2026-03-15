@@ -64,11 +64,11 @@ When resuming same session (same `CLAUDE_CODE_TASK_LIST_ID`): run `TaskList` fir
 
 ### Agent Tool — Prefer Direct Tools
 
-**Prefer doing work directly** with Probe CLI, Grep/Glob, Bash, and other built-in tools instead of launching sub-agents. The hook will warn (not block) on general Agent calls.
+**Prefer doing work directly** with Probe CLI, codebase-memory-mcp, Grep/Glob, Bash, and other built-in tools instead of launching sub-agents. The Explore agent is blocked by hook — use Probe + codebase-memory-mcp instead.
 
 **`/spec` reviewer agents** (`pilot:plan-reviewer`, `pilot:spec-reviewer`) pass through silently — these are expected parts of the workflow.
 
-**Search:** See `research-tools.md` for the priority chain (Probe → Grep/Glob).
+**Search:** See `research-tools.md` for the priority chain (Probe → codebase-memory-mcp → Grep/Glob).
 
 ### Spec Workflow Toggles
 

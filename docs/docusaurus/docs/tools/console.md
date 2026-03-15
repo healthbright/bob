@@ -14,17 +14,18 @@ The Console runs locally as a Bun/Express server with a React web UI. It's autom
 $ open http://localhost:41777
 ```
 
-## 8 Views
+## 9 Views
 
 | View | Description |
 |------|-------------|
 | **Dashboard** | Workspace status, active sessions, spec progress, git info, recent activity. Your real-time command center. |
 | **Specifications** | All spec plans with task progress (checkboxes), phase tracking (PENDING/COMPLETE/VERIFIED), and iteration history. |
+| **Changes** | Git diff viewer with staged/unstaged files, branch info, and worktree context. |
 | **Memories** | Browsable observations — decisions, discoveries, bugfixes — with type filters, search, and timeline view. |
 | **Sessions** | Active and past sessions with observation counts, duration, and the ability to browse session context. |
 | **Usage** | Daily token costs, model routing breakdown (Opus vs Sonnet distribution), and usage trends over time. |
 | **Share** | Browse, edit, rename, and delete all assets (skills, rules, commands, agents). Filter by scope and type. Push/pull to git remotes. Markdown preview. |
-| **Settings** | Model selection per command and sub-agent (Sonnet 4.6 vs Opus 4.6). Context window size (200K or 1M) auto-detected from your plan. |
+| **Settings** | Model selection per command and sub-agent (Sonnet 4.6 vs Opus 4.6). Spec workflow toggles (worktree support, ask questions, plan approval). Reviewer toggles (plan reviewer, spec reviewer). Context window size auto-detected from Claude Code. |
 | **Help** | Embedded documentation from pilot-shell.com — full technical reference without leaving the Console. |
 
 ## Smart Notifications via SSE
@@ -37,5 +38,5 @@ The Console sends real-time alerts via Server-Sent Events when Claude needs your
 - Session ended — completion summary with observation count
 
 :::info Settings tab
-Configure model selection per component — Planning (Opus), Implementation (Sonnet), Verification (Sonnet), each sub-agent independently. Context window size (200K or 1M) is auto-detected from Claude Code based on your subscription plan.
+Configure model selection per component — Planning (Opus), Implementation (Sonnet), Verification (Sonnet), each sub-agent independently. Spec workflow toggles control whether to ask questions, require plan approval, and use worktree isolation. Reviewer toggles enable/disable plan review and code review sub-agents. Context window size is auto-detected from Claude Code based on your subscription plan.
 :::

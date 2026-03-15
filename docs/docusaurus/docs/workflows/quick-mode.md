@@ -24,7 +24,7 @@ $ pilot
 - TDD enforcement — write failing tests before implementation
 - Context preservation across auto-compaction cycles
 - Persistent memory for recalling past decisions and context
-- MCP servers (lib-docs, mem-search, web-search, grep-mcp, web-fetch)
+- MCP servers (lib-docs, mem-search, web-search, grep-mcp, web-fetch, codebase-memory-mcp)
 - Language servers — real-time diagnostics and go-to-definition
 
 :::tip When to use /spec instead

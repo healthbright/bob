@@ -24,10 +24,11 @@ Rules are loaded automatically at session start. They're not suggestions — the
 - `context-management.md` — Auto-compaction and context preservation
 - `pilot-memory.md` — Online learning triggers
 
-### Tools (3 rules)
+### Tools (4 rules)
 
 - `research-tools.md` — Search priority and tool selection guide
 - `cli-tools.md` — Pilot CLI, Probe code search, RTK token optimization
+- `mcp-servers.md` — MCP server reference including codebase-memory-mcp (code knowledge graph)
 - `playwright-cli.md` — Browser automation for E2E UI testing
 
 ### Collaboration (1 rule)

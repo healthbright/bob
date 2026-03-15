@@ -64,7 +64,7 @@ Installs globally on macOS, Linux, and Windows (WSL2). All tools and rules go to
 7-step installer with progress tracking, rollback on failure, and idempotent re-runs:
 
 1. **Prerequisites** — Checks Homebrew, Node.js, Python 3.12+, uv, git
-2. **Dependencies** — Installs Probe, RTK, playwright-cli, language servers, property-based testing tools
+2. **Dependencies** — Installs Probe, RTK, codebase-memory-mcp, playwright-cli, language servers, property-based testing tools
 3. **Shell integration** — Auto-configures bash, fish, and zsh with `pilot` alias
 4. **Config & Claude files** — Sets up `.claude/` plugin, rules, commands, hooks, MCP servers
 5. **VS Code extensions** — Installs recommended extensions for your stack
@@ -203,7 +203,7 @@ A local web dashboard with different views and real-time notifications when Clau
 | **Sessions**      | Active and past sessions with observation counts and duration                            |
 | **Share**         | Skill sharing — view assets, source/sync status, CLI reference                           |
 | **Usage**         | Daily token costs, model routing breakdown, and usage trends                             |
-| **Settings**      | Model selection per command/sub-agent, extended context toggle, spec workflow toggles     |
+| **Settings**      | Model selection per command/sub-agent, spec workflow toggles (worktree, questions, approval), reviewer toggles, context window auto-detected |
 | **Help**          | Documentation, guides, and quick-start resources                                         |
 
 </details>
@@ -227,17 +227,25 @@ Hooks fire automatically across the entire lifecycle — formatting, linting, ty
 
 #### SessionStart (on startup, clear, or compact)
 
-| Hook                      | Type     | What it does                                                           |
-| ------------------------- | -------- | ---------------------------------------------------------------------- |
-| Memory loader             | Blocking | Loads persistent context from Pilot Shell Console memory               |
-| `post_compact_restore.py` | Blocking | After auto-compaction: re-injects active plan, task state, and context |
-| Session tracker           | Async    | Initializes user message tracking for the session                      |
+| Hook                      | Type     | What it does                                                                            |
+| ------------------------- | -------- | --------------------------------------------------------------------------------------- |
+| Memory loader             | Blocking | Loads persistent context from Pilot Shell Console memory                                |
+| `post_compact_restore.py` | Blocking | After auto-compaction: re-injects active plan, task state, and context                  |
+| `session_clear.py`        | Blocking | On /clear: resets session state (spec artifacts, task list, caches) for a clean start   |
+| Session tracker           | Async    | Initializes user message tracking for the session                                       |
+
+#### UserPromptSubmit (when the user sends a message)
+
+| Hook                | Type  | What it does                                                                 |
+| ------------------- | ----- | ---------------------------------------------------------------------------- |
+| Session initializer | Async | Registers the session with the Console worker daemon on first message        |
 
 #### PreToolUse (before search, web, or task tools)
 
-| Hook               | Type     | What it does                                                                                                                                 |
-| ------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tool_redirect.py` | Blocking | Blocks WebSearch/WebFetch (MCP alternatives exist), EnterPlanMode/ExitPlanMode (/spec conflict). Hints Probe CLI for semantic Grep patterns. |
+| Hook                    | Type     | What it does                                                                                                                                 |
+| ----------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tool_redirect.py`      | Blocking | Blocks WebSearch/WebFetch (MCP alternatives exist), Explore agent (use Probe + codebase-memory-mcp), EnterPlanMode/ExitPlanMode (/spec conflict). |
+| `tool_token_saver.py`   | Blocking | Rewrites Bash commands via RTK for token savings (60–90% reduction on dev operations).                                                       |
 
 #### PostToolUse (after every Write / Edit / MultiEdit)
 
@@ -256,10 +264,12 @@ Hooks fire automatically across the entire lifecycle — formatting, linting, ty
 
 #### Stop (when Claude tries to finish)
 
-| Hook                 | Type     | What it does                                                                                                                              |
-| -------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `spec_stop_guard.py` | Blocking | If an active spec exists with PENDING or COMPLETE status,**blocks stopping**. Forces verification to complete before the session can end. |
-| Session summarizer   | Async    | Saves session observations to persistent memory for future sessions.                                                                      |
+| Hook                       | Type     | What it does                                                                                                                              |
+| -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `spec_stop_guard.py`       | Blocking | If an active spec exists with PENDING or COMPLETE status, **blocks stopping**. Forces verification to complete before the session can end. |
+| `spec_plan_validator.py`   | Blocking | Verifies that the plan file was created with all required sections.                                                                       |
+| `spec_verify_validator.py` | Blocking | Verifies that the plan status was updated to VERIFIED before allowing the session to end.                                                 |
+| Session summarizer         | Async    | Saves session observations to persistent memory for future sessions.                                                                      |
 
 #### SessionEnd (when the session closes)
 
@@ -290,11 +300,11 @@ Opus for planning — where reasoning quality matters most. Sonnet for implement
 | Phase                 | Default | Why                                                                                                                                                |
 | --------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Planning**          | Opus    | Exploring your codebase, designing architecture, and writing the spec requires deep reasoning. A good plan is the foundation of everything.        |
-| **Plan Verification** | Sonnet  | The plan-reviewer sub-agent validates completeness and challenges assumptions on every feature spec. *(disabled by default)*                       |
+| **Plan Verification** | Sonnet  | The plan-reviewer sub-agent validates completeness and challenges assumptions on every feature spec. *(enabled by default — disable in Console Settings → Reviewers)*                       |
 | **Implementation**    | Sonnet  | With a solid plan, writing code is straightforward. Sonnet is fast, cost-effective, and produces high-quality code when guided by a clear spec.    |
-| **Code Verification** | Sonnet  | The unified spec-reviewer agent handles deep code review (compliance + quality + goal). The orchestrator runs mechanical checks and applies fixes. *(disabled by default)* |
+| **Code Verification** | Sonnet  | The unified spec-reviewer agent handles deep code review (compliance + quality + goal). The orchestrator runs mechanical checks and applies fixes. *(enabled by default — disable in Console Settings → Reviewers)* |
 
-Choose between Sonnet 4.6 and Opus 4.6 for the main session, each command, and sub-agents. A global "Extended Context (1M)" toggle enables the 1M token context window across all models simultaneously. **Note:** 1M context models require a Max (20x) or Enterprise subscription — not available to all users.
+Choose between Sonnet 4.6 and Opus 4.6 for the main session, each command, and sub-agents. Context window size (200K or 1M) is **auto-detected from Claude Code** based on your subscription plan — no manual configuration needed. 1M context requires a Max (20x) or Enterprise subscription.
 
 </details>
 
@@ -325,6 +335,7 @@ Production-tested best practices loaded into every session. Core rules cover wor
 
 - `research-tools.md` — Search priority and tool selection guide
 - `cli-tools.md` — Pilot CLI, Probe CLI semantic search, RTK token optimization
+- `mcp-servers.md` — MCP server reference including codebase-memory-mcp (code knowledge graph)
 - `playwright-cli.md` — Browser automation for E2E UI testing
 
 </details>
@@ -351,18 +362,19 @@ Production-tested best practices loaded into every session. Core rules cover wor
 
 ### MCP Servers
 
-MCP servers provide external context in every session — library docs, persistent memory, web search, GitHub code search, and web page fetching.
+MCP servers provide external context in every session — library docs, persistent memory, web search, GitHub code search, web page fetching, and code intelligence.
 
 <details>
 <summary><b>All servers</b></summary>
 
-| Server         | Purpose                                                          |
-| -------------- | ---------------------------------------------------------------- |
-| **lib-docs**   | Library documentation lookup — get API docs for any dependency   |
-| **mem-search** | Persistent memory search — recall context from past sessions     |
-| **web-search** | Web search via DuckDuckGo, Bing, and Exa                         |
-| **grep-mcp**   | GitHub code search — find real-world usage patterns across repos |
-| **web-fetch**  | Web page fetching — read documentation, APIs, references         |
+| Server                | Purpose                                                                          |
+| --------------------- | -------------------------------------------------------------------------------- |
+| **lib-docs**          | Library documentation lookup — get API docs for any dependency                   |
+| **mem-search**        | Persistent memory search — recall context from past sessions                     |
+| **web-search**        | Web search via DuckDuckGo, Bing, and Exa                                         |
+| **grep-mcp**          | GitHub code search — find real-world usage patterns across repos                 |
+| **web-fetch**         | Web page fetching — read documentation, APIs, references                         |
+| **codebase-memory**   | Code knowledge graph — call tracing, impact analysis, dead code detection        |
 
 </details>
 
@@ -459,7 +471,7 @@ Let's figure out if Pilot Shell is the right fit for your team and get everyone 
 <details>
 <summary><b>Does Pilot Shell send my code or data to external services?</b></summary>
 
-**No code, files, prompts, project data, or personal information ever leaves your machine through Pilot Shell.** All development tools — code search (Probe), persistent memory (Pilot Shell Console), session state, and quality hooks — run entirely locally.
+**No code, files, prompts, project data, or personal information ever leaves your machine through Pilot Shell.** All development tools — code search (Probe), code intelligence (codebase-memory-mcp), persistent memory (Pilot Shell Console), session state, and quality hooks — run entirely locally.
 
 Pilot Shell makes external calls **only for licensing**. Here is the complete list:
 
@@ -483,7 +495,7 @@ Yes. Your source code, project files, and development context never leave your m
 <details>
 <summary><b>What are the licenses of Pilot Shell's dependencies?</b></summary>
 
-All external tools and dependencies that Pilot Shell installs and uses are open source with permissive licenses (MIT, Apache 2.0, BSD). This includes ruff, basedpyright, Prettier, ESLint, gofmt, uv, Probe, RTK, playwright-cli, and all MCP servers. No copyleft or restrictive-licensed dependencies are introduced into your environment.
+All external tools and dependencies that Pilot Shell installs and uses are open source with permissive licenses (MIT, Apache 2.0, BSD). This includes ruff, basedpyright, Prettier, ESLint, gofmt, uv, Probe, RTK, codebase-memory-mcp, playwright-cli, and all MCP servers. No copyleft or restrictive-licensed dependencies are introduced into your environment.
 
 </details>
 

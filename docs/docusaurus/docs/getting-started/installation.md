@@ -23,7 +23,7 @@ Run from any directory — it installs globally to `~/.pilot/` and `~/.claude/`.
 | Step | Title | Description |
 |------|-------|-------------|
 | 1 | Prerequisites | Checks Homebrew, Node.js, Python 3.12+, uv, git |
-| 2 | Dependencies | Installs Probe (code search), RTK (token optimizer), playwright-cli, language servers |
+| 2 | Dependencies | Installs Probe (code search), RTK (token optimizer), codebase-memory-mcp (code intelligence), playwright-cli, language servers |
 | 3 | Shell integration | Auto-configures bash, fish, and zsh with the pilot alias |
 | 4 | Config & Claude files | Sets up `.claude/` plugin — rules, commands, hooks, MCP servers |
 | 5 | VS Code extensions | Installs recommended extensions for your language stack |
@@ -65,7 +65,7 @@ Pilot Shell works inside Dev Containers. Copy the `.devcontainer` folder from th
 ## Install Specific Version
 
 ```bash
-export VERSION=6.9.3
+export VERSION=7.5.7
 curl -fsSL https://raw.githubusercontent.com/maxritter/pilot-shell/main/install.sh | bash
 ```
 

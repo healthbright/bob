@@ -15,9 +15,9 @@ Pilot automatically routes each phase to the right model. Rather than always usi
 | Phase | Model | Rationale |
 |-------|-------|-----------|
 | **Planning** | Opus | Exploring your codebase, designing architecture, and writing the spec requires deep reasoning. A good plan is the foundation — invest here. |
-| **Plan Verification** | Sonnet | The plan-reviewer sub-agent validates completeness and challenges assumptions on every feature spec. |
+| **Plan Verification** | Sonnet | The plan-reviewer sub-agent validates completeness and challenges assumptions on every feature spec. *(enabled by default — disable in Console Settings → Reviewers)* |
 | **Implementation** | Sonnet | With a solid plan, writing code is straightforward. Sonnet is fast, cost-effective, and produces high-quality code when guided by a clear spec and strong hooks. |
-| **Code Verification** | Sonnet | The unified spec-reviewer agent handles deep code review (compliance + quality + goal). The orchestrator runs mechanical checks and applies fixes efficiently. |
+| **Code Verification** | Sonnet | The unified spec-reviewer agent handles deep code review (compliance + quality + goal). The orchestrator runs mechanical checks and applies fixes efficiently. *(enabled by default — disable in Console Settings → Reviewers)* |
 
 ## The Insight
 
