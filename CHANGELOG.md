@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.6.0] - 2026-03-16
+
+### Features
+
+- Rename /learn to /create-skill and /sync to /setup-rules
+
 ## [7.5.11] - 2026-03-16
 
 ### Bug Fixes
