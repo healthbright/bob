@@ -106,7 +106,7 @@ const rulesCategories = [
     rules: [
       "Project policies & debugging",
       "Auto-compaction & context management",
-      "Persistent memory & online learning",
+      "Persistent memory & reusable skills",
     ],
   },
   {

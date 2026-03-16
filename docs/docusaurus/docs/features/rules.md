@@ -18,11 +18,10 @@ Rules are loaded automatically at session start. They're not suggestions — the
 - `testing.md` — TDD workflow, test strategy, coverage requirements (≥80%)
 - `verification.md` — Execution verification, completion requirements
 
-### Development Practices (3 rules)
+### Development Practices (2 rules)
 
 - `development-practices.md` — Project policies, systematic debugging, git rules
 - `context-management.md` — Auto-compaction and context preservation
-- `pilot-memory.md` — Online learning triggers
 
 ### Tools (4 rules)
 
@@ -46,9 +45,9 @@ Rules are loaded automatically at session start. They're not suggestions — the
 | Backend | `**/models/**, **/routes/**, **/api/**` | API design, data models, query optimization, migrations |
 
 :::tip Custom rules
-Create `.claude/rules/my-rule.md` in your project. Add `paths: ["*.py"]` frontmatter to activate only for specific file types. Run `/sync` to auto-discover patterns and generate project-specific rules for you.
+Create `.claude/rules/my-rule.md` in your project. Add `paths: ["*.py"]` frontmatter to activate only for specific file types. Run `/setup-rules` to auto-discover patterns and generate project-specific rules for you.
 :::
 
 :::info Monorepo support
-Organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter to scope to the right files. `/sync` generates a `README.md` in your rules directory to document the structure.
+Organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter to scope to the right files. `/setup-rules` generates a `README.md` in your rules directory to document the structure.
 :::

@@ -17,10 +17,10 @@ const sidebars: SidebarsConfig = {
       label: "Workflows",
       collapsed: false,
       items: [
-        "workflows/sync",
+        "workflows/setup-rules",
         "workflows/spec",
         "workflows/quick-mode",
-        "workflows/learn",
+        "workflows/create-skill",
       ],
     },
     {

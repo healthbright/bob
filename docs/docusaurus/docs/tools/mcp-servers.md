@@ -8,7 +8,7 @@ description: External context always available to every session
 
 External context always available to every session.
 
-Six MCP servers are pre-configured and always available. They're lazy-loaded via `ToolSearch` to keep context lean — discovered and called on demand. Add your own in `.mcp.json`, then run `/sync` to generate documentation.
+Six MCP servers are pre-configured and always available. They're lazy-loaded via `ToolSearch` to keep context lean — discovered and called on demand. Add your own in `.mcp.json`, then run `/setup-rules` to generate documentation.
 
 ## lib-docs (Context7)
 

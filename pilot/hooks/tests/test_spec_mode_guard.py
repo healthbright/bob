@@ -94,12 +94,12 @@ class TestNonSpecPrompts:
         assert output == ""
 
     def test_allows_other_commands_in_plan_mode(self):
-        code, output = _run_with_input("/sync", "plan")
+        code, output = _run_with_input("/setup-rules", "plan")
         assert code == 0
         assert output == ""
 
-    def test_allows_learn_in_plan_mode(self):
-        code, output = _run_with_input("/learn", "plan")
+    def test_allows_create_skill_in_plan_mode(self):
+        code, output = _run_with_input("/create-skill", "plan")
         assert code == 0
         assert output == ""
 

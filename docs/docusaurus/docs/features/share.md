@@ -27,16 +27,16 @@ All assets are plain markdown files in your project's `.claude/` directory. Your
 
 ### Auto-generation
 
-- `/sync` explores your codebase and generates project-specific rules based on your tech stack, conventions, and patterns.
-- `/learn` captures non-obvious debugging discoveries, workarounds, and tool integrations as reusable skills.
+- `/setup-rules` explores your codebase and generates project-specific rules based on your tech stack, conventions, and patterns. Also creates `AGENTS.md` for cross-tool compatibility.
+- `/create-skill` builds reusable skills from any topic — explores the codebase and creates well-structured skills interactively.
 
 ### Monorepo support
 
-Organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter to scope to the right files. `/sync` validates the structure, enforces path-scoping, and generates a `README.md` to document the organization.
+Organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter to scope to the right files. `/setup-rules` validates the structure, enforces path-scoping, and generates a `README.md` to document the organization.
 
 ### MCP servers
 
-Add custom MCP servers in `.mcp.json`, then run `/sync` to generate documentation so Claude knows how to use them.
+Add custom MCP servers in `.mcp.json`, then run `/setup-rules` to generate documentation so Claude knows how to use them.
 
 ## Share Across Boundaries
 

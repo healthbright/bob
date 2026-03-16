@@ -15,6 +15,8 @@ Verify implemented code against the plan: compliance, quality, and goal achievem
 
 **Hard limit: ≤ 12 tool calls total** (excluding the final Write). Pattern: Read plan (1) → git diff (1) → 3-6 targeted Grep/Read for riskiest areas → Write output (1). Do NOT read every changed file in full. Do NOT read project rules.
 
+**⛔ MANDATORY: Write output.** Your LAST action MUST be `Write` to `output_path`. At 10+ tool calls without writing → STOP exploring, write what you have. No file = orchestrator stalls.
+
 **Token discipline:** Use `git diff` as your primary source for what changed. Only Read full files for newly created files (not in diff base) or when the diff context is insufficient to assess a specific issue.
 
 ## Scope

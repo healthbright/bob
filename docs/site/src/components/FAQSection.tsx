@@ -37,7 +37,7 @@ const faqItems = [
   {
     question: "Does Pilot Shell work with existing projects?",
     answer:
-      "Yes \u2014 that's the primary use case. Pilot Shell doesn't scaffold or restructure your code. You install it, run /sync, and it explores your codebase to discover your tech stack, conventions, and patterns. From there, every session has full context about your project. The more complex and established your codebase, the more value Pilot Shell adds \u2014 quality hooks catch regressions, persistent memory preserves decisions across sessions, and /spec plans features against your real architecture.",
+      "Yes \u2014 that's the primary use case. Pilot Shell doesn't scaffold or restructure your code. You install it, run /setup-rules, and it explores your codebase to discover your tech stack, conventions, and patterns. From there, every session has full context about your project. The more complex and established your codebase, the more value Pilot Shell adds \u2014 quality hooks catch regressions, persistent memory preserves decisions across sessions, and /spec plans features against your real architecture.",
   },
   {
     question: "Does Pilot Shell work with any programming language?",
@@ -52,7 +52,7 @@ const faqItems = [
   {
     question: "Can I use Pilot Shell on multiple projects?",
     answer:
-      "Yes. Pilot Shell installs once globally and works across all your projects \u2014 you don\u2019t need to reinstall per project. All tools, rules, commands, and hooks live in ~/.pilot/ and ~/.claude/, available everywhere. Just cd into any project and run pilot. Each project can optionally have its own .claude/ rules, custom skills, and MCP servers for project-specific behavior. Run /sync in each project to generate project-specific documentation and standards.",
+      "Yes. Pilot Shell installs once globally and works across all your projects \u2014 you don\u2019t need to reinstall per project. All tools, rules, commands, and hooks live in ~/.pilot/ and ~/.claude/, available everywhere. Just cd into any project and run pilot. Each project can optionally have its own .claude/ rules, custom skills, and MCP servers for project-specific behavior. Run /setup-rules in each project to generate project-specific documentation and standards.",
   },
   {
     question: "Do I need to run the installer from inside a project directory?",
@@ -74,7 +74,7 @@ const faqItems = [
   {
     question: "Can I add my own rules, commands, skills, and agents?",
     answer:
-      "Yes. Create your own in your project\u2019s .claude/ folder \u2014 rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell\u2019s built-in defaults and take precedence when they overlap. /sync auto-discovers your codebase patterns and generates project-specific rules. /learn extracts reusable knowledge from sessions into custom skills. Manage sharing via the skillshare CLI and view all shared assets on the Console Share page.",
+      "Yes. Create your own in your project\u2019s .claude/ folder \u2014 rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell\u2019s built-in defaults and take precedence when they overlap. /setup-rules auto-discovers your codebase patterns and generates project-specific rules and AGENTS.md. /create-skill builds reusable skills from any topic interactively. Manage sharing via the skillshare CLI and view all shared assets on the Console Share page.",
   },
   {
     question: "Can I use Pilot Shell inside a Dev Container?",

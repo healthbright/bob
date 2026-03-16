@@ -187,21 +187,21 @@ const WorkflowSteps = () => {
             <div className="rounded-xl p-4 border border-border/40 bg-background/30">
               <div className="flex items-center gap-2 mb-2">
                 <RefreshCw className="h-4 w-4 text-primary" />
-                <code className="text-sm font-medium text-primary">/sync</code>
+                <code className="text-sm font-medium text-primary">/setup-rules</code>
               </div>
               <p className="text-xs text-muted-foreground">
-                Syncs rules and standards with your codebase — explores
-                patterns, discovers conventions, creates new skills.
+                Generates project rules from your codebase — explores patterns,
+                documents conventions, creates AGENTS.md for cross-tool compatibility.
               </p>
             </div>
             <div className="rounded-xl p-4 border border-border/40 bg-background/30">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="h-4 w-4 text-primary" />
-                <code className="text-sm font-medium text-primary">/learn</code>
+                <code className="text-sm font-medium text-primary">/create-skill</code>
               </div>
               <p className="text-xs text-muted-foreground">
-                Online learning — extracts debugging discoveries, workarounds,
-                and tool integrations into reusable skills.
+                Build reusable skills from any topic — explores the codebase
+                and creates well-structured skills interactively.
               </p>
             </div>
           </div>

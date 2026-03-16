@@ -90,7 +90,7 @@ const HeroSection = () => {
             Semantic Search
           </Badge>
           <Badge variant="secondary" className="text-[10px] xs:text-xs">
-            Online Learning
+            Reusable Skills
           </Badge>
         </div>
 

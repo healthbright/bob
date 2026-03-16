@@ -21,7 +21,7 @@ class TestContextMonitorAutocompact:
     def test_autocompact_returns_0_with_additional_context(
         self, mock_resolve, mock_throttle, mock_sid, mock_save, capsys
     ):
-        mock_resolve.return_value = (80.0, 160000, [], False)
+        mock_resolve.return_value = (80.0, 160000, False)
 
         result = run_context_monitor()
 
@@ -38,7 +38,7 @@ class TestContextMonitorAutocompact:
     @patch("context_monitor._is_throttled", return_value=False)
     @patch("context_monitor._resolve_context")
     def test_autocompact_does_not_use_decision_block(self, mock_resolve, mock_throttle, mock_sid, mock_save, capsys):
-        mock_resolve.return_value = (80.0, 160000, [], False)
+        mock_resolve.return_value = (80.0, 160000, False)
 
         run_context_monitor()
 
@@ -47,30 +47,13 @@ class TestContextMonitorAutocompact:
         assert "decision" not in data
 
 
-class TestContextMonitorLearnReminder:
-    @patch("context_monitor.save_cache")
-    @patch("context_monitor._get_pilot_session_id", return_value="test-sess")
-    @patch("context_monitor._is_throttled", return_value=False)
-    @patch("context_monitor._resolve_context")
-    def test_learn_reminder_uses_additional_context(self, mock_resolve, mock_throttle, mock_sid, mock_save, capsys):
-        mock_resolve.return_value = (45.0, 90000, [], False)
-
-        result = run_context_monitor()
-
-        assert result == 0
-        captured = capsys.readouterr()
-        data = json.loads(captured.out)
-        assert "hookSpecificOutput" in data
-        assert "Skill(learn)" in data["hookSpecificOutput"]["additionalContext"]
-
-
 class TestContextMonitor80Warn:
     @patch("context_monitor.save_cache")
     @patch("context_monitor._get_pilot_session_id", return_value="test-sess")
     @patch("context_monitor._is_throttled", return_value=False)
     @patch("context_monitor._resolve_context")
     def test_80_warn_uses_additional_context(self, mock_resolve, mock_throttle, mock_sid, mock_save, capsys):
-        mock_resolve.return_value = (70.0, 140000, [40, 55, 65], False)
+        mock_resolve.return_value = (70.0, 140000, False)
 
         result = run_context_monitor()
 
@@ -87,7 +70,7 @@ class TestContextMonitorBelowThreshold:
     @patch("context_monitor._is_throttled", return_value=False)
     @patch("context_monitor._resolve_context")
     def test_below_threshold_no_output(self, mock_resolve, mock_throttle, mock_sid, mock_save, capsys):
-        mock_resolve.return_value = (20.0, 40000, [], False)
+        mock_resolve.return_value = (20.0, 40000, False)
 
         result = run_context_monitor()
 
@@ -197,10 +180,9 @@ class TestResolveContext:
         result = _resolve_context("test-session-123")
 
         assert result is not None
-        pct, tokens, shown_learn, shown_80 = result
+        pct, tokens, shown_80 = result
         assert pct == 45.0
         assert tokens == 90000
-        assert shown_learn == []
         assert shown_80 is False
 
     def test_includes_session_flags(self, tmp_path, monkeypatch):
@@ -214,17 +196,15 @@ class TestResolveContext:
             "session_id": session_id,
             "tokens": 170000,
             "timestamp": time.time() - 5,
-            "shown_learn": [40, 60],
             "shown_80_warn": True,
         }))
 
         result = _resolve_context(session_id)
 
         assert result is not None
-        pct, tokens, shown_learn, shown_80 = result
+        pct, tokens, shown_80 = result
         assert pct == 85.0
         assert tokens == 170000
-        assert shown_learn == [40, 60]
         assert shown_80 is True
 
 
@@ -246,7 +226,7 @@ class TestResolveContextStatuslineIntegration:
             result = _resolve_context("cc-session-id")
 
         assert result is not None
-        pct, _, _, _ = result
+        pct, _, _ = result
         assert pct == 91.5
 
     def test_ignores_stale_statusline_cache(self, tmp_path: Path) -> None:
@@ -284,7 +264,7 @@ class TestResolveContextStatuslineIntegration:
             result = _resolve_context("12345")
 
         assert result is not None
-        pct, _, _, _ = result
+        pct, _, _ = result
         assert pct == 92.0
 
     def test_accepts_cache_without_session_id_field(self, tmp_path: Path) -> None:
@@ -303,7 +283,7 @@ class TestResolveContextStatuslineIntegration:
             result = _resolve_context("any-cc-session")
 
         assert result is not None
-        pct, _, _, _ = result
+        pct, _, _ = result
         assert pct == 75.0
 
     def test_returns_none_when_no_cache_and_no_statusline(self, tmp_path: Path) -> None:
@@ -433,7 +413,6 @@ class TestCacheAlwaysSavedAfterResolve:
                 "tokens": 60000,
                 "timestamp": time.time() - 60,
                 "session_id": session_id,
-                "shown_learn": [40],
                 "shown_80_warn": False,
             })
         )
@@ -466,7 +445,6 @@ class TestCacheAlwaysSavedAfterResolve:
                 "tokens": 100000,
                 "timestamp": time.time() - 10,
                 "session_id": session_id,
-                "shown_learn": [40],
                 "shown_80_warn": False,
             })
         )
@@ -479,7 +457,7 @@ class TestCacheAlwaysSavedAfterResolve:
             result = _resolve_context(session_id)
 
         assert result is not None
-        pct, _, _, _ = result
+        pct, _, _ = result
         assert pct >= 89.0
 
 

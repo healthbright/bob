@@ -38,7 +38,7 @@ Claude Code writes code fast. But without structure, it skips tests, loses conte
 
 **So I built Pilot Shell**. Instead of adding process on top, it bakes quality into every interaction. Linting, formatting, and type checking run as enforced hooks on every edit. TDD is mandatory, not suggested. Context is preserved across sessions. Every rule exists because I hit a real problem: a bug that slipped through, a regression that shouldn't have happened, a session where Claude cut corners and nobody caught it.
 
-This isn't a vibe coding tool, it's true agentic engineering, but without the added complexity. You install it once, run `pilot` in any project, then `/sync` to learn your codebase. The guardrails are just there. The end result is that you can walk away — start a `/spec` task, approve the plan, go grab a coffee. When you come back, the work is tested, verified, formatted, and ready to ship.
+This isn't a vibe coding tool, it's true agentic engineering, but without the added complexity. You install it once, run `pilot` in any project, then `/setup-rules` to generate your project rules. Automate your common workflows by invoking the `/create-skill` command. Start a `/spec` task and let it run - when it finished, the work is tested, verified and ready to ship.
 
 ---
 
@@ -152,13 +152,69 @@ Investigation-first workflow for targeted fixes. Finds the root cause before tou
 
 Just chat — no plan, no approval gate. Quality hooks and TDD enforcement still apply. Best for small tasks and exploration. For anything that needs a plan, use `/spec` — not Claude Code's built-in plan mode.
 
-### Other Commands
+### /setup-rules — Generate Rules
 
-| Command  | What it does                                                                                                                                        |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/sync`  | Explores your codebase, discovers conventions, builds a search index, updates project rules. Run once initially, then anytime your project changes. |
-| `/learn` | Captures non-obvious discoveries as reusable skills. Triggers automatically or on demand.                                                           |
-| Share    | Share skills, rules, commands, and agents across machines and teams — global sync, project mode, org hub.                                            |
+Explores your codebase, discovers conventions, generates modular rules, documents MCP servers, and creates `AGENTS.md` for cross-tool compatibility. Run once initially, then anytime your project changes significantly.
+
+```bash
+pilot
+> /setup-rules
+```
+
+<details>
+<summary><b>What /setup-rules Does</b></summary>
+
+12 phases that read your codebase and produce comprehensive AI context:
+
+1. **Read existing rules** — inventory all `.claude/rules/` files, detect structure and path-scoping
+2. **Migrate unscoped assets** — prefix with project slug for better sharing
+3. **Quality audit** — check rules against best practices (size, specificity, stale references, conflicts)
+4. **Explore codebase** — semantic search with Probe CLI, structural analysis with codebase-memory-mcp
+5. **Compare patterns** — discovered vs documented conventions
+6. **Sync project rule** — update `{slug}-project.md` with current tech stack, structure, commands
+7. **Sync MCP docs** — smoke-test user MCP servers, document working tools
+8. **Discover new rules** — find undocumented patterns worth capturing
+9. **Generate AGENTS.md** — consolidate all rules into one file for Cursor, Codex, Gemini CLI, Copilot, and 50+ other AI tools. If an existing `AGENTS.md` is found (hand-written or from another tool), offers a migration path: merge, regenerate, or skip.
+10. **Cross-check** — validate all references, ensure consistency across generated files
+11. **Summary** — report all changes made
+
+**AGENTS.md** is a [universal standard](https://agents.md/) used by 60k+ open-source projects. `.claude/rules/` files are modular and only work with Claude Code — other tools can only read `AGENTS.md`. `/setup-rules` consolidates all your tribal knowledge (commit standards, architectural patterns, conventions, gotchas) into this one comprehensive file.
+
+**For monorepos:** Organizes rules in nested subdirectories by product and team, with `paths` frontmatter to scope rules to specific file types. Generates a `README.md` documenting the structure.
+
+</details>
+
+### /create-skill — Skill Creator
+
+Builds a reusable skill from any topic — explores the codebase and creates it interactively with you. If no topic is given, evaluates the current session for extractable knowledge.
+
+```bash
+pilot
+> /create-skill "Automate the review and triaging of our PR Bot comments"
+```
+
+<details>
+<summary><b>What /create-skill Does</b></summary>
+
+5 phases that turn domain knowledge into a reusable skill:
+
+1. **Reference** — load use case categories, complexity spectrum, file structure template, description formula, security restrictions
+2. **Understand** — explore the codebase for relevant patterns, ask clarifying questions, or evaluate the current session for extractable knowledge
+3. **Check existing** — search project and global skills to avoid duplicates
+4. **Create** — generate with skillshare or write directly to `.claude/skills/`, apply portability and determinism checklists
+5. **Quality gates** — structure checklist (SKILL.md naming, frontmatter fields), content checklist (error handling, examples, exclusions), triggering test (should/shouldn't trigger), iteration signals
+
+**Use case categories:**
+
+| Category                      | Best For                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| **Document & Asset Creation** | Consistent reports, designs, code with embedded style guides and templates |
+| **Workflow Automation**       | Multi-step processes with validation gates and iterative refinement        |
+| **MCP Enhancement**           | Workflow guidance on top of MCP tool access, multi-MCP coordination        |
+
+**Skill structure:** Each skill is a folder with a `SKILL.md` file (case-sensitive), optional `scripts/`, `references/`, and `assets/` directories. The YAML frontmatter description determines when Claude loads the skill — it must include what the skill does, when to use it, and specific trigger phrases. Progressive disclosure keeps context lean: frontmatter loads always (~100 tokens), SKILL.md loads on activation, linked files load on demand.
+
+</details>
 
 ### Customize & Share
 
@@ -166,22 +222,22 @@ Create your own rules, commands, skills, and agents — all plain markdown files
 
 **Create assets in your project:**
 
-| Asset        | Location              | When it loads                        |
-| ------------ | --------------------- | ------------------------------------ |
-| **Rules**    | `.claude/rules/`      | Every session, or by file type       |
-| **Commands** | `.claude/commands/`   | On demand via `/command-name`        |
-| **Skills**   | `.claude/skills/`     | Automatically when relevant          |
-| **Agents**   | `.claude/agents/`     | Spawned as sub-agents for specialized tasks |
+| Asset        | Location            | When it loads                               |
+| ------------ | ------------------- | ------------------------------------------- |
+| **Rules**    | `.claude/rules/`    | Every session, or by file type              |
+| **Commands** | `.claude/commands/` | On demand via `/command-name`               |
+| **Skills**   | `.claude/skills/`   | Automatically when relevant                 |
+| **Agents**   | `.claude/agents/`   | Spawned as sub-agents for specialized tasks |
 
-`/sync` explores your codebase and generates project-specific rules. `/learn` captures debugging discoveries as reusable skills. Add MCP servers in `.mcp.json` and run `/sync` to generate documentation. For monorepos, organize rules in subdirectories by team with `paths` frontmatter to scope by file type.
+Use `/setup-rules` to auto-generate rules and `AGENTS.md` from your codebase. Use `/create-skill` to capture workflows as reusable skills. Add MCP servers in `.mcp.json` and run `/setup-rules` to generate documentation. For monorepos, organize rules in subdirectories by team with `paths` frontmatter to scope by file type.
 
 **Share all four asset types** — skills, rules, commands, and agents — across boundaries via [Skillshare](https://github.com/runkids/skillshare). Works with 50+ AI tools (Claude Code, Cursor, Codex, Windsurf, and more) so you have one source of truth for all your AI assets.
 
-| Mode | Scope | How it works |
-| ---- | ----- | ------------ |
-| [**Project**](https://skillshare.runkids.cc/docs/how-to/sharing/project-setup) | Single repo, team-wide | Commit `.skillshare/skills/` to your repo — team members get assets on `git clone` |
-| [**Global**](https://skillshare.runkids.cc/docs/how-to/sharing/cross-machine-sync) | Personal, all projects | Sync skills, rules, commands, and agents — push/pull across your machines via git |
-| [**Organization**](https://skillshare.runkids.cc/docs/how-to/sharing/organization-sharing) | All projects, org-wide | Tracked repos distribute curated assets — hub index enables search |
+| Mode                                                                                       | Scope                  | How it works                                                                       |
+| ------------------------------------------------------------------------------------------ | ---------------------- | ---------------------------------------------------------------------------------- |
+| [**Project**](https://skillshare.runkids.cc/docs/how-to/sharing/project-setup)             | Single repo, team-wide | Commit `.skillshare/skills/` to your repo — team members get assets on `git clone` |
+| [**Global**](https://skillshare.runkids.cc/docs/how-to/sharing/cross-machine-sync)         | Personal, all projects | Sync skills, rules, commands, and agents — push/pull across your machines via git  |
+| [**Organization**](https://skillshare.runkids.cc/docs/how-to/sharing/organization-sharing) | All projects, org-wide | Tracked repos distribute curated assets — hub index enables search                 |
 
 Manage sharing via the `skillshare` CLI and view all shared assets on the Console Share page.
 
@@ -194,17 +250,17 @@ A local web dashboard with different views and real-time notifications when Clau
 <details>
 <summary><b>All views</b></summary>
 
-| View              | What it shows                                                                            |
-| ----------------- | ---------------------------------------------------------------------------------------- |
-| **Dashboard**     | Workspace status, active sessions, spec progress, git info, recent activity              |
-| **Specification** | All spec plans with task progress, phase tracking, and iteration history                 |
-| **Changes**       | Git diff viewer with staged/unstaged files, branch info, and worktree context            |
-| **Memories**      | Browsable observations — decisions, discoveries, bugfixes — with type filters and search |
-| **Sessions**      | Active and past sessions with observation counts and duration                            |
-| **Share**         | Skill sharing — view assets, source/sync status, CLI reference                           |
-| **Usage**         | Daily token costs, model routing breakdown, and usage trends                             |
+| View              | What it shows                                                                                                                                |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dashboard**     | Workspace status, active sessions, spec progress, git info, recent activity                                                                  |
+| **Specification** | All spec plans with task progress, phase tracking, and iteration history                                                                     |
+| **Changes**       | Git diff viewer with staged/unstaged files, branch info, and worktree context                                                                |
+| **Memories**      | Browsable observations — decisions, discoveries, bugfixes — with type filters and search                                                     |
+| **Sessions**      | Active and past sessions with observation counts and duration                                                                                |
+| **Share**         | Skill sharing — view assets, source/sync status, CLI reference                                                                               |
+| **Usage**         | Daily token costs, model routing breakdown, and usage trends                                                                                 |
 | **Settings**      | Model selection per command/sub-agent, spec workflow toggles (worktree, questions, approval), reviewer toggles, context window auto-detected |
-| **Help**          | Documentation, guides, and quick-start resources                                         |
+| **Help**          | Documentation, guides, and quick-start resources                                                                                             |
 
 </details>
 
@@ -227,25 +283,25 @@ Hooks fire automatically across the entire lifecycle — formatting, linting, ty
 
 #### SessionStart (on startup, clear, or compact)
 
-| Hook                      | Type     | What it does                                                                            |
-| ------------------------- | -------- | --------------------------------------------------------------------------------------- |
-| Memory loader             | Blocking | Loads persistent context from Pilot Shell Console memory                                |
-| `post_compact_restore.py` | Blocking | After auto-compaction: re-injects active plan, task state, and context                  |
-| `session_clear.py`        | Blocking | On /clear: resets session state (spec artifacts, task list, caches) for a clean start   |
-| Session tracker           | Async    | Initializes user message tracking for the session                                       |
+| Hook                      | Type     | What it does                                                                          |
+| ------------------------- | -------- | ------------------------------------------------------------------------------------- |
+| Memory loader             | Blocking | Loads persistent context from Pilot Shell Console memory                              |
+| `post_compact_restore.py` | Blocking | After auto-compaction: re-injects active plan, task state, and context                |
+| `session_clear.py`        | Blocking | On /clear: resets session state (spec artifacts, task list, caches) for a clean start |
+| Session tracker           | Async    | Initializes user message tracking for the session                                     |
 
 #### UserPromptSubmit (when the user sends a message)
 
-| Hook                | Type  | What it does                                                                 |
-| ------------------- | ----- | ---------------------------------------------------------------------------- |
-| Session initializer | Async | Registers the session with the Console worker daemon on first message        |
+| Hook                | Type  | What it does                                                          |
+| ------------------- | ----- | --------------------------------------------------------------------- |
+| Session initializer | Async | Registers the session with the Console worker daemon on first message |
 
 #### PreToolUse (before search, web, or task tools)
 
-| Hook                    | Type     | What it does                                                                                                                                 |
-| ----------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tool_redirect.py`      | Blocking | Blocks WebSearch/WebFetch (MCP alternatives exist), Explore agent (use Probe + codebase-memory-mcp), EnterPlanMode/ExitPlanMode (/spec conflict). |
-| `tool_token_saver.py`   | Blocking | Rewrites Bash commands via RTK for token savings (60–90% reduction on dev operations).                                                       |
+| Hook                  | Type     | What it does                                                                                                                                      |
+| --------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tool_redirect.py`    | Blocking | Blocks WebSearch/WebFetch (MCP alternatives exist), Explore agent (use Probe + codebase-memory-mcp), EnterPlanMode/ExitPlanMode (/spec conflict). |
+| `tool_token_saver.py` | Blocking | Rewrites Bash commands via RTK for token savings (60–90% reduction on dev operations).                                                            |
 
 #### PostToolUse (after every Write / Edit / MultiEdit)
 
@@ -253,7 +309,7 @@ Hooks fire automatically across the entire lifecycle — formatting, linting, ty
 | ----------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `file_checker.py`       | Blocking     | Dispatches to language-specific checkers: Python (ruff + basedpyright), TypeScript (Prettier + ESLint + tsc), Go (gofmt + golangci-lint). Auto-fixes formatting.     |
 | `file_checker.py` (TDD) | Non-blocking | Checks if implementation files were modified without failing tests first. Shows reminder to write tests. Excludes test files, docs, config, TSX, and infrastructure. |
-| `context_monitor.py`    | Non-blocking | Monitors context usage. Warns at ~80% (informational) and ~90%+ (caution). Prompts `/learn` at key thresholds.                                                       |
+| `context_monitor.py`    | Non-blocking | Monitors context usage. Warns at ~80% (informational) and ~90%+ (caution). Informs when auto-compact is approaching.                                                 |
 | Memory observer         | Async        | Captures development observations to persistent memory.                                                                                                              |
 
 #### PreCompact (before auto-compaction)
@@ -264,12 +320,12 @@ Hooks fire automatically across the entire lifecycle — formatting, linting, ty
 
 #### Stop (when Claude tries to finish)
 
-| Hook                       | Type     | What it does                                                                                                                              |
-| -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Hook                       | Type     | What it does                                                                                                                               |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `spec_stop_guard.py`       | Blocking | If an active spec exists with PENDING or COMPLETE status, **blocks stopping**. Forces verification to complete before the session can end. |
-| `spec_plan_validator.py`   | Blocking | Verifies that the plan file was created with all required sections.                                                                       |
-| `spec_verify_validator.py` | Blocking | Verifies that the plan status was updated to VERIFIED before allowing the session to end.                                                 |
-| Session summarizer         | Async    | Saves session observations to persistent memory for future sessions.                                                                      |
+| `spec_plan_validator.py`   | Blocking | Verifies that the plan file was created with all required sections.                                                                        |
+| `spec_verify_validator.py` | Blocking | Verifies that the plan status was updated to VERIFIED before allowing the session to end.                                                  |
+| Session summarizer         | Async    | Saves session observations to persistent memory for future sessions.                                                                       |
 
 #### SessionEnd (when the session closes)
 
@@ -297,12 +353,12 @@ Opus for planning — where reasoning quality matters most. Sonnet for implement
 <details>
 <summary><b>Phase-by-phase breakdown</b></summary>
 
-| Phase                 | Default | Why                                                                                                                                                |
-| --------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Planning**          | Opus    | Exploring your codebase, designing architecture, and writing the spec requires deep reasoning. A good plan is the foundation of everything.        |
-| **Plan Verification** | Sonnet  | The plan-reviewer sub-agent validates completeness and challenges assumptions on every feature spec. *(enabled by default — disable in Console Settings → Reviewers)*                       |
-| **Implementation**    | Sonnet  | With a solid plan, writing code is straightforward. Sonnet is fast, cost-effective, and produces high-quality code when guided by a clear spec.    |
-| **Code Verification** | Sonnet  | The unified spec-reviewer agent handles deep code review (compliance + quality + goal). The orchestrator runs mechanical checks and applies fixes. *(enabled by default — disable in Console Settings → Reviewers)* |
+| Phase                 | Default | Why                                                                                                                                                                                                                 |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Planning**          | Opus    | Exploring your codebase, designing architecture, and writing the spec requires deep reasoning. A good plan is the foundation of everything.                                                                         |
+| **Plan Verification** | Sonnet  | The plan-reviewer sub-agent validates completeness and challenges assumptions on every feature spec. _(enabled by default — disable in Console Settings → Reviewers)_                                               |
+| **Implementation**    | Sonnet  | With a solid plan, writing code is straightforward. Sonnet is fast, cost-effective, and produces high-quality code when guided by a clear spec.                                                                     |
+| **Code Verification** | Sonnet  | The unified spec-reviewer agent handles deep code review (compliance + quality + goal). The orchestrator runs mechanical checks and applies fixes. _(enabled by default — disable in Console Settings → Reviewers)_ |
 
 Choose between Sonnet 4.6 and Opus 4.6 for the main session, each command, and sub-agents. Context window size (200K or 1M) is **auto-detected from Claude Code** based on your subscription plan — no manual configuration needed. 1M context requires a Max (20x) or Enterprise subscription.
 
@@ -326,7 +382,6 @@ Production-tested best practices loaded into every session. Core rules cover wor
 
 - `development-practices.md` — Project policies, debugging methodology, git rules
 - `context-management.md` — Auto-compaction and context preservation
-- `pilot-memory.md` — Online learning triggers
 
 </details>
 
@@ -367,14 +422,14 @@ MCP servers provide external context in every session — library docs, persiste
 <details>
 <summary><b>All servers</b></summary>
 
-| Server                | Purpose                                                                          |
-| --------------------- | -------------------------------------------------------------------------------- |
-| **lib-docs**          | Library documentation lookup — get API docs for any dependency                   |
-| **mem-search**        | Persistent memory search — recall context from past sessions                     |
-| **web-search**        | Web search via DuckDuckGo, Bing, and Exa                                         |
-| **grep-mcp**          | GitHub code search — find real-world usage patterns across repos                 |
-| **web-fetch**         | Web page fetching — read documentation, APIs, references                         |
-| **codebase-memory**   | Code knowledge graph — call tracing, impact analysis, dead code detection        |
+| Server              | Purpose                                                                   |
+| ------------------- | ------------------------------------------------------------------------- |
+| **lib-docs**        | Library documentation lookup — get API docs for any dependency            |
+| **mem-search**      | Persistent memory search — recall context from past sessions              |
+| **web-search**      | Web search via DuckDuckGo, Bing, and Exa                                  |
+| **grep-mcp**        | GitHub code search — find real-world usage patterns across repos          |
+| **web-fetch**       | Web page fetching — read documentation, APIs, references                  |
+| **codebase-memory** | Code knowledge graph — call tracing, impact analysis, dead code detection |
 
 </details>
 
@@ -516,7 +571,7 @@ No. Pilot Shell is built exclusively for Claude Code. Every hook, rule, command,
 <details>
 <summary><b>Does Pilot Shell work with existing projects?</b></summary>
 
-Yes — that's the primary use case. Pilot Shell doesn't scaffold or restructure your code. You install it, run `/sync`, and it explores your codebase to discover your tech stack, conventions, and patterns. From there, every session has full context about your project. The more complex and established your codebase, the more value Pilot Shell adds — quality hooks catch regressions, persistent memory preserves decisions across sessions, and `/spec` plans features against your real architecture.
+Yes — that's the primary use case. Pilot Shell doesn't scaffold or restructure your code. You install it, run `/setup-rules`, and it explores your codebase to discover your tech stack, conventions, and patterns. From there, every session has full context about your project. The more complex and established your codebase, the more value Pilot Shell adds — quality hooks catch regressions, persistent memory preserves decisions across sessions, and `/spec` plans features against your real architecture.
 
 </details>
 
@@ -530,7 +585,7 @@ Pilot Shell's quality hooks (auto-formatting, linting, type checking) currently 
 <details>
 <summary><b>Can I use Pilot Shell on multiple projects?</b></summary>
 
-Yes. Pilot Shell installs once globally and works across all your projects — you don't need to reinstall per project. All tools, rules, commands, and hooks live in `~/.pilot/` and `~/.claude/`, available everywhere. Just `cd` into any project and run `pilot`. Each project can optionally have its own `.claude/` rules, custom skills, and MCP servers for project-specific behavior. Run `/sync` in each project to generate project-specific documentation and standards.
+Yes. Pilot Shell installs once globally and works across all your projects — you don't need to reinstall per project. All tools, rules, commands, and hooks live in `~/.pilot/` and `~/.claude/`, available everywhere. Just `cd` into any project and run `pilot`. Each project can optionally have its own `.claude/` rules, custom skills, and MCP servers for project-specific behavior. Run `/setup-rules` in each project to generate project-specific documentation and standards.
 
 </details>
 
@@ -572,9 +627,9 @@ You can also set a persistent default in `~/.claude/settings.json` by changing t
 <details>
 <summary><b>Can I add my own rules, commands, skills, and agents?</b></summary>
 
-Yes. Create your own in your project's `.claude/` folder — rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell's built-in defaults and take precedence when they overlap. `/sync` auto-discovers your codebase patterns and generates project-specific rules. `/learn` extracts reusable knowledge from sessions into custom skills. Manage sharing via the `skillshare` CLI and view all shared assets on the Console Share page.
+Yes. Create your own in your project's `.claude/` folder — rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell's built-in defaults and take precedence when they overlap. `/setup-rules` auto-discovers your codebase patterns and generates project-specific rules and AGENTS.md. `/create-skill` builds reusable skills from any topic interactively. Manage sharing via the `skillshare` CLI and view all shared assets on the Console Share page.
 
-For monorepos, organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter so they only load when working on relevant files. `/sync` validates this structure, enforces path-scoping, and generates a `README.md` to document the organization.
+For monorepos, organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter so they only load when working on relevant files. `/setup-rules` validates this structure, enforces path-scoping, and generates a `README.md` to document the organization.
 
 </details>
 

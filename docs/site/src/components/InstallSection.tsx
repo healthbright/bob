@@ -85,17 +85,17 @@ const InstallSection = () => {
                   </code>{" "}
                   to launch{" → "}
                   <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                    /sync
+                    /setup-rules
                   </code>{" "}
-                  to load rules{" → "}
+                  to generate rules{" → "}
                   <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                     /spec
                   </code>{" "}
                   to build features{" → "}
                   <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                    /learn
+                    /create-skill
                   </code>{" "}
-                  to extract knowledge
+                  to create skills
                 </p>
               </div>
             </div>

@@ -32,7 +32,7 @@ Skills in the **source** are synced to the **target** (`~/.claude/skills/`) wher
 ### Key Concepts
 
 - **Sync**: Distributes skills from source to target. **Must run after every mutation** (`install`, `uninstall`, `update`, `collect`).
-- **Collect**: Imports skills that exist only in Claude's directory (e.g., from `/learn`) back into the source directory so they can be pushed/shared.
+- **Collect**: Imports skills that exist only in Claude's directory (e.g., from `/create-skill`) back into the source directory so they can be pushed/shared.
 - **Team Remote**: Git remotes for **global skills only**. Project skills are shared by committing `.skillshare/` to the project repo instead.
 - **Push**: Uploads current global skills to remote. Skills removed locally will also be removed from the remote.
 - **Audit**: Security scan on install — blocks CRITICAL findings by default. Use `--skip-audit` to bypass, `--force` to override.
@@ -93,16 +93,18 @@ Skills are shared with users who may not have Pilot Shell. **Only reference buil
 
 If a skill requires a non-standard tool, list it as a prerequisite — never silently assume it exists.
 
-### /learn and /sync Integration
+### /create-skill and /setup-rules Integration
 
-Both `/learn` and `/sync` create skills in `.skillshare/skills/` **if it exists** in the project. Otherwise they fall back to `.claude/skills/`. When creating in `.skillshare/`, they run `skillshare sync -p` afterward to make the skill available to Claude. This works independently — if Skillshare isn't used, skills go directly to `.claude/skills/` as before.
+`/create-skill` creates skills in `.skillshare/skills/` **if it exists** in the project. Otherwise it falls back to `.claude/skills/`. When creating in `.skillshare/`, it runs `skillshare sync -p` afterward to make the skill available to Claude. This works independently — if Skillshare isn't used, skills go directly to `.claude/skills/` as before.
+
+`/setup-rules` focuses exclusively on rules and AGENTS.md — it does not create skills.
 
 ### When to Use
 
 | Situation | Action |
 |-----------|--------|
 | User says "share", "push", "sync skills" | Direct to Share page in Console |
-| After `/learn` captures a new skill | Use Collect to import to source, then push |
+| After `/create-skill` captures a new skill | Use Collect to import to source, then push |
 | User wants skills on another machine | Set up Team Remote, push from source, pull on target |
 | New team member onboarding | `skillshare install -p && skillshare sync -p` |
 | Org-wide skill distribution | `skillshare install <url> --track` (Team plan) |

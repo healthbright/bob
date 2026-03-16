@@ -15,6 +15,8 @@ Verify plans against user requirements and challenge dangerous assumptions. Comb
 
 **Hard limit: ≤ 7 tool calls total** (excluding the final Write). Pattern: Read plan (1) → 2-4 targeted Grep calls for riskiest assumptions → Write output (1). Do NOT read every file mentioned in the plan. Flag unverifiable claims as `untested_assumption` rather than spending tool calls.
 
+**⛔ MANDATORY: Write output.** Your LAST action MUST be `Write` to `output_path`. At 5+ tool calls without writing → STOP exploring, write what you have. No file = orchestrator stalls.
+
 **Token discipline:** Do NOT repeat plan content in your reasoning. Note issues as you read, then write output. Keep internal reasoning minimal — your job is to find issues, not narrate.
 
 ## Scope

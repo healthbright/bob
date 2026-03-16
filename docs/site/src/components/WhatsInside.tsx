@@ -30,7 +30,7 @@ const insideItems: InsideItem[] = [
     title: "Customize & Share",
     description: "Create assets, share everywhere",
     summary:
-      "Create rules, commands, skills, and agents in .claude/ — all plain markdown. Share all four asset types across machines via git, across teams via project repos, or org-wide via tracked repos. Works with 50+ AI tools — one source of truth for Claude Code, Cursor, Codex, and more.",
+      "Create and sharerules, commands, skills, and agents across machines via git, across teams via project repos, or org-wide via tracked repos. One source of truth for all your AI assets.",
   },
   {
     icon: Plug2,
@@ -55,10 +55,10 @@ const insideItems: InsideItem[] = [
   },
   {
     icon: Lightbulb,
-    title: "Online Learning",
-    description: "Grows smarter with every session",
+    title: "Reusable Skills",
+    description: "Capture workflows as reusable knowledge",
     summary:
-      "Extracts non-obvious debugging discoveries, workarounds, and tool integrations into reusable skills. Knowledge compounds — solutions found once are available forever.",
+      "Build skills from any topic — /create-skill explores the codebase and creates well-structured skills interactively. Team knowledge compounds and stays consistent.",
   },
   {
     icon: GitBranch,

@@ -7,7 +7,7 @@ description: Complete technical reference for Pilot Shell
 
 # Pilot Shell Documentation
 
-**Pilot Shell** is the professional development environment for Claude Code. It provides spec-driven development, endless context, persistent memory, quality hooks, online learning, and a modular rules system.
+**Pilot Shell** is the professional development environment for Claude Code. It provides spec-driven development, persistent memory, quality hooks, reusable skills, and a modular rules system.
 
 ## Quick Start
 
@@ -18,8 +18,8 @@ curl -fsSL https://raw.githubusercontent.com/maxritter/pilot-shell/main/install.
 # Start
 cd your-project && pilot
 
-# Sync with your codebase
-> /sync
+# Generate project rules
+> /setup-rules
 
 # Plan and build a feature
 > /spec "Add user authentication with OAuth"
@@ -30,7 +30,7 @@ cd your-project && pilot
 | Category | Highlights |
 |----------|-----------|
 | **[Getting Started](/docs/getting-started/prerequisites)** | Prerequisites, one-command installation |
-| **[Workflows](/docs/workflows/sync)** | `/sync`, `/spec`, Quick Mode, `/learn` |
+| **[Workflows](/docs/workflows/setup-rules)** | `/setup-rules`, `/spec`, Quick Mode, `/create-skill` |
 | **[Features](/docs/features/share)** | Customize & share, hooks pipeline, context preservation, rules, model routing |
 | **[Tools](/docs/tools/mcp-servers)** | MCP servers, language servers, Console dashboard, CLI reference |
 | **[Reference](/docs/reference/open-source)** | Open source compliance |
@@ -40,9 +40,9 @@ cd your-project && pilot
 | Command | Purpose |
 |---------|---------|
 | `pilot` or `ccp` | Start Claude with Pilot enhancements |
-| `/sync` | Explore codebase and sync rules |
+| `/setup-rules` | Generate project rules, AGENTS.md, and MCP docs |
 | `/spec "task"` | Plan → Implement → Verify with TDD |
-| `/learn` | Extract knowledge into reusable skills |
+| `/create-skill` | Build a reusable skill from any topic |
 
 ## Architecture
 
