@@ -39,6 +39,10 @@ HOMEBREW_PACKAGES = [
     "skillshare",
 ]
 
+# Packages with pinned major versions — upgrading could jump to an incompatible version.
+# These are installed once and only upgraded manually.
+HOMEBREW_NO_UPGRADE_PACKAGES = {"python@3.12", "node@22", "nvm"}
+
 
 def _is_nvm_installed() -> bool:
     """Check if nvm is installed (it's a shell function, not a binary)."""
@@ -168,6 +172,43 @@ def _install_homebrew_package(package: str) -> bool:
         if attempt < MAX_RETRIES - 1:
             time.sleep(RETRY_DELAY)
     return False
+
+
+def _upgrade_homebrew_package(package: str) -> bool:
+    """Upgrade a single Homebrew package to its latest version."""
+    for attempt in range(MAX_RETRIES):
+        try:
+            result = subprocess.run(
+                ["brew", "upgrade", package],
+                capture_output=True,
+                check=False,
+                timeout=120,
+            )
+            if result.returncode == 0:
+                return True
+        except (subprocess.SubprocessError, OSError):
+            pass
+        if attempt < MAX_RETRIES - 1:
+            time.sleep(RETRY_DELAY)
+    return False
+
+
+def _get_outdated_homebrew_packages(packages: list[str]) -> set[str]:
+    """Return the subset of packages that have an available upgrade in Homebrew."""
+    try:
+        result = subprocess.run(
+            ["brew", "outdated", "--quiet"],
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            return set()
+        outdated = set(result.stdout.decode().splitlines())
+        # brew outdated uses short names — match against our package list
+        return {p for p in packages if any(p == o or p.startswith(o + "@") or o.startswith(p) for o in outdated)}
+    except (subprocess.SubprocessError, OSError):
+        return set()
 
 
 def _get_command_for_package(package: str) -> str:
@@ -312,7 +353,7 @@ class PrerequisitesStep(BaseStep):
         """Check if this step should be skipped.
 
         Returns True (skip) if:
-        - Homebrew is available AND all packages are already installed
+        - Homebrew is available AND all packages are installed AND none are outdated
         """
         if not is_homebrew_available():
             return False
@@ -325,6 +366,11 @@ class PrerequisitesStep(BaseStep):
                 cmd = _get_command_for_package(package)
                 if not command_exists(cmd):
                     return False
+
+        # All packages installed — check if any upgradeable ones are outdated
+        upgradeable = [p for p in HOMEBREW_PACKAGES if p not in HOMEBREW_NO_UPGRADE_PACKAGES]
+        if _get_outdated_homebrew_packages(upgradeable):
+            return False
 
         return True
 
@@ -366,6 +412,9 @@ class PrerequisitesStep(BaseStep):
         if is_homebrew_available():
             _add_bun_tap()
 
+        upgradeable = [p for p in HOMEBREW_PACKAGES if p not in HOMEBREW_NO_UPGRADE_PACKAGES]
+        outdated = _get_outdated_homebrew_packages(upgradeable) if is_homebrew_available() else set()
+
         for package in HOMEBREW_PACKAGES:
             if not is_homebrew_available():
                 break
@@ -376,8 +425,19 @@ class PrerequisitesStep(BaseStep):
                 is_installed = command_exists(cmd)
 
             if is_installed:
-                if ui:
-                    ui.info(f"{package} already installed")
+                if package in outdated:
+                    if ui:
+                        with ui.spinner(f"Upgrading {package}..."):
+                            success = _upgrade_homebrew_package(package)
+                        if success:
+                            ui.success(f"{package} upgraded")
+                        else:
+                            ui.warning(f"Could not upgrade {package}")
+                    else:
+                        _upgrade_homebrew_package(package)
+                else:
+                    if ui:
+                        ui.info(f"{package} already up-to-date")
                 continue
 
             if ui:

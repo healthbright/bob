@@ -53,7 +53,8 @@ class TestPrerequisitesStep:
             with patch("installer.steps.prerequisites.is_homebrew_available", return_value=True):
                 with patch("installer.steps.prerequisites.command_exists", return_value=True):
                     with patch("installer.steps.prerequisites._is_nvm_installed", return_value=True):
-                        assert step.check(ctx) is True
+                        with patch("installer.steps.prerequisites._get_outdated_homebrew_packages", return_value=set()):
+                            assert step.check(ctx) is True
 
 
 class TestPrerequisitesStepRun:
@@ -91,15 +92,17 @@ class TestPrerequisitesStepRun:
             mock_tap.assert_called_once()
             assert mock_install.call_count == len(HOMEBREW_PACKAGES)
 
+    @patch("installer.steps.prerequisites._upgrade_homebrew_package")
+    @patch("installer.steps.prerequisites._get_outdated_homebrew_packages")
     @patch("installer.steps.prerequisites._install_homebrew_package")
     @patch("installer.steps.prerequisites._add_bun_tap")
     @patch("installer.steps.prerequisites._is_nvm_installed")
     @patch("installer.steps.prerequisites.command_exists")
     @patch("installer.steps.prerequisites.is_homebrew_available")
     def test_prerequisites_run_skips_installed_packages(
-        self, mock_homebrew_available, mock_cmd_exists, mock_nvm_installed, mock_tap, mock_install
+        self, mock_homebrew_available, mock_cmd_exists, mock_nvm_installed, mock_tap, mock_install, mock_outdated, mock_upgrade
     ):
-        """PrerequisitesStep.run skips packages that are already installed."""
+        """PrerequisitesStep.run skips packages that are already installed and up-to-date."""
         from installer.context import InstallContext
         from installer.steps.prerequisites import PrerequisitesStep
         from installer.ui import Console
@@ -109,6 +112,7 @@ class TestPrerequisitesStepRun:
         mock_nvm_installed.return_value = True
         mock_tap.return_value = True
         mock_install.return_value = True
+        mock_outdated.return_value = set()
 
         step = PrerequisitesStep()
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -122,6 +126,7 @@ class TestPrerequisitesStepRun:
 
             mock_tap.assert_called_once()
             mock_install.assert_not_called()
+            mock_upgrade.assert_not_called()
 
 
 class TestPrerequisitesHelpers:
@@ -788,3 +793,132 @@ class TestLinuxFallbackPreservation:
             step.run(ctx)
 
         mock_ripgrep.assert_not_called()
+
+
+class TestBrewUpgrade:
+    """Tests for Homebrew upgrade logic."""
+
+    def test_upgrade_homebrew_package_success(self):
+        """_upgrade_homebrew_package returns True on success."""
+        from installer.steps.prerequisites import _upgrade_homebrew_package
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=0)
+            result = _upgrade_homebrew_package("rtk")
+
+        assert result is True
+        mock_run.assert_called_once_with(
+            ["brew", "upgrade", "rtk"],
+            capture_output=True,
+            check=False,
+            timeout=120,
+        )
+
+    def test_upgrade_homebrew_package_failure_returns_false(self):
+        """_upgrade_homebrew_package returns False when brew upgrade fails."""
+        from installer.steps.prerequisites import _upgrade_homebrew_package
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=1)
+            result = _upgrade_homebrew_package("rtk")
+
+        assert result is False
+
+    def test_get_outdated_homebrew_packages_returns_matching(self):
+        """_get_outdated_homebrew_packages returns packages that appear in brew outdated output."""
+        from installer.steps.prerequisites import _get_outdated_homebrew_packages
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=0, stdout=b"rtk\nskillshare\nbun\n")
+            result = _get_outdated_homebrew_packages(["rtk", "skillshare", "gh", "bun"])
+
+        assert result == {"rtk", "skillshare", "bun"}
+
+    def test_get_outdated_homebrew_packages_empty_when_all_up_to_date(self):
+        """_get_outdated_homebrew_packages returns empty set when nothing is outdated."""
+        from installer.steps.prerequisites import _get_outdated_homebrew_packages
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=0, stdout=b"")
+            result = _get_outdated_homebrew_packages(["rtk", "skillshare"])
+
+        assert result == set()
+
+    def test_get_outdated_homebrew_packages_returns_empty_on_error(self):
+        """_get_outdated_homebrew_packages returns empty set when brew command fails."""
+        from installer.steps.prerequisites import _get_outdated_homebrew_packages
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=1, stdout=b"")
+            result = _get_outdated_homebrew_packages(["rtk"])
+
+        assert result == set()
+
+    @patch("installer.steps.prerequisites._upgrade_homebrew_package")
+    @patch("installer.steps.prerequisites._get_outdated_homebrew_packages")
+    @patch("installer.steps.prerequisites._install_homebrew_package")
+    @patch("installer.steps.prerequisites._add_bun_tap")
+    @patch("installer.steps.prerequisites._is_nvm_installed")
+    @patch("installer.steps.prerequisites.command_exists")
+    @patch("installer.steps.prerequisites.is_homebrew_available")
+    def test_run_upgrades_outdated_packages(
+        self, mock_brew, mock_cmd_exists, mock_nvm, mock_tap, mock_install, mock_outdated, mock_upgrade
+    ):
+        """run() calls upgrade for installed packages that are outdated."""
+        from installer.context import InstallContext
+        from installer.steps.prerequisites import PrerequisitesStep
+        from installer.ui import Console
+
+        mock_brew.return_value = True
+        mock_cmd_exists.return_value = True
+        mock_nvm.return_value = True
+        mock_tap.return_value = True
+        mock_install.return_value = True
+        mock_outdated.return_value = {"rtk", "skillshare"}
+        mock_upgrade.return_value = True
+
+        step = PrerequisitesStep()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ctx = InstallContext(
+                project_dir=Path(tmpdir),
+                is_local_install=True,
+                ui=Console(non_interactive=True),
+            )
+            step.run(ctx)
+
+        mock_install.assert_not_called()
+        upgraded = {call.args[0] for call in mock_upgrade.call_args_list}
+        assert "rtk" in upgraded
+        assert "skillshare" in upgraded
+
+    @patch("installer.steps.prerequisites._get_outdated_homebrew_packages")
+    @patch("installer.steps.prerequisites._is_nvm_installed")
+    @patch("installer.steps.prerequisites.command_exists")
+    @patch("installer.steps.prerequisites.is_homebrew_available")
+    def test_check_returns_false_when_outdated_packages_exist(
+        self, mock_brew, mock_cmd_exists, mock_nvm, mock_outdated
+    ):
+        """check() returns False (run step) when upgradeable packages are outdated."""
+        from installer.context import InstallContext
+        from installer.steps.prerequisites import PrerequisitesStep
+
+        mock_brew.return_value = True
+        mock_cmd_exists.return_value = True
+        mock_nvm.return_value = True
+        mock_outdated.return_value = {"rtk"}
+
+        step = PrerequisitesStep()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ctx = InstallContext(project_dir=Path(tmpdir), is_local_install=True)
+            result = step.check(ctx)
+
+        assert result is False
+
+    def test_no_upgrade_packages_excludes_version_pinned(self):
+        """HOMEBREW_NO_UPGRADE_PACKAGES excludes version-pinned packages."""
+        from installer.steps.prerequisites import HOMEBREW_NO_UPGRADE_PACKAGES
+
+        assert "python@3.12" in HOMEBREW_NO_UPGRADE_PACKAGES
+        assert "node@22" in HOMEBREW_NO_UPGRADE_PACKAGES
+        assert "rtk" not in HOMEBREW_NO_UPGRADE_PACKAGES
+        assert "skillshare" not in HOMEBREW_NO_UPGRADE_PACKAGES

@@ -198,9 +198,27 @@ def _configure_skillshare_extras() -> None:
         (base / name).mkdir(parents=True, exist_ok=True)
 
 
+def _is_brew_managed(package: str) -> bool:
+    """Check if a package is managed by Homebrew."""
+    try:
+        result = subprocess.run(
+            ["brew", "list", package],
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        return result.returncode == 0
+    except (subprocess.SubprocessError, OSError, FileNotFoundError):
+        return False
+
+
 def install_rtk() -> bool:
-    """Install RTK (Rust Token Killer) CLI for token-optimized dev operations."""
-    if command_exists("rtk"):
+    """Install or upgrade RTK (Rust Token Killer) CLI.
+
+    If rtk is managed by Homebrew, skip — brew upgrade in prerequisites handles it.
+    Otherwise, run the curl install script (handles both install and upgrade).
+    """
+    if _is_brew_managed("rtk"):
         return True
 
     return _run_bash_with_retry(
@@ -466,7 +484,9 @@ def _install_plugin_dependencies(_project_dir: Path, ui: Any = None) -> bool:
     This installs all Node.js dependencies defined in plugin/package.json,
     which includes runtime dependencies for MCP servers and hooks.
     """
-    plugin_dir = Path.home() / ".claude" / "pilot"
+    from installer.steps.claude_files import get_claude_config_dir
+
+    plugin_dir = get_claude_config_dir() / "pilot"
 
     if not plugin_dir.exists():
         if ui:
@@ -541,7 +561,9 @@ def _precache_npx_mcp_servers(_ui: Any) -> bool:
     before returning, avoiding the race condition of launching the actual
     server and killing it mid-install.
     """
-    mcp_config_path = Path.home() / ".claude" / "pilot" / ".mcp.json"
+    from installer.steps.claude_files import get_claude_config_dir
+
+    mcp_config_path = get_claude_config_dir() / "pilot" / ".mcp.json"
     if not mcp_config_path.exists():
         return True
 

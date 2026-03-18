@@ -240,9 +240,9 @@ class TestInstallRtk:
 
         assert callable(install_rtk)
 
-    @patch("installer.steps.dependencies.command_exists", return_value=True)
-    def test_install_rtk_skips_if_already_installed(self, _mock_cmd):
-        """install_rtk skips installation when rtk is already in PATH."""
+    @patch("installer.steps.dependencies._is_brew_managed", return_value=True)
+    def test_install_rtk_skips_if_brew_managed(self, _mock_brew):
+        """install_rtk skips curl install when rtk is managed by Homebrew."""
         from installer.steps.dependencies import install_rtk
 
         with patch("installer.steps.dependencies._run_bash_with_retry") as mock_bash:
@@ -251,9 +251,9 @@ class TestInstallRtk:
         assert result is True
         mock_bash.assert_not_called()
 
-    @patch("installer.steps.dependencies.command_exists", return_value=False)
-    def test_install_rtk_runs_curl_when_not_installed(self, _mock_cmd):
-        """install_rtk runs curl installer when rtk not in PATH."""
+    @patch("installer.steps.dependencies._is_brew_managed", return_value=False)
+    def test_install_rtk_runs_curl_when_not_brew_managed(self, _mock_brew):
+        """install_rtk runs curl installer when rtk is not brew-managed (install or upgrade)."""
         from installer.steps.dependencies import install_rtk
 
         with patch("installer.steps.dependencies._run_bash_with_retry", return_value=True) as mock_bash:
@@ -265,8 +265,8 @@ class TestInstallRtk:
         assert "rtk-ai/rtk" in call_args
         assert "install.sh" in call_args
 
-    @patch("installer.steps.dependencies.command_exists", return_value=False)
-    def test_install_rtk_returns_false_when_curl_fails(self, _mock_cmd):
+    @patch("installer.steps.dependencies._is_brew_managed", return_value=False)
+    def test_install_rtk_returns_false_when_curl_fails(self, _mock_brew):
         """install_rtk returns False when curl installer fails."""
         from installer.steps.dependencies import install_rtk
 
@@ -330,33 +330,34 @@ class TestInstallPluginDependencies:
 
         assert callable(_install_plugin_dependencies)
 
-    @patch("installer.steps.dependencies.Path")
-    def test_install_plugin_dependencies_returns_false_if_no_plugin_dir(self, mock_path):
+    def test_install_plugin_dependencies_returns_false_if_no_plugin_dir(self):
         """_install_plugin_dependencies returns False if plugin directory doesn't exist."""
         from installer.steps.dependencies import _install_plugin_dependencies
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            mock_path.home.return_value = Path(tmpdir)
-            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+            config_dir = Path(tmpdir) / "claude-config"
+            config_dir.mkdir()
+
+            with patch("installer.steps.claude_files.get_claude_config_dir", return_value=config_dir):
+                result = _install_plugin_dependencies(Path(tmpdir), ui=None)
             assert result is False
 
-    @patch("installer.steps.dependencies.Path")
-    def test_install_plugin_dependencies_returns_false_if_no_package_json(self, mock_path):
+    def test_install_plugin_dependencies_returns_false_if_no_package_json(self):
         """_install_plugin_dependencies returns False if no package.json exists."""
         from installer.steps.dependencies import _install_plugin_dependencies
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            plugin_dir = Path(tmpdir) / ".claude" / "pilot"
+            config_dir = Path(tmpdir) / "claude-config"
+            plugin_dir = config_dir / "pilot"
             plugin_dir.mkdir(parents=True)
 
-            mock_path.home.return_value = Path(tmpdir)
-            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+            with patch("installer.steps.claude_files.get_claude_config_dir", return_value=config_dir):
+                result = _install_plugin_dependencies(Path(tmpdir), ui=None)
             assert result is False
 
     @patch("installer.steps.dependencies._run_bash_with_retry")
     @patch("installer.steps.dependencies.command_exists")
-    @patch("installer.steps.dependencies.Path")
-    def test_install_plugin_dependencies_runs_bun_install(self, mock_path, mock_cmd_exists, mock_run):
+    def test_install_plugin_dependencies_runs_bun_install(self, mock_cmd_exists, mock_run):
         """_install_plugin_dependencies runs bun install when bun is available."""
         from installer.steps.dependencies import _install_plugin_dependencies
 
@@ -364,20 +365,20 @@ class TestInstallPluginDependencies:
         mock_run.return_value = True
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            plugin_dir = Path(tmpdir) / ".claude" / "pilot"
+            config_dir = Path(tmpdir) / "claude-config"
+            plugin_dir = config_dir / "pilot"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / "package.json").write_text('{"name": "test"}')
 
-            mock_path.home.return_value = Path(tmpdir)
-            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+            with patch("installer.steps.claude_files.get_claude_config_dir", return_value=config_dir):
+                result = _install_plugin_dependencies(Path(tmpdir), ui=None)
 
             assert result is True
             mock_run.assert_called_with("bun install", cwd=plugin_dir)
 
     @patch("installer.steps.dependencies._run_bash_with_retry")
     @patch("installer.steps.dependencies.command_exists")
-    @patch("installer.steps.dependencies.Path")
-    def test_install_plugin_dependencies_falls_back_to_npm(self, mock_path, mock_cmd_exists, mock_run):
+    def test_install_plugin_dependencies_falls_back_to_npm(self, mock_cmd_exists, mock_run):
         """_install_plugin_dependencies falls back to npm install when bun is unavailable."""
         from installer.steps.dependencies import _install_plugin_dependencies
 
@@ -385,32 +386,33 @@ class TestInstallPluginDependencies:
         mock_run.return_value = True
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            plugin_dir = Path(tmpdir) / ".claude" / "pilot"
+            config_dir = Path(tmpdir) / "claude-config"
+            plugin_dir = config_dir / "pilot"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / "package.json").write_text('{"name": "test"}')
 
-            mock_path.home.return_value = Path(tmpdir)
-            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+            with patch("installer.steps.claude_files.get_claude_config_dir", return_value=config_dir):
+                result = _install_plugin_dependencies(Path(tmpdir), ui=None)
 
         assert result is True
         npm_calls = [c for c in mock_run.call_args_list if "npm" in str(c)]
         assert len(npm_calls) > 0, "npm install should be called when bun is unavailable"
 
     @patch("installer.steps.dependencies.command_exists")
-    @patch("installer.steps.dependencies.Path")
-    def test_install_plugin_dependencies_returns_false_when_no_package_manager(self, mock_path, mock_cmd_exists):
+    def test_install_plugin_dependencies_returns_false_when_no_package_manager(self, mock_cmd_exists):
         """_install_plugin_dependencies returns False when neither bun nor npm is available."""
         from installer.steps.dependencies import _install_plugin_dependencies
 
         mock_cmd_exists.return_value = False
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            plugin_dir = Path(tmpdir) / ".claude" / "pilot"
+            config_dir = Path(tmpdir) / "claude-config"
+            plugin_dir = config_dir / "pilot"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / "package.json").write_text('{"name": "test"}')
 
-            mock_path.home.return_value = Path(tmpdir)
-            result = _install_plugin_dependencies(Path(tmpdir), ui=None)
+            with patch("installer.steps.claude_files.get_claude_config_dir", return_value=config_dir):
+                result = _install_plugin_dependencies(Path(tmpdir), ui=None)
 
         assert result is False
 

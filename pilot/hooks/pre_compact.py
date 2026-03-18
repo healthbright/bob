@@ -48,7 +48,8 @@ def _capture_task_list() -> dict | None:
         pid = os.environ.get("PILOT_SESSION_ID", "")
         if not pid:
             return None
-        tasks_dir = Path.home() / ".claude" / "tasks" / f"pilot-{pid}"
+        claude_config = Path(os.environ.get("CLAUDE_CONFIG_DIR", str(Path.home() / ".claude")))
+        tasks_dir = claude_config / "tasks" / f"pilot-{pid}"
         if not tasks_dir.exists():
             return None
 

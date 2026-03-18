@@ -34,7 +34,8 @@ def _clean_task_list(session_id: str) -> None:
 
     CLAUDE_CODE_TASK_LIST_ID is 'pilot-<PID>' where PID == PILOT_SESSION_ID.
     """
-    task_dir = Path.home() / ".claude" / "tasks" / f"pilot-{session_id}"
+    claude_config = Path(os.environ.get("CLAUDE_CONFIG_DIR", str(Path.home() / ".claude")))
+    task_dir = claude_config / "tasks" / f"pilot-{session_id}"
     if not task_dir.is_dir():
         return
     try:

@@ -5,7 +5,7 @@ import {
   Lightbulb,
   Sparkles,
   Search,
-  Stethoscope,
+  Smartphone,
   Terminal,
 } from "lucide-react";
 import { useInView } from "@/hooks/use-in-view";
@@ -40,11 +40,11 @@ const insideItems: InsideItem[] = [
       "Library docs, web search, GitHub code search, and persistent memory — all pre-configured MCP servers. No setup, no API keys, always available.",
   },
   {
-    icon: Stethoscope,
-    title: "LSP Diagnostics",
-    description: "Real-time type checking & linting",
+    icon: Smartphone,
+    title: "Remote Control",
+    description: "Control sessions from your phone",
     summary:
-      "Language servers for Python, TypeScript, and Go provide live diagnostics. Errors surface immediately — not after a failed build.",
+      "Start a task at your desk, monitor and steer from your phone. Connect via the Claude Mobile App or any browser — your full local environment stays available.",
   },
   {
     icon: Search,

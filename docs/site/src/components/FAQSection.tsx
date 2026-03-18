@@ -77,6 +77,11 @@ const faqItems = [
       "Yes. Create your own in your project\u2019s .claude/ folder \u2014 rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell\u2019s built-in defaults and take precedence when they overlap. /setup-rules auto-discovers your codebase patterns and generates project-specific rules and AGENTS.md. /create-skill builds reusable skills from any topic interactively. Manage sharing via the skillshare CLI and view all shared assets on the Console Share page.",
   },
   {
+    question: "Can I control Pilot Shell from my phone?",
+    answer:
+      "Yes \u2014 using Claude Code\u2019s Remote Control feature. Start a session via pilot on your computer, then type /remote-control to make it accessible from the Claude Mobile App (iOS/Android) under the Code tab. You can also enable it globally via /config \u2192 \u201cEnable Remote Control for all sessions\u201d. Remote Control requires the native install of Claude Code (curl -fsSL https://claude.ai/install.sh | bash), not the npm version. Your computer must stay awake \u2014 on macOS, use Amphetamine to keep your Mac awake with the display off. To start sessions directly from your phone, install Termius on your mobile device, SSH into your computer, and run pilot. For SSH access outside your home network, install Tailscale on both devices \u2014 the Claude App approach works everywhere without extra setup. If Remote Control doesn\u2019t connect, run /logout followed by /login inside Claude Code to re-authenticate.",
+  },
+  {
     question: "Can I use Pilot Shell inside a Dev Container?",
     answer:
       "Yes. Copy the .devcontainer folder from the Pilot Shell repository into your project, adapt it to your needs (base image, extensions, dependencies), and install Pilot Shell inside the container. Everything works the same \u2014 hooks, rules, MCP servers, persistent memory, and the Console dashboard all run inside the container. This is a great option for teams that want a consistent, reproducible development environment.",

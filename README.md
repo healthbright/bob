@@ -6,8 +6,8 @@
 
 ### Claude Code is powerful. Pilot Shell makes it reliable.
 
-Start a task, grab a coffee, come back to production-grade code.</br>
-**Tests enforced. Context preserved. Quality automated.**
+Start a task, grab a coffee, check progress from your phone.</br>
+**Tests enforced. Context preserved. Quality automated. Controllable from anywhere.**
 
 [![Stars](https://img.shields.io/github/stars/maxritter/pilot-shell?style=flat&color=F59E0B)](https://github.com/maxritter/pilot-shell/stargazers)
 [![Star History](https://img.shields.io/badge/Star_History-chart-8B5CF6)](https://star-history.com/#maxritter/pilot-shell&Date)
@@ -38,7 +38,7 @@ Claude Code writes code fast. But without structure, it skips tests, loses conte
 
 **So I built Pilot Shell**. Instead of adding process on top, it bakes quality into every interaction. Linting, formatting, and type checking run as enforced hooks on every edit. TDD is mandatory, not suggested. Context is preserved across sessions. Every rule exists because I hit a real problem: a bug that slipped through, a regression that shouldn't have happened, a session where Claude cut corners and nobody caught it.
 
-This isn't a vibe coding tool, it's true agentic engineering, but without the added complexity. You install it once, run `pilot` in any project, then `/setup-rules` to generate your project rules. Automate your common workflows by invoking the `/create-skill` command. Start a `/spec` task and let it run - when it finished, the work is tested, verified and ready to ship.
+This isn't a vibe coding tool, it's true agentic engineering, but without the added complexity. You install it once, run `pilot` in any project, then `/setup-rules` to generate your project rules. Automate your common workflows by invoking the `/create-skill` command. Start a `/spec` task and let it run — when it's done, the work is tested, verified and ready to ship. And with [Remote Control](https://youtu.be/Ko7_tC1fMMM?si=kWDzYiQvxlkZTrRK), you can monitor and steer sessions from your phone, tablet, or any browser.
 
 ---
 
@@ -264,11 +264,45 @@ A local web dashboard with different views and real-time notifications when Clau
 
 </details>
 
+### Remote Control
+
+Control your Pilot Shell sessions from anywhere — your phone, tablet, or any browser. Start a `/spec` task at your desk, then monitor and steer it from the couch.
+
+**Prerequisite:** [Remote Control](https://youtu.be/Ko7_tC1fMMM?si=kWDzYiQvxlkZTrRK) requires the native install of Claude Code (not the npm version). If you have the npm version installed, uninstall it first:
+
+```bash
+npm uninstall -g @anthropic-ai/claude-code   # Remove npm version if installed
+curl -fsSL https://claude.ai/install.sh | bash  # Install native version
+```
+
+**Activate Remote Control:**
+
+| Method             | How                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| **Single session** | Type `/remote-control` inside any Pilot Shell session                                 |
+| **All sessions**   | Run `/config` in Claude Code → set "Enable Remote Control for all sessions" to `true` |
+
+Once active, open the **Claude Mobile App** (iOS/Android) → **Code** tab. Your Pilot Shell session appears there with all rules, hooks, and MCP servers — the full Pilot Shell experience, from your phone. Your computer must stay awake for the connection to remain active — on macOS, use [Amphetamine](https://apps.apple.com/de/app/amphetamine/id937984704) to keep your Mac awake with the display off.
+
+<details>
+<summary><b>Start sessions via SSH from your phone</b></summary>
+
+The above assumes you start sessions via `pilot` on your computer first. To also **start new sessions from your phone**:
+
+1. Install [Termius](https://termius.com/) on your **mobile phone** (not your computer)
+2. Connect via SSH to your computer and run `pilot` in any project directory
+
+**macOS sleep support:** Turn on **Remote Login** in macOS Settings → General → Sharing → Advanced → Remote Login. This lets you SSH into your Mac even while it's sleeping.
+
+**Outside your home network:** Install [Tailscale](https://tailscale.com/) on both your computer and phone to create a VPN tunnel. This is only needed for the SSH approach — Remote Control via the Claude App works everywhere without extra setup.
+
+</details>
+
 ---
 
 ## Demo
 
-A full-stack project — created from scratch with a single prompt, then extended with **3 features built in parallel** using `/spec`. Every line of code was planned, implemented, tested, and verified entirely by AI. Zero manual code edits, zero bug fixes by a human. **[Watch the demo and browse the code →](https://github.com/maxritter/pilot-shell-demo)**
+A full-stack project — created from **scratch with a single prompt**, then extended with **3 features built in parallel** using `/spec` and Git worktrees. Every line of code tested and verified by Pilot, zero manual code edits. **[Check out the Demo Project here →](https://github.com/maxritter/pilot-shell-demo)**
 
 ---
 
@@ -630,6 +664,13 @@ You can also set a persistent default in `~/.claude/settings.json` by changing t
 Yes. Create your own in your project's `.claude/` folder — rules, commands, skills, and agents are all plain markdown files. Your project-level assets load alongside Pilot Shell's built-in defaults and take precedence when they overlap. `/setup-rules` auto-discovers your codebase patterns and generates project-specific rules and AGENTS.md. `/create-skill` builds reusable skills from any topic interactively. Manage sharing via the `skillshare` CLI and view all shared assets on the Console Share page.
 
 For monorepos, organize rules in nested subdirectories by product and team (e.g. `.claude/rules/my-product/team-x/`). Team-level rules must use `paths` frontmatter so they only load when working on relevant files. `/setup-rules` validates this structure, enforces path-scoping, and generates a `README.md` to document the organization.
+
+</details>
+
+<details>
+<summary><b>Can I control Pilot Shell from my phone?</b></summary>
+
+Yes — using Claude Code's [Remote Control](https://youtu.be/Ko7_tC1fMMM?si=kWDzYiQvxlkZTrRK) feature. Start a session via `pilot` on your computer, then type `/remote-control` to make it accessible from the Claude Mobile App (iOS/Android) under the **Code** tab. You can also enable it globally via `/config` → "Enable Remote Control for all sessions". Remote Control requires the native install of Claude Code (`curl -fsSL https://claude.ai/install.sh | bash`), not the npm version. Your computer must stay awake — on macOS, use [Amphetamine](https://apps.apple.com/de/app/amphetamine/id937984704) to keep your Mac awake with the display off. To start sessions directly from your phone, install [Termius](https://termius.com/) on your mobile device, SSH into your computer, and run `pilot`. For SSH access outside your home network, install [Tailscale](https://tailscale.com/) on both devices — the Claude App approach works everywhere without extra setup. **Troubleshooting:** If Remote Control doesn't connect, run `/logout` followed by `/login` inside Claude Code to re-authenticate.
 
 </details>
 

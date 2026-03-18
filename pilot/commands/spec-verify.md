@@ -307,10 +307,12 @@ Re-run full test suite + type checker + build one final time. If code changed du
    ```
    If dirty: report "Cannot sync: main branch has uncommitted changes. Please commit or `git stash` first, then re-run `/spec <plan_path>`." Do NOT proceed.
 
-5. **Save plan to project root** (gitignored, local reference):
+5. **Save plan to project root** (only if gitignored):
    ```bash
-   cp <worktree_plan_path> <project_root>/docs/plans/<plan_filename>
+   git -C <project_root> check-ignore -q docs/plans/<plan_filename>
    ```
+   If exit 0 (ignored): `cp <worktree_plan_path> <project_root>/docs/plans/<plan_filename>`
+   If exit 1 (tracked): skip — the squash merge will bring the updated plan.
 
 6. **Show diff:** `~/.pilot/bin/pilot worktree diff --json <plan_slug>`
 
@@ -324,14 +326,15 @@ Re-run full test suite + type checker + build one final time. If code changed du
 
    **Squash merge:**
    ```bash
-   ~/.pilot/bin/pilot worktree sync --json <plan_slug>
-   # Then cleanup + cd in SAME bash call:
-   PROJECT_ROOT=$(~/.pilot/bin/pilot worktree cleanup --force --json <plan_slug> | python3 -c "import sys,json; print(json.load(sys.stdin)['project_root'])") && cd "$PROJECT_ROOT"
+   # ⛔ ALL THREE operations MUST be in ONE Bash call chained with &&
+   # If sync fails, cleanup MUST NOT run — otherwise work is lost.
+   ~/.pilot/bin/pilot worktree sync --json <plan_slug> && PROJECT_ROOT=$(~/.pilot/bin/pilot worktree cleanup --force --json <plan_slug> | python3 -c "import sys,json; print(json.load(sys.stdin)['project_root'])") && cd "$PROJECT_ROOT"
    ```
-   ⛔ NEVER call cleanup and cd in separate Bash calls — worktree deletion invalidates CWD.
+   ⛔ NEVER split sync, cleanup, or cd into separate Bash calls — compaction between them can cause work loss.
+   ⛔ The `&&` chain ensures cleanup only runs after a successful sync.
 
    **Keep worktree:** Report path, user can sync later.
-   **Discard:** Same cleanup+cd command as above.
+   **Discard:** `cleanup --discard` + `cd` in same bash call (no sync needed — `--discard` explicitly allows deleting unmerged work).
 
 ### Step 3.12: Post-Merge Verification (after squash merge only)
 

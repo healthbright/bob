@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
         "features/context-preservation",
         "features/rules",
         "features/model-routing",
+        "features/remote-control",
       ],
     },
     {

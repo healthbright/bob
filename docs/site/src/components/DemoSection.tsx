@@ -19,8 +19,8 @@ const DemoSection = () => {
           </h2>
           <p className="text-muted-foreground text-lg sm:text-xl max-w-3xl mx-auto mb-8">
             A full-stack project — created from scratch, then extended with 3
-            features in parallel. Every line of code planned, tested, and
-            verified entirely by AI. Zero manual code edits.
+            features in parallel. Every line of code tested and
+            verified by Pilot, zero manual code edits.
           </p>
           <Button variant="outline" size="lg" asChild>
             <a
@@ -29,7 +29,7 @@ const DemoSection = () => {
               rel="noopener noreferrer"
             >
               <Github className="mr-2 h-5 w-5" />
-              Watch the demo and browse the code
+              Check out the Demo Project
             </a>
           </Button>
         </div>
