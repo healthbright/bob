@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.6.4] - 2026-03-18
+
+### Bug Fixes
+
+- Optimize rules by converting reference-heavy content to on-demand skills
+
 ## [7.6.3] - 2026-03-18
 
 ### Bug Fixes
