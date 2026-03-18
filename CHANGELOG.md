@@ -2,6 +2,12 @@
 
 All notable changes to Pilot Shell will be documented in this file.
 
+## [7.6.2] - 2026-03-18
+
+### Bug Fixes
+
+- Improve create-skill with eval testing, description optimization, and writing guidance
+
 ## [7.6.1] - 2026-03-18
 
 ### Bug Fixes
