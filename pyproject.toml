@@ -6,16 +6,14 @@ build-backend = "setuptools.build_meta"
 include = ["launcher*", "installer*"]
 
 [project]
-name = "pilot-shell"
+name = "bob"
 version = "1.0.0"
-description = "Pilot Shell"
+description = "Bob - Claude Code Enhancement Shell"
 requires-python = ">=3.12,<3.13"
 readme = "README.md"
 dependencies = [
     "rich>=14.0.0",
     "platformdirs>=4.3.6",
-    "cryptography>=44.0.0",
-    "Cython>=3.0.0",
     "setuptools>=61.0",
 ]
 
@@ -37,7 +35,7 @@ pythonpath = ["installer", "launcher", "."]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-testpaths = ["launcher/tests", "installer/tests"]
+testpaths = ["installer/tests"]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::pytest.PytestUnraisableExceptionWarning",
@@ -104,7 +102,6 @@ max-args = 6
 max-statements = 60
 
 [tool.ruff.lint.per-file-ignores]
-"launcher/tests/*" = ["D", "UP", "PLR0913", "PLR0915"]
 "installer/tests/*" = ["D", "UP", "PLR0913", "PLR0915"]
 "installer/steps/*" = ["PLR0913", "PLR0915"]
 
@@ -124,7 +121,7 @@ exclude = [
     "**/build/**",
     "misc/",
 ]
-extraPaths = ["pilot/hooks"]
+extraPaths = ["bob-plugin/hooks"]
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.12"

@@ -1,7 +1,7 @@
 """Settings merge utilities for non-destructive installer updates.
 
 Provides three-way merge logic for settings files (~/.claude/settings.json,
-~/.claude.json) and manifest-based tracking for Pilot-managed files
+~/.claude.json) and manifest-based tracking for Bob-managed files
 in shared directories (commands/, rules/).
 """
 
@@ -18,7 +18,7 @@ def merge_settings(
     current: dict[str, Any],
     incoming: dict[str, Any],
 ) -> dict[str, Any]:
-    """Three-way merge of settings: baseline (last Pilot install), current (on disk), incoming (new Pilot).
+    """Three-way merge of settings: baseline (last Bob install), current (on disk), incoming (new Bob).
 
     Rules:
     - If no baseline exists (first install), incoming wins for all keys.
@@ -93,7 +93,7 @@ def merge_app_config(
     source: dict[str, Any],
     baseline: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    """Merge app-level preferences from source into target (~/.claude.json).
+    """Merge app-level preferences from source template into target (~/.claude.json).
 
     With baseline (three-way merge): only updates keys the user hasn't manually changed.
     Without baseline (first install): sets all source keys into target.
@@ -111,7 +111,7 @@ def merge_app_config(
 
 
 def load_manifest(manifest_path: Path) -> set[str]:
-    """Load the set of Pilot-managed filenames from manifest."""
+    """Load the set of Bob-managed filenames from manifest."""
     if not manifest_path.exists():
         return set()
     try:
@@ -122,7 +122,7 @@ def load_manifest(manifest_path: Path) -> set[str]:
 
 
 def save_manifest(manifest_path: Path, files: set[str]) -> None:
-    """Save the set of Pilot-managed filenames to manifest."""
+    """Save the set of Bob-managed filenames to manifest."""
     try:
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest_path.write_text(json.dumps({"files": sorted(files)}, indent=2) + "\n")
@@ -131,15 +131,15 @@ def save_manifest(manifest_path: Path, files: set[str]) -> None:
 
 
 def cleanup_managed_files(directory: Path, manifest_path: Path, prefix: str) -> None:
-    """Remove only Pilot-managed files from a directory, preserving user files.
+    """Remove only Bob-managed files from a directory, preserving user files.
 
-    Reads the manifest to know which files Pilot previously installed,
+    Reads the manifest to know which files Bob previously installed,
     removes those files (cleaning up stale ones from previous versions),
     and leaves all other files untouched.
 
     Args:
         directory: The directory to clean (e.g. ~/.claude/commands/)
-        manifest_path: Path to .pilot-manifest.json
+        manifest_path: Path to .bob-manifest.json
         prefix: Manifest entry prefix to filter (e.g. "commands/" or "rules/")
     """
     managed = load_manifest(manifest_path)

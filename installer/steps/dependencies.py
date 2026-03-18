@@ -162,7 +162,7 @@ def _configure_skillshare_extras() -> None:
 
     Extras allow syncing non-skill resources to Claude's directories via
     `skillshare sync --all` (Skillshare 0.17+). Uses merge mode so
-    user-created and Pilot-managed files coexist.
+    user-created and Bob-managed files coexist.
 
     Sequencing (MUST be in this order):
     1. Migrate old flat dirs -> new nested dirs (runs even when extras: in config)
@@ -504,7 +504,7 @@ def _install_plugin_dependencies(_project_dir: Path, ui: Any = None) -> bool:
     """
     from installer.steps.claude_files import get_claude_config_dir
 
-    plugin_dir = get_claude_config_dir() / "pilot"
+    plugin_dir = get_claude_config_dir() / "bob"
 
     if not plugin_dir.exists():
         if ui:
@@ -526,8 +526,8 @@ def _install_plugin_dependencies(_project_dir: Path, ui: Any = None) -> bool:
     return False
 
 
-def _setup_pilot_memory(ui: Any) -> bool:
-    """Setup pilot-memory (no-op, kept for compatibility)."""
+def _setup_bob_memory(ui: Any) -> bool:
+    """Setup bob-memory (no-op, kept for compatibility)."""
     return True
 
 
@@ -579,7 +579,7 @@ def _precache_npx_mcp_servers(_ui: Any) -> bool:
     """
     from installer.steps.claude_files import get_claude_config_dir
 
-    mcp_config_path = get_claude_config_dir() / "pilot" / ".mcp.json"
+    mcp_config_path = get_claude_config_dir() / "bob" / ".mcp.json"
     if not mcp_config_path.exists():
         return True
 
@@ -679,8 +679,8 @@ class DependenciesStep(BaseStep):
         if _install_with_spinner(ui, "Python tools", install_python_tools):
             installed.append("python_tools")
 
-        if _setup_pilot_memory(ui):
-            installed.append("pilot_memory")
+        if _setup_bob_memory(ui):
+            installed.append("bob_memory")
 
         if _install_with_spinner(ui, "Plugin dependencies", _install_plugin_dependencies, ctx.project_dir, ui):
             installed.append("plugin_deps")

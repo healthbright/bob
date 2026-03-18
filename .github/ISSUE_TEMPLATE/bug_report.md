@@ -22,8 +22,7 @@ labels: bug, needs-triage
 
 - **OS**: <!-- e.g., macOS 15.3, Ubuntu 24.04 -->
 - **Claude Code version**: <!-- claude --version -->
-- **Pilot version**: <!-- pilot --version -->
-- **Tier**: <!-- Trial / Solo / Team -->
+- **Bob version**: <!-- bob --version -->
 
 ## Error Output
 
@@ -33,6 +32,6 @@ Paste any error messages or logs here
 
 ## Checklist
 
-- [ ] I am using the latest version of Pilot Shell
+- [ ] I am using the latest version of Bob
 - [ ] I have searched existing issues to avoid duplicates
 - [ ] I can reproduce this consistently with the steps above

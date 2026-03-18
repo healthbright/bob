@@ -14,10 +14,6 @@ on:
   # Automatic: code review on PRs
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
-    paths-ignore:
-      - 'launcher/**'       # git-crypted - exclude from review
-      - 'console/**'        # git-crypted - exclude from review
-      - 'docs/site/api/**'  # git-crypted - exclude from review
 
   # Manual trigger
   workflow_dispatch:
@@ -57,7 +53,7 @@ jobs:
           additional_permissions: |
             actions: read
 
-  # Automatic code review on PRs (delta-aware: full review on open, incremental on push)
+  # Automatic code review on PRs
   claude-review:
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -93,13 +89,6 @@ jobs:
           prompt: |
             /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number || inputs.pr_number }}
 
-            IMPORTANT: The following paths are git-crypt encrypted and will appear as binary data.
-            Do NOT flag them as issues or claim you cannot verify their contents:
-            - launcher/**
-            - console/**
-            - docs/site/api/**
-            Skip these paths entirely in your review. Only review non-encrypted files.
-
       # Incremental review on push (synchronize) - only review the delta
       - name: Incremental code review
         if: github.event.action == 'synchronize'
@@ -113,19 +102,12 @@ jobs:
           prompt: |
             /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}
 
-            IMPORTANT: The following paths are git-crypt encrypted and will appear as binary data.
-            Do NOT flag them as issues or claim you cannot verify their contents:
-            - launcher/**
-            - console/**
-            - docs/site/api/**
-            Skip these paths entirely in your review. Only review non-encrypted files.
-
             IMPORTANT - INCREMENTAL REVIEW MODE:
             This PR was already reviewed. A new push just landed with changes to: ${{ steps.changes.outputs.files }}
 
             Only report:
             1. NEW issues introduced in files changed by this push
-            2. Previously reported issues that are now FIXED by this push (mark with ✅ Resolved)
+            2. Previously reported issues that are now FIXED by this push (mark with resolved)
             3. A brief "Still open" section listing unresolved issues from prior review (one line each, no full details)
 
             Do NOT repeat the full description of unchanged issues. Keep the review focused on the delta.

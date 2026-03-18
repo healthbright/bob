@@ -1,4 +1,4 @@
-# git-cliff configuration for Pilot Shell
+# git-cliff configuration for Bob
 # https://git-cliff.org/docs/configuration
 
 [changelog]
@@ -6,7 +6,7 @@
 header = """
 # Changelog
 
-All notable changes to Pilot Shell will be documented in this file.
+All notable changes to Bob will be documented in this file.
 
 """
 # Body template - Keep a Changelog format
@@ -37,13 +37,6 @@ filter_unconventional = true
 # Do NOT split squash merge commits — they contain detailed body text that
 # git-cliff would treat as separate entries, causing massive duplication
 split_commits = false
-
-# Only include commits from v6.0.0 onwards (project rebranding)
-# This prevents git-cliff from regenerating old changelog entries
-skip_tags = "v[0-5].*"
-
-# Ignore all tags before v6.0.0 to prevent including historical commits
-ignore_tags = "v[0-5].*"
 
 # Commit preprocessors
 commit_preprocessors = [

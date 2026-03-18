@@ -146,13 +146,13 @@ class TestGetRepoFiles:
 class TestTreeCaching:
     """Test ETag caching for tree API responses."""
 
-    def test_get_cache_path_returns_path_in_pilot_dir(self):
-        """get_cache_path returns path under ~/.pilot/cache."""
+    def test_get_cache_path_returns_path_in_bob_dir(self):
+        """get_cache_path returns path under ~/.bob/cache."""
         from installer.downloads import get_cache_path
 
         cache_path = get_cache_path()
         assert cache_path.parent.name == "cache"
-        assert cache_path.parent.parent.name == ".pilot"
+        assert cache_path.parent.parent.name == ".bob"
 
     def test_load_tree_cache_returns_empty_when_no_cache(self):
         """load_tree_cache returns empty dict when cache file doesn't exist."""
@@ -172,7 +172,7 @@ class TestTreeCaching:
             cache_data = {
                 "main": {
                     "etag": '"abc123"',
-                    "files": [{"path": "pilot/test.py", "sha": "def456"}],
+                    "files": [{"path": "bob/test.py", "sha": "def456"}],
                 }
             }
             save_tree_cache(cache_path, cache_data)
@@ -194,7 +194,7 @@ class TestTreeCaching:
             cache_path = Path(tmpdir) / "cache.json"
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_text(
-                '{"main": {"etag": "\\"cached-etag\\"", "files": [{"path": "pilot/test.py", "sha": "abc123"}]}}'
+                '{"main": {"etag": "\\"cached-etag\\"", "files": [{"path": "bob/test.py", "sha": "abc123"}]}}'
             )
 
             def side_effect(request, *_args, **_kwargs):
@@ -205,10 +205,10 @@ class TestTreeCaching:
 
             with patch("installer.downloads.get_cache_path", return_value=cache_path):
                 with patch("urllib.request.urlopen", side_effect=side_effect):
-                    files = get_repo_files("pilot", config)
+                    files = get_repo_files("bob", config)
 
         assert len(files) == 1
-        assert files[0].path == "pilot/test.py"
+        assert files[0].path == "bob/test.py"
         assert files[0].sha == "abc123"
 
 
@@ -425,7 +425,7 @@ class TestTreeJsonFallback:
 
         tree_json_data = {
             "tree": [
-                {"path": "pilot/test.py", "type": "blob", "sha": "abc123"},
+                {"path": "bob/test.py", "type": "blob", "sha": "abc123"},
                 {"path": "installer/test.py", "type": "blob", "sha": "def456"},
             ]
         }
@@ -437,7 +437,7 @@ class TestTreeJsonFallback:
         mock_response.__exit__.return_value = None
 
         with patch("urllib.request.urlopen", return_value=mock_response) as mock_urlopen:
-            files = get_repo_files("pilot", config)
+            files = get_repo_files("bob", config)
 
         assert mock_urlopen.call_count == 1, "Should only call urlopen once (tree.json), not fall through to API"
         first_call_request = mock_urlopen.call_args_list[0][0][0]
@@ -447,7 +447,7 @@ class TestTreeJsonFallback:
         assert "releases/download/v6.6.0/tree.json" in first_call_url
 
         assert len(files) == 1
-        assert files[0].path == "pilot/test.py"
+        assert files[0].path == "bob/test.py"
         assert files[0].sha == "abc123"
 
     def test_get_repo_files_falls_back_to_api_when_tree_json_unavailable(self):
@@ -463,7 +463,7 @@ class TestTreeJsonFallback:
 
         api_data = {
             "tree": [
-                {"path": "pilot/test.py", "type": "blob", "sha": "xyz789"},
+                {"path": "bob/test.py", "type": "blob", "sha": "xyz789"},
             ]
         }
 
@@ -481,10 +481,10 @@ class TestTreeJsonFallback:
                 return mock_response
 
         with patch("urllib.request.urlopen", side_effect=side_effect) as mock_urlopen:
-            files = get_repo_files("pilot", config)
+            files = get_repo_files("bob", config)
 
         assert mock_urlopen.call_count == 2
 
         assert len(files) == 1
-        assert files[0].path == "pilot/test.py"
+        assert files[0].path == "bob/test.py"
         assert files[0].sha == "xyz789"

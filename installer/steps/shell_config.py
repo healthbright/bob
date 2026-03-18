@@ -1,4 +1,4 @@
-"""Shell config step - configures shell with claude alias."""
+"""Shell config step - configures shell with bob alias."""
 
 from __future__ import annotations
 
@@ -10,38 +10,41 @@ from installer.steps.base import BaseStep
 
 OLD_CCP_MARKER = "# Claude CodePro alias"
 OLD_CLAUDE_PILOT_MARKER = "# Claude Pilot"
-CLAUDE_ALIAS_MARKER = "# Pilot Shell"
-PILOT_BIN = "$HOME/.pilot/bin/pilot"
-PILOT_BIN_DIR = "$HOME/.pilot/bin"
+OLD_PILOT_SHELL_MARKER = "# Pilot Shell"
+CLAUDE_ALIAS_MARKER = "# Bob"
+BOB_BIN = "$HOME/.bob/bin/bob"
+BOB_BIN_DIR = "$HOME/.bob/bin"
 BUN_BIN_PATH = "$HOME/.bun/bin"
 
 
 def get_alias_lines(shell_type: str) -> str:
-    """Get pilot and ccp alias lines for the given shell type."""
+    """Get bob alias lines for the given shell type."""
     if shell_type == "fish":
-        path_line = f'set -gx PATH "{PILOT_BIN_DIR}" "{BUN_BIN_PATH}" $PATH'
+        path_line = f'set -gx PATH "{BOB_BIN_DIR}" "{BUN_BIN_PATH}" $PATH'
     else:
-        path_line = f'export PATH="{PILOT_BIN_DIR}:{BUN_BIN_PATH}:$PATH"'
-    return f'{CLAUDE_ALIAS_MARKER}\n{path_line}\nalias pilot="{PILOT_BIN}"\nalias ccp="{PILOT_BIN}"'
+        path_line = f'export PATH="{BOB_BIN_DIR}:{BUN_BIN_PATH}:$PATH"'
+    return f'{CLAUDE_ALIAS_MARKER}\n{path_line}\nalias bob="{BOB_BIN}"'
 
 
 def alias_exists_in_file(config_file: Path) -> bool:
-    """Check if claude/ccp/pilot alias already exists in config file."""
+    """Check if claude/ccp/pilot/bob alias already exists in config file."""
     if not config_file.exists():
         return False
     content = config_file.read_text()
     return (
         CLAUDE_ALIAS_MARKER in content
+        or OLD_PILOT_SHELL_MARKER in content
         or OLD_CLAUDE_PILOT_MARKER in content
         or OLD_CCP_MARKER in content
         or "alias ccp" in content
         or "alias claude" in content
         or "alias pilot" in content
+        or "alias bob" in content
     )
 
 
 def remove_old_alias(config_file: Path) -> bool:
-    """Remove old ccp/claude alias from config file to allow clean update."""
+    """Remove old ccp/claude/pilot/bob alias from config file to allow clean update."""
     if not config_file.exists():
         return False
 
@@ -49,18 +52,23 @@ def remove_old_alias(config_file: Path) -> bool:
     has_old = (
         OLD_CCP_MARKER in content
         or OLD_CLAUDE_PILOT_MARKER in content
+        or OLD_PILOT_SHELL_MARKER in content
         or CLAUDE_ALIAS_MARKER in content
         or "alias ccp" in content
         or "alias claude" in content
         or "alias pilot" in content
+        or "alias bob" in content
         or "ccp()" in content
         or "claude()" in content
         or "pilot()" in content
+        or "bob()" in content
         or "function ccp" in content
         or "function claude" in content
         or "function pilot" in content
+        or "function bob" in content
         or 'PATH="$HOME/.bun/bin' in content
         or 'PATH="$HOME/.pilot/bin' in content
+        or 'PATH="$HOME/.bob/bin' in content
     )
     if not has_old:
         return False
@@ -73,24 +81,33 @@ def remove_old_alias(config_file: Path) -> bool:
     for line in lines:
         stripped = line.strip()
 
-        if OLD_CCP_MARKER in line or OLD_CLAUDE_PILOT_MARKER in line or CLAUDE_ALIAS_MARKER in line:
+        if (
+            OLD_CCP_MARKER in line
+            or OLD_CLAUDE_PILOT_MARKER in line
+            or OLD_PILOT_SHELL_MARKER in line
+            or CLAUDE_ALIAS_MARKER in line
+        ):
             continue
 
         if (
             stripped.startswith("alias ccp=")
             or stripped.startswith("alias claude=")
             or stripped.startswith("alias pilot=")
+            or stripped.startswith("alias bob=")
             or stripped.startswith("alias ccp ")
             or stripped.startswith("alias claude ")
             or stripped.startswith("alias pilot ")
+            or stripped.startswith("alias bob ")
         ):
             continue
 
         if (
             stripped == 'export PATH="$HOME/.bun/bin:$PATH"'
             or stripped == 'export PATH="$HOME/.pilot/bin:$HOME/.bun/bin:$PATH"'
+            or stripped == 'export PATH="$HOME/.bob/bin:$HOME/.bun/bin:$PATH"'
             or stripped == 'set -gx PATH "$HOME/.bun/bin" $PATH'
             or stripped == 'set -gx PATH "$HOME/.pilot/bin" "$HOME/.bun/bin" $PATH'
+            or stripped == 'set -gx PATH "$HOME/.bob/bin" "$HOME/.bun/bin" $PATH'
         ):
             continue
 
@@ -103,6 +120,9 @@ def remove_old_alias(config_file: Path) -> bool:
         elif stripped.startswith("pilot()") or stripped == "pilot () {":
             inside_function = True
             brace_count = 0
+        elif stripped.startswith("bob()") or stripped == "bob () {":
+            inside_function = True
+            brace_count = 0
         if inside_function:
             brace_count += line.count("{") - line.count("}")
             if brace_count <= 0:
@@ -113,6 +133,7 @@ def remove_old_alias(config_file: Path) -> bool:
             stripped.startswith("function ccp")
             or stripped.startswith("function claude")
             or stripped.startswith("function pilot")
+            or stripped.startswith("function bob")
         ):
             inside_function = True
             continue
@@ -138,7 +159,7 @@ def remove_old_alias(config_file: Path) -> bool:
 
 
 class ShellConfigStep(BaseStep):
-    """Step that configures shell with claude alias."""
+    """Step that configures shell with bob alias."""
 
     name = "shell_config"
 
@@ -148,7 +169,7 @@ class ShellConfigStep(BaseStep):
         return False
 
     def run(self, ctx: InstallContext) -> None:
-        """Configure shell with pilot alias."""
+        """Configure shell with bob alias."""
         ui = ctx.ui
         config_files = get_shell_config_files()
         modified_files: list[str] = []

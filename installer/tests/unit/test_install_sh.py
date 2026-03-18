@@ -36,7 +36,7 @@ def test_install_sh_downloads_installer_files():
 
 
 def test_install_sh_runs_installer():
-    """Verify install.sh runs the Python installer (which downloads Pilot binary)."""
+    """Verify install.sh runs the Python installer (which downloads Bob binary)."""
     install_sh = Path(__file__).parent.parent.parent.parent / "install.sh"
     content = install_sh.read_text()
 
@@ -87,7 +87,7 @@ def test_install_sh_skips_prompt_on_restart():
     install_sh = Path(__file__).parent.parent.parent.parent / "install.sh"
     content = install_sh.read_text()
 
-    assert 'RESTART_PILOT" = true' in content, "Must check RESTART_PILOT flag"
+    assert 'RESTART_BOB" = true' in content, "Must check RESTART_BOB flag"
     assert "Updating local installation" in content, "Must show update message"
 
 

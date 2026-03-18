@@ -9,57 +9,57 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-class TestGetPilotVersion:
-    """Test _get_pilot_version function."""
+class TestGetBobVersion:
+    """Test _get_bob_version function."""
 
     @patch("installer.steps.finalize.subprocess.run")
-    def test_returns_version_from_pilot_binary(self, mock_run):
-        """_get_pilot_version returns version from pilot --version output."""
-        from installer.steps.finalize import _get_pilot_version
+    def test_returns_version_from_bob_binary(self, mock_run):
+        """_get_bob_version returns version from bob --version output."""
+        from installer.steps.finalize import _get_bob_version
 
         mock_run.return_value = MagicMock(
             returncode=0,
-            stdout="Pilot Shell v5.2.3",
+            stdout="Bob v5.2.3",
         )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("installer.steps.finalize.Path.home", return_value=Path(tmpdir)):
-                bin_dir = Path(tmpdir) / ".pilot" / "bin"
+                bin_dir = Path(tmpdir) / ".bob" / "bin"
                 bin_dir.mkdir(parents=True)
-                pilot_path = bin_dir / "pilot"
-                pilot_path.write_text("#!/bin/bash\necho 'Pilot Shell v5.2.3'")
+                bob_path = bin_dir / "bob"
+                bob_path.write_text("#!/bin/bash\necho 'Bob v5.2.3'")
 
-                version = _get_pilot_version()
+                version = _get_bob_version()
                 assert version == "5.2.3"
 
     @patch("installer.steps.finalize.subprocess.run")
-    def test_returns_dev_version_from_pilot_binary(self, mock_run):
-        """_get_pilot_version returns dev version from pilot --version output."""
-        from installer.steps.finalize import _get_pilot_version
+    def test_returns_dev_version_from_bob_binary(self, mock_run):
+        """_get_bob_version returns dev version from bob --version output."""
+        from installer.steps.finalize import _get_bob_version
 
         mock_run.return_value = MagicMock(
             returncode=0,
-            stdout="Pilot Shell vdev-abc1234-20260125",
+            stdout="Bob vdev-abc1234-20260125",
         )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("installer.steps.finalize.Path.home", return_value=Path(tmpdir)):
-                bin_dir = Path(tmpdir) / ".pilot" / "bin"
+                bin_dir = Path(tmpdir) / ".bob" / "bin"
                 bin_dir.mkdir(parents=True)
-                pilot_path = bin_dir / "pilot"
-                pilot_path.write_text("#!/bin/bash")
+                bob_path = bin_dir / "bob"
+                bob_path.write_text("#!/bin/bash")
 
-                version = _get_pilot_version()
+                version = _get_bob_version()
                 assert version == "dev-abc1234-20260125"
 
-    def test_returns_fallback_when_pilot_not_found(self):
-        """_get_pilot_version returns installer version when pilot not found."""
+    def test_returns_fallback_when_bob_not_found(self):
+        """_get_bob_version returns installer version when bob not found."""
         from installer import __version__
-        from installer.steps.finalize import _get_pilot_version
+        from installer.steps.finalize import _get_bob_version
 
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("installer.steps.finalize.Path.home", return_value=Path(tmpdir)):
-                version = _get_pilot_version()
+                version = _get_bob_version()
                 assert version == __version__
 
 

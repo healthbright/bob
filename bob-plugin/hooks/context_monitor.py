@@ -1,0 +1,188 @@
+#!/usr/bin/env python3
+"""Context monitor - warns when context usage is high."""
+
+from __future__ import annotations
+
+import json
+import os
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+from _lib.util import (
+    _get_compaction_threshold_pct,
+    _get_max_context_tokens,
+    get_session_cache_path,
+    post_tool_use_context,
+)
+
+THRESHOLD_WARN = 65
+THRESHOLD_AUTOCOMPACT = 75
+
+
+def _to_effective(raw_pct: float) -> float:
+    """Convert raw context % to effective % (where compaction threshold = 100%)."""
+    return min(raw_pct / _get_compaction_threshold_pct() * 100, 100)
+
+
+def _get_bob_session_id() -> str:
+    """Get Bob session ID from environment."""
+    return os.environ.get("BOB_SESSION_ID", "").strip() or "unknown"
+
+
+def get_session_flags(session_id: str) -> bool:
+    """Get shown_80_warn flag for this session."""
+    if get_session_cache_path().exists():
+        try:
+            with get_session_cache_path().open() as f:
+                cache = json.load(f)
+                if cache.get("session_id") == session_id:
+                    return cache.get("shown_80_warn", False)
+        except (json.JSONDecodeError, OSError):
+            pass
+    return False
+
+
+def save_cache(
+    tokens: int, session_id: str, shown_80_warn: bool | None = None
+) -> None:
+    """Save context calculation to cache with session ID."""
+    existing_80_warn = False
+    if get_session_cache_path().exists():
+        try:
+            with get_session_cache_path().open() as f:
+                cache = json.load(f)
+                if cache.get("session_id") == session_id:
+                    existing_80_warn = cache.get("shown_80_warn", False)
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    if shown_80_warn:
+        existing_80_warn = True
+
+    try:
+        with get_session_cache_path().open("w") as f:
+            json.dump(
+                {
+                    "tokens": tokens,
+                    "timestamp": time.time(),
+                    "session_id": session_id,
+                    "shown_80_warn": existing_80_warn,
+                },
+                f,
+            )
+    except OSError:
+        pass
+
+
+def _read_statusline_context_pct() -> float | None:
+    """Read authoritative context percentage from statusline cache.
+
+    Returns None if cache is missing, corrupt, or stale (>60s).
+    Cache is already scoped per Bob session via BOB_SESSION_ID.
+    """
+    bob_session_id = os.environ.get("BOB_SESSION_ID", "").strip()
+    if not bob_session_id:
+        return None
+    cache_file = Path.home() / ".bob" / "sessions" / bob_session_id / "context-pct.json"
+    if not cache_file.exists():
+        return None
+    try:
+        data = json.loads(cache_file.read_text())
+        ts = data.get("ts")
+        if ts is None or time.time() - ts > 60:
+            return None
+        pct = data.get("pct")
+        return float(pct) if pct is not None else None
+    except (json.JSONDecodeError, OSError, ValueError, TypeError):
+        return None
+
+
+def _is_throttled(session_id: str) -> bool:
+    """Check if context monitoring should be throttled (skipped).
+
+    Returns True if:
+    - Last check was < 30 seconds ago AND
+    - Last cached context was below the warning threshold (~80% effective)
+
+    Always returns False at high context (never throttle when approaching compaction).
+    """
+    cache_path = get_session_cache_path()
+    if not cache_path.exists():
+        return False
+
+    try:
+        with cache_path.open() as f:
+            cache = json.load(f)
+            if cache.get("session_id") != session_id:
+                return False
+
+            timestamp = cache.get("timestamp")
+            if timestamp is None:
+                return False
+
+            if time.time() - timestamp < 30:
+                tokens = cache.get("tokens", 0)
+                percentage = (tokens / _get_max_context_tokens()) * 100
+                if percentage < THRESHOLD_WARN:
+                    return True
+
+            return False
+    except (json.JSONDecodeError, OSError, KeyError):
+        return False
+
+
+def _resolve_context(session_id: str) -> tuple[float, int, bool] | None:
+    """Resolve context percentage and tokens. Returns (pct, tokens, shown_80) or None.
+    Uses the session-scoped statusline cache (context-pct.json) which is
+    written by the statusline process for this specific Bob session.
+    """
+    statusline_pct = _read_statusline_context_pct()
+    if statusline_pct is None:
+        return None
+
+    shown_80_warn = get_session_flags(session_id)
+    return statusline_pct, int(statusline_pct / 100 * _get_max_context_tokens()), shown_80_warn
+
+
+def run_context_monitor() -> int:
+    """Run context monitoring. Always returns 0. Uses additionalContext JSON for all messages."""
+    session_id = _get_bob_session_id()
+
+    if _is_throttled(session_id):
+        return 0
+
+    resolved = _resolve_context(session_id)
+    if resolved is None:
+        return 0
+
+    percentage, total_tokens, shown_80_warn = resolved
+    effective = _to_effective(percentage)
+
+    save_cache(total_tokens, session_id)
+
+    if percentage >= THRESHOLD_AUTOCOMPACT:
+        print(
+            post_tool_use_context(
+                f"Context at {effective:.0f}%. Auto-compact approaching — no context is lost. "
+                f"Continue all workflow steps normally. Do NOT skip steps, sub-agents, or verification."
+            )
+        )
+        return 0
+
+    if percentage >= THRESHOLD_WARN and not shown_80_warn:
+        save_cache(total_tokens, session_id, shown_80_warn=True)
+        print(
+            post_tool_use_context(
+                f"Context at {effective:.0f}%. Auto-compact will handle context automatically. "
+                f"Continue working normally."
+            )
+        )
+        return 0
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(run_context_monitor())

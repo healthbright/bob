@@ -1,4 +1,4 @@
-"""One-time migrations for ~/.pilot/config.json (model preferences).
+"""One-time migrations for ~/.bob/config.json (model preferences).
 
 Uses a _configVersion field to track which migrations have been applied.
 Each migration runs exactly once, even across repeated installer runs.
@@ -26,13 +26,13 @@ _STALE_AGENT_KEYS = frozenset(
 
 
 def migrate_model_config(config_path: Path | None = None) -> bool:
-    """Run pending one-time migrations on ~/.pilot/config.json.
+    """Run pending one-time migrations on ~/.bob/config.json.
 
     Returns True if any migration was applied, False otherwise.
     Safe to call repeatedly — already-applied migrations are skipped.
     """
     if config_path is None:
-        config_path = Path.home() / ".pilot" / "config.json"
+        config_path = Path.home() / ".bob" / "config.json"
 
     if not config_path.exists():
         return False

@@ -9,8 +9,8 @@ from unittest.mock import patch
 from installer.steps.shell_config import (
     CLAUDE_ALIAS_MARKER,
     OLD_CCP_MARKER,
-    PILOT_BIN,
-    PILOT_BIN_DIR,
+    BOB_BIN,
+    BOB_BIN_DIR,
     ShellConfigStep,
     alias_exists_in_file,
     get_alias_lines,
@@ -40,8 +40,8 @@ class TestShellConfigStep:
             assert step.check(ctx) is False
 
     @patch("installer.steps.shell_config.get_shell_config_files")
-    def test_shell_config_run_adds_pilot_alias(self, mock_get_files):
-        """ShellConfigStep.run adds pilot and ccp aliases to shell configs."""
+    def test_shell_config_run_adds_bob_alias(self, mock_get_files):
+        """ShellConfigStep.run adds bob alias to shell configs."""
         from installer.context import InstallContext
         from installer.ui import Console
 
@@ -60,9 +60,8 @@ class TestShellConfigStep:
 
             content = bashrc.read_text()
             assert CLAUDE_ALIAS_MARKER in content
-            assert "alias pilot=" in content
-            assert "alias ccp=" in content
-            assert PILOT_BIN in content
+            assert "alias bob=" in content
+            assert BOB_BIN in content
 
     @patch("installer.steps.shell_config.get_shell_config_files")
     def test_shell_config_migrates_old_ccp_alias(self, mock_get_files):
@@ -87,11 +86,11 @@ class TestShellConfigStep:
             assert "wrapper.py" not in content
             assert OLD_CCP_MARKER not in content
             assert CLAUDE_ALIAS_MARKER in content
-            assert "alias pilot=" in content
+            assert "alias bob=" in content
 
     @patch("installer.steps.shell_config.get_shell_config_files")
     def test_shell_config_upgrades_old_bun_only_path(self, mock_get_files):
-        """ShellConfigStep upgrades old config with only .bun/bin to include .pilot/bin."""
+        """ShellConfigStep upgrades old config with only .bun/bin to include .bob/bin."""
         from installer.context import InstallContext
         from installer.ui import Console
 
@@ -102,8 +101,7 @@ class TestShellConfigStep:
                 "# before\n"
                 f"{CLAUDE_ALIAS_MARKER}\n"
                 'export PATH="$HOME/.bun/bin:$PATH"\n'
-                f'alias pilot="{PILOT_BIN}"\n'
-                f'alias ccp="{PILOT_BIN}"\n'
+                f'alias bob="{BOB_BIN}"\n'
                 "# after\n"
             )
             mock_get_files.return_value = [bashrc]
@@ -118,7 +116,7 @@ class TestShellConfigStep:
             content = bashrc.read_text()
             assert "# before" in content
             assert "# after" in content
-            assert PILOT_BIN_DIR in content
+            assert BOB_BIN_DIR in content
             assert content.count(CLAUDE_ALIAS_MARKER) == 1
 
 
@@ -131,22 +129,20 @@ class TestAliasLines:
         assert isinstance(result, str)
         assert len(result) > 0
 
-    def test_get_alias_lines_contains_pilot_and_ccp_aliases(self):
-        """Alias lines contain pilot and ccp aliases (not claude to avoid overriding binary)."""
+    def test_get_alias_lines_contains_bob_alias(self):
+        """Alias lines contain bob alias (not claude to avoid overriding binary)."""
         result = get_alias_lines("bash")
-        assert "alias pilot=" in result
-        assert "alias ccp=" in result
+        assert "alias bob=" in result
         assert "alias claude=" not in result
-        assert PILOT_BIN in result
+        assert BOB_BIN in result
         assert CLAUDE_ALIAS_MARKER in result
 
     def test_get_alias_lines_fish_uses_alias_syntax(self):
-        """Fish alias uses alias syntax for pilot and ccp aliases."""
+        """Fish alias uses alias syntax for bob alias."""
         result = get_alias_lines("fish")
-        assert "alias pilot=" in result
-        assert "alias ccp=" in result
+        assert "alias bob=" in result
         assert "alias claude=" not in result
-        assert PILOT_BIN in result
+        assert BOB_BIN in result
         assert CLAUDE_ALIAS_MARKER in result
 
 
@@ -186,6 +182,13 @@ class TestAliasDetection:
         with tempfile.TemporaryDirectory() as tmpdir:
             config = Path(tmpdir) / ".bashrc"
             config.write_text("alias claude='something'\n")
+            assert alias_exists_in_file(config) is True
+
+    def test_alias_exists_in_file_detects_bob_alias(self):
+        """alias_exists_in_file detects alias bob."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = Path(tmpdir) / ".bashrc"
+            config.write_text("alias bob='something'\n")
             assert alias_exists_in_file(config) is True
 
 

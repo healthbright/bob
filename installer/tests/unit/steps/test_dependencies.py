@@ -42,7 +42,7 @@ class TestDependenciesStep:
     @patch("installer.steps.dependencies.install_typescript_lsp", return_value=True)
     @patch("installer.steps.dependencies._precache_npx_mcp_servers", return_value=True)
     @patch("installer.steps.dependencies._install_plugin_dependencies")
-    @patch("installer.steps.dependencies._setup_pilot_memory")
+    @patch("installer.steps.dependencies._setup_bob_memory")
     @patch("installer.steps.dependencies.install_python_tools")
     @patch("installer.steps.dependencies.install_uv")
     @patch("installer.steps.dependencies.install_nodejs")
@@ -53,7 +53,7 @@ class TestDependenciesStep:
         mock_nodejs,
         mock_uv,
         mock_python_tools,
-        mock_setup_pilot_memory,
+        mock_setup_bob_memory,
         mock_plugin_deps,
         _mock_precache,
         _mock_ts_lsp,
@@ -75,7 +75,7 @@ class TestDependenciesStep:
         mock_nodejs.return_value = True
         mock_uv.return_value = True
         mock_python_tools.return_value = True
-        mock_setup_pilot_memory.return_value = True
+        mock_setup_bob_memory.return_value = True
         mock_plugin_deps.return_value = True
 
         step = DependenciesStep()
@@ -163,20 +163,20 @@ class TestDependencyInstallFunctions:
         assert callable(install_python_tools)
 
 
-class TestSetupPilotMemory:
-    """Test pilot-memory setup."""
+class TestSetupBobMemory:
+    """Test bob-memory setup."""
 
-    def test_setup_pilot_memory_exists(self):
-        """_setup_pilot_memory function exists."""
-        from installer.steps.dependencies import _setup_pilot_memory
+    def test_setup_bob_memory_exists(self):
+        """_setup_bob_memory function exists."""
+        from installer.steps.dependencies import _setup_bob_memory
 
-        assert callable(_setup_pilot_memory)
+        assert callable(_setup_bob_memory)
 
-    def test_setup_pilot_memory_returns_true(self):
-        """_setup_pilot_memory returns True."""
-        from installer.steps.dependencies import _setup_pilot_memory
+    def test_setup_bob_memory_returns_true(self):
+        """_setup_bob_memory returns True."""
+        from installer.steps.dependencies import _setup_bob_memory
 
-        result = _setup_pilot_memory(ui=None)
+        result = _setup_bob_memory(ui=None)
 
         assert result is True
 
@@ -348,7 +348,7 @@ class TestInstallPluginDependencies:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config_dir = Path(tmpdir) / "claude-config"
-            plugin_dir = config_dir / "pilot"
+            plugin_dir = config_dir / "bob"
             plugin_dir.mkdir(parents=True)
 
             with patch("installer.steps.claude_files.get_claude_config_dir", return_value=config_dir):
@@ -366,7 +366,7 @@ class TestInstallPluginDependencies:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config_dir = Path(tmpdir) / "claude-config"
-            plugin_dir = config_dir / "pilot"
+            plugin_dir = config_dir / "bob"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / "package.json").write_text('{"name": "test"}')
 
@@ -387,7 +387,7 @@ class TestInstallPluginDependencies:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config_dir = Path(tmpdir) / "claude-config"
-            plugin_dir = config_dir / "pilot"
+            plugin_dir = config_dir / "bob"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / "package.json").write_text('{"name": "test"}')
 
@@ -407,7 +407,7 @@ class TestInstallPluginDependencies:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config_dir = Path(tmpdir) / "claude-config"
-            plugin_dir = config_dir / "pilot"
+            plugin_dir = config_dir / "bob"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / "package.json").write_text('{"name": "test"}')
 
@@ -820,7 +820,7 @@ class TestPrecacheNpxMcpServers:
         }
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            plugin_dir = Path(tmpdir) / ".claude" / "pilot"
+            plugin_dir = Path(tmpdir) / ".claude" / "bob"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / ".mcp.json").write_text(json.dumps(mcp_config))
 
@@ -847,7 +847,7 @@ class TestPrecacheNpxMcpServers:
         }
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            plugin_dir = Path(tmpdir) / ".claude" / "pilot"
+            plugin_dir = Path(tmpdir) / ".claude" / "bob"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / ".mcp.json").write_text(json.dumps(mcp_config))
 
@@ -874,7 +874,7 @@ class TestPrecacheNpxMcpServers:
         mock_proc.wait = MagicMock(return_value=0)
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            plugin_dir = Path(tmpdir) / ".claude" / "pilot"
+            plugin_dir = Path(tmpdir) / ".claude" / "bob"
             plugin_dir.mkdir(parents=True)
             (plugin_dir / ".mcp.json").write_text(json.dumps(mcp_config))
 

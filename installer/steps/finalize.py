@@ -11,13 +11,13 @@ from installer.context import InstallContext
 from installer.steps.base import BaseStep
 
 
-def _get_pilot_version() -> str:
-    """Get version from Pilot binary, fallback to installer version."""
-    pilot_path = Path.home() / ".pilot" / "bin" / "pilot"
-    if pilot_path.exists():
+def _get_bob_version() -> str:
+    """Get version from Bob binary, fallback to installer version."""
+    bob_path = Path.home() / ".bob" / "bin" / "bob"
+    if bob_path.exists():
         try:
             result = subprocess.run(
-                [str(pilot_path), "--version"],
+                [str(bob_path), "--version"],
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -52,7 +52,7 @@ class FinalizeStep(BaseStep):
             return
 
         if ui.quiet:
-            ui.print(f"  [green]✓[/green] Update complete (v{_get_pilot_version()})")
+            ui.print(f"  [green]✓[/green] Update complete (v{_get_bob_version()})")
             return
 
         steps: list[tuple[str, str]] = []
@@ -72,18 +72,16 @@ class FinalizeStep(BaseStep):
                 cmd_str = " or ".join(reload_cmds)
                 steps.append(("🔄 Reload shell", f"{cmd_str} (or restart terminal)"))
 
-        steps.append(("Launch Pilot Shell", "Run: pilot (in your project folder)"))
+        steps.append(("Launch Bob", "Run: bob (in your project folder)"))
         steps.append(("/setup-rules", "Generate project rules, audit codebase, and create AGENTS.md"))
         steps.append(("/create-skill", "Create well-structured reusable skills for your workflows"))
         steps.append(("/spec", "Plan, implement & verify features and bug fixes (replaces CC plan mode)"))
-        steps.append(("Pilot Shell Console", "Open in your browser at: http://localhost:41777"))
+        steps.append(("Bob Console", "Open in your browser at: http://localhost:41777"))
 
         ui.next_steps(steps)
 
         if not ui.quiet:
             ui.rule()
             ui.print()
-            ui.print("  [bold yellow]⭐ Star this repo:[/bold yellow] https://github.com/maxritter/pilot-shell")
-            ui.print()
-            ui.print(f"  [dim]Installed version: {_get_pilot_version()}[/dim]")
+            ui.print(f"  [dim]Installed version: {_get_bob_version()}[/dim]")
             ui.print()

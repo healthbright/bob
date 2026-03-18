@@ -2,20 +2,20 @@
 
 set -e
 
-REPO="maxritter/pilot-shell"
+REPO="healthbright/bob"
 
 VERSION="${VERSION:-}"
 VERSION="${VERSION#v}"
 
 INSTALLER_ARGS=""
-RESTART_PILOT=false
+RESTART_BOB=false
 SKIP_VERSION_CHECK=false
 USE_LOCAL_INSTALLER=false
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-	--restart-pilot)
-		RESTART_PILOT=true
+	--restart-bob)
+		RESTART_BOB=true
 		shift
 		;;
 	--skip-version-check)
@@ -80,7 +80,7 @@ if [ -z "$VERSION" ]; then
 	VERSION=$(get_latest_release) || true
 	if [ -z "$VERSION" ]; then
 		echo "  [!!] Failed to fetch latest version from GitHub."
-		echo "  [!!] Please specify a version: VERSION=6.0.0 curl ... | bash"
+		echo "  [!!] Please specify a version: VERSION=1.0.0 curl ... | bash"
 		exit 1
 	fi
 	echo "  [OK] Latest version: $VERSION"
@@ -141,29 +141,12 @@ install_uv() {
 	echo "  [OK] uv installed"
 }
 
-show_macos_gatekeeper_warning() {
-	echo ""
-	echo "  ⚠️  macOS Gatekeeper is blocking the pilot binary"
-	echo ""
-	echo "  The installer requires pilot to verify your license."
-	echo "  Please follow these steps to unblock it:"
-	echo ""
-	echo "    1. Open System Settings → Privacy & Security"
-	echo "    2. Scroll down to find a message about 'pilot' being blocked"
-	echo "    3. Click 'Allow Anyway'"
-	echo "    4. Re-run this installer"
-	echo ""
-	echo "  Or run this command to remove the quarantine flag:"
-	echo "    xattr -cr $HOME/.pilot/bin"
-	echo ""
-}
-
 confirm_local_install() {
 	echo ""
 	echo "  Local installation will:"
-	echo "    • Add 'pilot' and 'ccp' command to your favorite shell config (~/.bashrc, ~/.zshrc, fish)"
-	echo "    • Configure Claude Code to Pilot best-practices (~/.claude.json, ~/.claude/settings.json)"
-	echo "    • Install additional tool dependencies via Homebrew or NPM on your system"
+	echo "    - Add 'bob' command to your shell config (~/.bashrc, ~/.zshrc, fish)"
+	echo "    - Configure Claude Code with Bob best-practices (~/.claude.json, ~/.claude/settings.json)"
+	echo "    - Install additional tool dependencies via Homebrew or NPM on your system"
 	echo ""
 	confirm=""
 	if [ -t 0 ]; then
@@ -185,7 +168,7 @@ confirm_local_install() {
 }
 
 download_installer() {
-	local installer_dir="$HOME/.pilot/installer"
+	local installer_dir="$HOME/.bob/installer"
 
 	echo "  [..] Downloading installer..."
 
@@ -241,136 +224,27 @@ download_installer() {
 	echo "  [OK] Installer downloaded"
 }
 
-get_platform_suffix() {
-	local os_name=""
-	local arch=""
+setup_bob_launcher() {
+	local bin_dir="$HOME/.bob/bin"
 
-	case "$(uname -s)" in
-	Linux) os_name="linux" ;;
-	Darwin) os_name="darwin" ;;
-	*) return 1 ;;
-	esac
-
-	case "$(uname -m)" in
-	x86_64 | amd64) arch="x86_64" ;;
-	arm64 | aarch64) arch="arm64" ;;
-	*) return 1 ;;
-	esac
-
-	echo "${os_name}-${arch}"
-}
-
-get_local_so_name() {
-	local platform_tag=""
-	case "$(uname -s)" in
-	Linux)
-		case "$(uname -m)" in
-		x86_64 | amd64) platform_tag="x86_64-linux-gnu" ;;
-		arm64 | aarch64) platform_tag="aarch64-linux-gnu" ;;
-		esac
-		;;
-	Darwin) platform_tag="darwin" ;;
-	esac
-
-	echo "pilot.cpython-312-${platform_tag}.so"
-}
-
-download_pilot_binary() {
-	local bin_dir="$HOME/.pilot/bin"
-	local platform_suffix
-	local so_name
-	local base_url
-
-	platform_suffix=$(get_platform_suffix) || {
-		echo "  [!!] Unsupported platform for Pilot binary"
-		return 1
-	}
-
-	so_name=$(get_local_so_name)
-
-	case "$VERSION" in
-	dev-*) base_url="https://github.com/${REPO}/releases/download/${VERSION}" ;;
-	*) base_url="https://github.com/${REPO}/releases/download/v${VERSION}" ;;
-	esac
-
-	if [ -d "$bin_dir" ]; then
-		rm -rf "$bin_dir"
-	fi
 	mkdir -p "$bin_dir"
 
-	echo "  [..] Downloading Pilot binary (${platform_suffix})..."
+	# Create the bob launcher script
+	cat > "$bin_dir/bob" << 'LAUNCHER_EOF'
+#!/bin/bash
+# Bob - Claude Code Enhancement Shell
+# Can we fix it? Yes we can!
 
-	local so_url="${base_url}/pilot-${platform_suffix}.so"
-	local so_path="${bin_dir}/${so_name}"
+exec claude "$@"
+LAUNCHER_EOF
 
-	if command -v curl >/dev/null 2>&1; then
-		if ! curl -fsSL "$so_url" -o "$so_path" 2>/dev/null; then
-			echo "  [!!] Failed to download pilot module"
-			return 1
-		fi
-	elif command -v wget >/dev/null 2>&1; then
-		if ! wget -q "$so_url" -O "$so_path" 2>/dev/null; then
-			echo "  [!!] Failed to download pilot module"
-			return 1
-		fi
-	fi
+	chmod +x "$bin_dir/bob"
 
-	chmod +x "$so_path"
-
-	local wrapper_url="${base_url}/pilot"
-	local wrapper_path="${bin_dir}/pilot"
-
-	if command -v curl >/dev/null 2>&1; then
-		if ! curl -fsSL "$wrapper_url" -o "$wrapper_path" 2>/dev/null; then
-			echo "  [!!] Failed to download pilot wrapper"
-			rm -f "$so_path"
-			return 1
-		fi
-	elif command -v wget >/dev/null 2>&1; then
-		if ! wget -q "$wrapper_url" -O "$wrapper_path" 2>/dev/null; then
-			echo "  [!!] Failed to download pilot wrapper"
-			rm -f "$so_path"
-			return 1
-		fi
-	fi
-
-	chmod +x "$wrapper_path"
-
-	echo "  [..] Verifying pilot binary..."
-	local pilot_version
-	pilot_version=$("$wrapper_path" --version 2>/dev/null) || true
-
-	if [ -z "$pilot_version" ] && [ "$(uname -s)" = "Darwin" ]; then
-		echo "  [..] Removing macOS quarantine attributes..."
-		xattr -cr "$bin_dir" 2>/dev/null || true
-		spctl --add "$wrapper_path" 2>/dev/null || true
-		spctl --add "$so_path" 2>/dev/null || true
-		pilot_version=$("$wrapper_path" --version 2>/dev/null) || true
-	fi
-
-	if [ -z "$pilot_version" ]; then
-		if [ "$(uname -s)" = "Darwin" ]; then
-			show_macos_gatekeeper_warning
-			exit 1
-		else
-			echo "  [!!] Pilot binary failed to execute"
-			return 1
-		fi
-	fi
-
-	local installed_version
-	installed_version=$(echo "$pilot_version" | sed -n 's/.* v\([^ ]*\).*/\1/p')
-
-	if [ -z "$installed_version" ]; then
-		echo "  [!!] Could not determine pilot version"
-		return 1
-	fi
-
-	echo "  [OK] Pilot binary ready (v${installed_version})"
+	echo "  [OK] Bob launcher ready"
 }
 
 run_installer() {
-	local installer_dir="$HOME/.pilot/installer"
+	local installer_dir="$HOME/.bob/installer"
 
 	echo ""
 
@@ -401,10 +275,10 @@ is_native_windows() {
 if is_native_windows; then
 	echo ""
 	echo "======================================================================"
-	echo "  Pilot Shell — Windows Detected"
+	echo "  Bob — Windows Detected"
 	echo "======================================================================"
 	echo ""
-	echo "  Pilot Shell requires a Unix environment (macOS, Linux, or WSL2)."
+	echo "  Bob requires a Unix environment (macOS, Linux, or WSL2)."
 	echo ""
 	echo "  Install WSL2 first (PowerShell as admin):"
 	echo "    wsl --install -d Ubuntu"
@@ -416,14 +290,15 @@ fi
 
 echo ""
 echo "======================================================================"
-echo "  Pilot Shell Installer (v${VERSION})"
+echo "  Bob Installer (v${VERSION})"
+echo "  Can we fix it? Yes we can!"
 echo "======================================================================"
 echo ""
 
 if is_in_container; then
 	echo "  Running inside container — skipping system dependencies"
 	echo ""
-elif [ "$RESTART_PILOT" = true ]; then
+elif [ "$RESTART_BOB" = true ]; then
 	echo "  Updating local installation..."
 	echo ""
 elif [ "$USE_LOCAL_INSTALLER" = true ]; then
@@ -435,7 +310,7 @@ else
 fi
 
 echo ""
-echo "Downloading Pilot Shell (v${VERSION})..."
+echo "Downloading Bob (v${VERSION})..."
 echo ""
 
 if check_uv; then
@@ -468,28 +343,28 @@ fi
 if [ "$USE_LOCAL_INSTALLER" = true ]; then
 	if [ -d "installer" ] && [ -f "pyproject.toml" ]; then
 		echo "  [OK] Using local installer from current directory"
-		rm -rf "$HOME/.pilot/installer"
-		mkdir -p "$HOME/.pilot/installer"
-		ln -sf "$(pwd)/installer" "$HOME/.pilot/installer/installer"
-		ln -sf "$(pwd)/pyproject.toml" "$HOME/.pilot/installer/pyproject.toml"
+		rm -rf "$HOME/.bob/installer"
+		mkdir -p "$HOME/.bob/installer"
+		ln -sf "$(pwd)/installer" "$HOME/.bob/installer/installer"
+		ln -sf "$(pwd)/pyproject.toml" "$HOME/.bob/installer/pyproject.toml"
 	else
-		echo "  [!!] --local requires running from pilot-shell repo root"
+		echo "  [!!] --local requires running from bob repo root"
 		echo "  [!!] Missing: installer/ directory or pyproject.toml"
 		exit 1
 	fi
 else
 	download_installer
 fi
-download_pilot_binary
+setup_bob_launcher
 
 run_installer $INSTALLER_ARGS
 
-if [ "$RESTART_PILOT" = true ]; then
-	PILOT_BIN="$HOME/.pilot/bin/pilot"
-	if [ -x "$PILOT_BIN" ]; then
+if [ "$RESTART_BOB" = true ]; then
+	BOB_BIN="$HOME/.bob/bin/bob"
+	if [ -x "$BOB_BIN" ]; then
 		echo ""
-		echo "  Restarting Pilot Shell..."
+		echo "  Restarting Bob..."
 		echo ""
-		exec "$PILOT_BIN" --skip-update-check
+		exec "$BOB_BIN" --skip-update-check
 	fi
 fi

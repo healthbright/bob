@@ -1,0 +1,11 @@
+{
+  "name": "bob-plugin",
+  "version": "7.6.5",
+  "description": "Bob - Claude Code Enhancement Plugin",
+  "author": {
+    "name": "HealthBright"
+  },
+  "repository": "https://github.com/healthbright/bob",
+  "license": "MIT",
+  "keywords": ["bob", "claude-code"]
+}

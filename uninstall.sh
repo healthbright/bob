@@ -2,22 +2,23 @@
 
 set -e
 
-PILOT_DIR="$HOME/.pilot"
+BOB_DIR="$HOME/.bob"
 CLAUDE_DIR="$HOME/.claude"
-PILOT_PLUGIN_DIR="$CLAUDE_DIR/pilot"
-MANIFEST_FILE="$CLAUDE_DIR/.pilot-manifest.json"
+BOB_PLUGIN_DIR="$CLAUDE_DIR/bob"
+MANIFEST_FILE="$CLAUDE_DIR/.bob-manifest.json"
 
-CLAUDE_ALIAS_MARKER="# Pilot Shell"
+CLAUDE_ALIAS_MARKER="# Bob"
+OLD_PILOT_SHELL_MARKER="# Pilot Shell"
 OLD_CLAUDE_PILOT_MARKER="# Claude Pilot"
 OLD_CCP_MARKER="# Claude CodePro alias"
 
 removed_items=()
 
-get_pilot_version() {
-	local pilot_path="$PILOT_DIR/bin/pilot"
-	if [ -x "$pilot_path" ]; then
+get_bob_version() {
+	local bob_path="$BOB_DIR/bin/bob"
+	if [ -x "$bob_path" ]; then
 		local version
-		version=$("$pilot_path" --version 2>/dev/null | sed -n 's/.* v\([^ ]*\).*/\1/p') || true
+		version=$("$bob_path" --version 2>/dev/null | sed -n 's/.* v\([^ ]*\).*/\1/p') || true
 		if [ -n "$version" ]; then
 			echo "$version"
 			return
@@ -42,10 +43,14 @@ get_affected_shell_configs() {
 	)
 	for config_file in "${config_files[@]}"; do
 		if [ -f "$config_file" ] && grep -q -e "$CLAUDE_ALIAS_MARKER" \
+			-e "$OLD_PILOT_SHELL_MARKER" \
 			-e "$OLD_CLAUDE_PILOT_MARKER" \
 			-e "$OLD_CCP_MARKER" \
 			-e "alias ccp=" \
+			-e "alias bob=" \
 			-e "alias pilot=" \
+			-e 'PATH="$HOME/.bob/bin' \
+			-e 'PATH "$HOME/.bob/bin' \
 			-e 'PATH="$HOME/.pilot/bin' \
 			-e 'PATH "$HOME/.pilot/bin' \
 			"$config_file" 2>/dev/null; then
@@ -56,48 +61,48 @@ get_affected_shell_configs() {
 
 confirm_uninstall() {
 	local version
-	version=$(get_pilot_version)
+	version=$(get_bob_version)
 
 	echo ""
 	echo "======================================================================"
-	echo "  Pilot Shell Uninstaller (v${version})"
+	echo "  Bob Uninstaller (v${version})"
 	echo "======================================================================"
 	echo ""
 
 	echo "  Uninstalling will:"
 	echo ""
 
-	if [ -d "$PILOT_DIR" ]; then
-		echo "    • Remove ~/.pilot/ (binary, installer)"
+	if [ -d "$BOB_DIR" ]; then
+		echo "    - Remove ~/.bob/ (launcher, installer)"
 	fi
 
-	if [ -d "$PILOT_PLUGIN_DIR" ]; then
-		echo "    • Remove ~/.claude/pilot/ (hooks, scripts, agents, MCP config)"
+	if [ -d "$BOB_PLUGIN_DIR" ]; then
+		echo "    - Remove ~/.claude/bob/ (hooks, scripts, agents, MCP config)"
 	fi
 
 	local entries
 	entries=$(get_manifest_entries)
 	if [ -n "$entries" ]; then
-		echo "$entries" | grep -q '^commands/' && echo "    • Remove Pilot-managed commands from ~/.claude/commands/"
-		echo "$entries" | grep -q '^rules/' && echo "    • Remove Pilot-managed rules from ~/.claude/rules/"
+		echo "$entries" | grep -q '^commands/' && echo "    - Remove Bob-managed commands from ~/.claude/commands/"
+		echo "$entries" | grep -q '^rules/' && echo "    - Remove Bob-managed rules from ~/.claude/rules/"
 	fi
 
 	if [ -f "$CLAUDE_DIR/settings.json" ]; then
-		echo "    • Clean Pilot-added entries from ~/.claude/settings.json"
+		echo "    - Clean Bob-added entries from ~/.claude/settings.json"
 	fi
 
-	if [ -f "$HOME/.claude.json" ] && [ -f "$CLAUDE_DIR/.pilot-claude-baseline.json" ]; then
-		echo "    • Clean Pilot-added keys from ~/.claude.json"
+	if [ -f "$HOME/.claude.json" ] && [ -f "$CLAUDE_DIR/.bob-claude-baseline.json" ]; then
+		echo "    - Clean Bob-added keys from ~/.claude.json"
 	fi
 
 	local baseline_files=""
-	for f in "$CLAUDE_DIR/.pilot-settings-baseline.json" "$CLAUDE_DIR/.pilot-claude-baseline.json" "$MANIFEST_FILE"; do
+	for f in "$CLAUDE_DIR/.bob-settings-baseline.json" "$CLAUDE_DIR/.bob-claude-baseline.json" "$MANIFEST_FILE"; do
 		if [ -f "$f" ]; then
 			baseline_files="$baseline_files $(basename "$f")"
 		fi
 	done
 	if [ -n "$baseline_files" ]; then
-		echo "    • Remove Pilot metadata:${baseline_files}"
+		echo "    - Remove Bob metadata:${baseline_files}"
 	fi
 
 	local affected_shells
@@ -105,7 +110,7 @@ confirm_uninstall() {
 	if [ -n "$affected_shells" ]; then
 		local shell_list
 		shell_list=$(echo "$affected_shells" | tr '\n' ', ' | sed 's/,$//')
-		echo "    • Remove 'pilot' and 'ccp' aliases from ${shell_list}"
+		echo "    - Remove 'bob' alias from ${shell_list}"
 	fi
 
 	echo ""
@@ -145,10 +150,14 @@ remove_shell_aliases() {
 		fi
 
 		if ! grep -q -e "$CLAUDE_ALIAS_MARKER" \
+			-e "$OLD_PILOT_SHELL_MARKER" \
 			-e "$OLD_CLAUDE_PILOT_MARKER" \
 			-e "$OLD_CCP_MARKER" \
 			-e "alias ccp=" \
+			-e "alias bob=" \
 			-e "alias pilot=" \
+			-e 'PATH="$HOME/.bob/bin' \
+			-e 'PATH "$HOME/.bob/bin' \
 			-e 'PATH="$HOME/.pilot/bin' \
 			-e 'PATH "$HOME/.pilot/bin' \
 			"$config_file" 2>/dev/null; then
@@ -159,14 +168,18 @@ remove_shell_aliases() {
 		tmp_file=$(mktemp)
 
 		awk '
+		/# Bob/ { next }
 		/# Pilot Shell/ { next }
 		/# Claude Pilot/ { next }
 		/# Claude CodePro alias/ { next }
 		/^[[:space:]]*alias ccp=/ { next }
+		/^[[:space:]]*alias bob=/ { next }
 		/^[[:space:]]*alias pilot=/ { next }
 		/^[[:space:]]*alias claude=/ { next }
+		/^[[:space:]]*export PATH="\$HOME\/.bob\/bin/ { next }
 		/^[[:space:]]*export PATH="\$HOME\/.pilot\/bin/ { next }
-		/^[[:space:]]*set -gx PATH "\$HOME\/.pilot\/bin/ { next }
+		/^[[:space:]]*set -gx PATH "\$HOME\/.bob\/bin"/ { next }
+		/^[[:space:]]*set -gx PATH "\$HOME\/.pilot\/bin"/ { next }
 		/^[[:space:]]*export PATH="\$HOME\/.bun\/bin:\$PATH"/ { next }
 		/^[[:space:]]*set -gx PATH "\$HOME\/.bun\/bin"/ { next }
 		{ print }
@@ -206,7 +219,7 @@ remove_manifest_files() {
 	done <<<"$entries"
 
 	if [ "$removed_count" -gt 0 ]; then
-		echo "    [OK] Removed $removed_count Pilot-managed commands and rules"
+		echo "    [OK] Removed $removed_count Bob-managed commands and rules"
 		removed_items+=("$removed_count commands/rules from ~/.claude/")
 	fi
 
@@ -281,15 +294,15 @@ try:
         with open('$target_file', 'w') as f:
             json.dump(current, f, indent=2)
             f.write('\n')
-        print('    [OK] Cleaned Pilot entries from $display_path (user settings preserved)')
+        print('    [OK] Cleaned Bob entries from $display_path (user settings preserved)')
 except Exception as e:
     print(f'    [!!] Could not clean $display_path: {e}', file=sys.stderr)
 " 2>&1
 }
 
-remove_pilot_settings() {
+remove_bob_settings() {
 	local settings_file="$CLAUDE_DIR/settings.json"
-	local baseline="$CLAUDE_DIR/.pilot-settings-baseline.json"
+	local baseline="$CLAUDE_DIR/.bob-settings-baseline.json"
 
 	if [ ! -f "$settings_file" ]; then
 		return
@@ -306,7 +319,7 @@ remove_pilot_settings() {
 
 remove_claude_json_keys() {
 	local claude_json="$HOME/.claude.json"
-	local baseline="$CLAUDE_DIR/.pilot-claude-baseline.json"
+	local baseline="$CLAUDE_DIR/.bob-claude-baseline.json"
 
 	if [ ! -f "$claude_json" ] || [ ! -f "$baseline" ]; then
 		return
@@ -316,11 +329,11 @@ remove_claude_json_keys() {
 	removed_items+=("~/.claude.json")
 }
 
-remove_pilot_baselines() {
+remove_bob_baselines() {
 	local files=(
-		"$CLAUDE_DIR/.pilot-settings-baseline.json"
-		"$CLAUDE_DIR/.pilot-claude-baseline.json"
-		"$CLAUDE_DIR/.pilot-manifest.json"
+		"$CLAUDE_DIR/.bob-settings-baseline.json"
+		"$CLAUDE_DIR/.bob-claude-baseline.json"
+		"$CLAUDE_DIR/.bob-manifest.json"
 	)
 
 	for file in "${files[@]}"; do
@@ -332,19 +345,19 @@ remove_pilot_baselines() {
 	done
 }
 
-remove_pilot_plugin() {
-	if [ -d "$PILOT_PLUGIN_DIR" ]; then
-		rm -rf "$PILOT_PLUGIN_DIR"
-		echo "    [OK] Removed ~/.claude/pilot/"
-		removed_items+=("~/.claude/pilot/")
+remove_bob_plugin() {
+	if [ -d "$BOB_PLUGIN_DIR" ]; then
+		rm -rf "$BOB_PLUGIN_DIR"
+		echo "    [OK] Removed ~/.claude/bob/"
+		removed_items+=("~/.claude/bob/")
 	fi
 }
 
-remove_pilot_dir() {
-	if [ -d "$PILOT_DIR" ]; then
-		rm -rf "$PILOT_DIR"
-		echo "    [OK] Removed ~/.pilot/"
-		removed_items+=("~/.pilot/")
+remove_bob_dir() {
+	if [ -d "$BOB_DIR" ]; then
+		rm -rf "$BOB_DIR"
+		echo "    [OK] Removed ~/.bob/"
+		removed_items+=("~/.bob/")
 	fi
 }
 
@@ -353,9 +366,9 @@ print_summary() {
 	echo "======================================================================"
 
 	if [ ${#removed_items[@]} -eq 0 ]; then
-		echo "  Nothing to remove. Pilot Shell does not appear to be installed."
+		echo "  Nothing to remove. Bob does not appear to be installed."
 	else
-		echo "  Pilot Shell has been uninstalled."
+		echo "  Bob has been uninstalled."
 		echo ""
 		echo "  Removed ${#removed_items[@]} items:"
 		for item in "${removed_items[@]}"; do
@@ -364,7 +377,7 @@ print_summary() {
 	fi
 
 	echo ""
-	echo "  To fully clean up third-party tools installed by Pilot:"
+	echo "  To fully clean up third-party tools installed by Bob:"
 	echo "    - Claude Code:    npm uninstall -g @anthropic-ai/claude-code"
 	echo "    - Probe:          npm uninstall -g @probelabs/probe"
 	echo "    - playwright-cli: npm uninstall -g @playwright/cli"
@@ -393,7 +406,7 @@ while [ $# -gt 0 ]; do
 	--help | -h)
 		echo "Usage: uninstall.sh [--yes|-y]"
 		echo ""
-		echo "Uninstall Pilot Shell and remove all installed files."
+		echo "Uninstall Bob and remove all installed files."
 		echo ""
 		echo "Options:"
 		echo "  --yes, -y    Skip confirmation prompt"
@@ -408,13 +421,13 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-if ! [ -d "$PILOT_DIR" ] && ! [ -d "$PILOT_PLUGIN_DIR" ] && ! [ -f "$MANIFEST_FILE" ]; then
+if ! [ -d "$BOB_DIR" ] && ! [ -d "$BOB_PLUGIN_DIR" ] && ! [ -f "$MANIFEST_FILE" ]; then
 	echo ""
 	echo "======================================================================"
-	echo "  Pilot Shell Uninstaller"
+	echo "  Bob Uninstaller"
 	echo "======================================================================"
 	echo ""
-	echo "  Nothing to remove. Pilot Shell does not appear to be installed."
+	echo "  Nothing to remove. Bob does not appear to be installed."
 	echo ""
 	echo "======================================================================"
 	echo ""
@@ -426,20 +439,20 @@ if [ "$SKIP_CONFIRM" = false ]; then
 else
 	echo ""
 	echo "======================================================================"
-	echo "  Pilot Shell Uninstaller"
+	echo "  Bob Uninstaller"
 	echo "======================================================================"
 fi
 
 echo ""
-echo "  Uninstalling Pilot Shell..."
+echo "  Uninstalling Bob..."
 echo ""
 
 remove_shell_aliases
 remove_manifest_files
-remove_pilot_settings
+remove_bob_settings
 remove_claude_json_keys
-remove_pilot_baselines
-remove_pilot_plugin
-remove_pilot_dir
+remove_bob_baselines
+remove_bob_plugin
+remove_bob_dir
 
 print_summary

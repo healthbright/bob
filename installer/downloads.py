@@ -88,7 +88,7 @@ def compute_git_blob_sha(file_path: Path) -> str:
 
 def get_cache_path() -> Path:
     """Get path to the tree cache file."""
-    return Path.home() / ".pilot" / "cache" / "tree-cache.json"
+    return Path.home() / ".bob" / "cache" / "tree-cache.json"
 
 
 def load_tree_cache(cache_path: Path | None = None) -> dict:
