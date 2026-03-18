@@ -1,3 +1,13 @@
+---
+name: mcp-servers
+description: |
+  Pilot MCP server reference with API details, parameters, and usage examples.
+  Use when: (1) using mem-search for persistent memory, (2) context7 for library docs,
+  (3) web-search or web-fetch for web content, (4) grep-mcp for GitHub code search,
+  (5) codebase-memory-mcp for structural analysis, (6) any MCP tool usage,
+  (7) need ToolSearch query examples, (8) need MCP tool parameter reference.
+---
+
 ## Pilot MCP Servers
 
 MCP tools are lazy-loaded via `ToolSearch`. Discover tools by keyword, then call them directly.

@@ -80,7 +80,17 @@ Use EXACT parameter names — abbreviated names cause `InputValidationError`:
 
 **`/spec` reviewer agents** (`pilot:plan-reviewer`, `pilot:spec-reviewer`) pass through silently — these are expected parts of the workflow.
 
-**Search:** See `research-tools.md` for the priority chain (Probe → codebase-memory-mcp → Grep/Glob).
+**Search priority:** Probe CLI (`probe search`) → codebase-memory-mcp (structural) → Grep/Glob (exact patterns). See `cli-tools.md` for Probe reference.
+
+### ⛔ Web Search/Fetch
+
+**NEVER use built-in `WebFetch` or `WebSearch` — blocked by hook.** Use MCP alternatives via `ToolSearch`:
+
+| Need | ToolSearch query |
+|------|-----------------|
+| Web search | `+web-search search` |
+| GitHub README | `+web-search fetch` |
+| Fetch page | `+web-fetch fetch` |
 
 ### Spec Workflow Toggles
 

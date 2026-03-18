@@ -1,3 +1,12 @@
+---
+name: skill-sharing
+description: |
+  Skillshare CLI reference and sharing workflows. Use when: (1) user says "share",
+  "push", "sync skills", "skillshare", (2) managing extras (rules, commands, agents),
+  (3) cross-machine sync, (4) team/org sharing setup, (5) hub or audit operations,
+  (6) .skillignore configuration, (7) new team member onboarding with skills.
+---
+
 ## Skill Sharing
 
 Share skills, rules, commands, and agents across machines and teams using **Skillshare** (v0.17+) and a Git repository.

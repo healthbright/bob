@@ -986,3 +986,89 @@ class TestResolveRepoUrl:
         result = step._resolve_repo_url("v5.0.0")
 
         assert result == "https://github.com/maxritter/pilot-shell"
+
+
+class TestSkillsDeployment:
+    """Test that skills from pilot/skills/ are deployed to ~/.claude/pilot/skills/ via pilot_plugin."""
+
+    def test_skills_categorized_as_pilot_plugin(self):
+        """Files in pilot/skills/ are categorized as 'pilot_plugin' for plugin injection."""
+        from installer.steps.claude_files import _categorize_file
+
+        assert _categorize_file("pilot/skills/mcp-servers/skill.md") == "pilot_plugin"
+        assert _categorize_file("pilot/skills/skill-sharing/skill.md") == "pilot_plugin"
+
+    def test_skills_deployed_to_plugin_path(self):
+        """Skills are installed to ~/.claude/pilot/skills/<name>/skill.md."""
+        from installer.context import InstallContext
+        from installer.steps.claude_files import ClaudeFilesStep
+        from installer.ui import Console
+
+        step = ClaudeFilesStep()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_dir = Path(tmpdir) / "home"
+            home_dir.mkdir()
+
+            source_dir = Path(tmpdir) / "source"
+            source_pilot = source_dir / "pilot"
+            skill_dir = source_pilot / "skills" / "mcp-servers"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "skill.md").write_text("---\nname: mcp-servers\n---\n# MCP Servers")
+
+            dest_dir = Path(tmpdir) / "dest"
+            dest_dir.mkdir()
+
+            ctx = InstallContext(
+                project_dir=dest_dir,
+                ui=Console(non_interactive=True),
+                local_mode=True,
+                local_repo_dir=source_dir,
+            )
+
+            with patch("installer.steps.claude_files.Path.home", return_value=home_dir):
+                step.run(ctx)
+
+            expected_path = home_dir / ".claude" / "pilot" / "skills" / "mcp-servers" / "skill.md"
+            assert expected_path.exists(), f"Skill not at {expected_path}"
+            assert "MCP Servers" in expected_path.read_text()
+
+    def test_stale_skills_cleared_on_reinstall(self):
+        """Plugin directory (including skills) is cleared on each install."""
+        from installer.context import InstallContext
+        from installer.steps.claude_files import ClaudeFilesStep
+        from installer.ui import Console
+
+        step = ClaudeFilesStep()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_dir = Path(tmpdir) / "home"
+            home_dir.mkdir()
+
+            # Create a stale skill in the plugin directory
+            stale_skill = home_dir / ".claude" / "pilot" / "skills" / "old-skill"
+            stale_skill.mkdir(parents=True)
+            (stale_skill / "skill.md").write_text("old skill content")
+
+            # Source has a different skill
+            source_dir = Path(tmpdir) / "source"
+            source_pilot = source_dir / "pilot"
+            skill_dir = source_pilot / "skills" / "new-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "skill.md").write_text("new skill")
+
+            dest_dir = Path(tmpdir) / "dest"
+            dest_dir.mkdir()
+
+            ctx = InstallContext(
+                project_dir=dest_dir,
+                ui=Console(non_interactive=True),
+                local_mode=True,
+                local_repo_dir=source_dir,
+            )
+
+            with patch("installer.steps.claude_files.Path.home", return_value=home_dir):
+                step.run(ctx)
+
+            # Old skill cleared (plugin dir is wiped on each install)
+            assert not stale_skill.exists(), "Stale skill should be removed"
+            # New skill installed
+            assert (home_dir / ".claude" / "pilot" / "skills" / "new-skill" / "skill.md").exists()
