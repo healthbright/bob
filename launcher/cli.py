@@ -38,8 +38,25 @@ def print_banner() -> None:
 def cmd_launch(args: list[str]) -> int:
     """Launch Claude Code with bob enhancements."""
     print_banner()
-    cmd = ["claude"] + args
-    return subprocess.call(cmd)
+
+    # Set session environment variables
+    session_id = str(os.getpid())
+    env = os.environ.copy()
+    env["BOB_SESSION_ID"] = session_id
+    env["CLAUDE_CODE_TASK_LIST_ID"] = f"bob-{session_id}"
+
+    # Create session directory
+    session_dir = get_bob_dir() / "sessions" / session_id
+    session_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        cmd = ["claude"] + args
+        return subprocess.call(cmd, env=env)
+    finally:
+        # Cleanup session directory
+        import shutil
+
+        shutil.rmtree(session_dir, ignore_errors=True)
 
 
 def cmd_version() -> int:
@@ -49,9 +66,10 @@ def cmd_version() -> int:
 
 
 def cmd_statusline() -> int:
-    """Output status line information."""
-    session_id = os.environ.get("BOB_SESSION_ID", "")
-    print(f"Bob | {session_id}" if session_id else "Bob")
+    """Run the statusline (reads JSON from stdin, outputs formatted status)."""
+    from launcher.statusline import main as statusline_main
+
+    statusline_main()
     return 0
 
 
